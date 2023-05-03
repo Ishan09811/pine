@@ -194,6 +194,8 @@ namespace skyline::gpu {
                 IGNORE_VALIDATION("VUID-vkCmdDraw-subpass-02685")
                 IGNORE_VALIDATION("VUID-vkCmdDrawIndexed-renderPass-02684")
                 IGNORE_VALIDATION("VUID-vkCmdDrawIndexed-subpass-02685")
+
+                DEBUG_VALIDATION("VUID-vkCmdCopyImage-srcImageLayout-00128")
             }
 
             #undef IGNORE_TYPE

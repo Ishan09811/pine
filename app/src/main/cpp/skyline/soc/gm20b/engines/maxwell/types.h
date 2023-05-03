@@ -545,6 +545,20 @@ namespace skyline::soc::gm20b::engine::maxwell3d::type {
     };
     static_assert(sizeof(MultisampleControl) == sizeof(u32));
 
+    enum class MsaaMode : u32 {
+        e1x1 = 0,
+        e2x1 = 1,
+        e2x2 = 2,
+        e4x2 = 3,
+        e4x2D3D = 4,
+        e2x1D3D = 5,
+        e4x4 = 6,
+        e2x2Vc4 = 8,
+        e2x2Vc12 = 9,
+        e4x2Vc8 = 10,
+        e4x2Vc24 = 11,
+    };
+
     struct SamplerBinding {
         enum class Value : u8 {
             Independently = 0,

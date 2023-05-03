@@ -31,6 +31,7 @@ namespace skyline::gpu {
       private:
         const DeviceState &state; // We access the device state inside Texture (and Buffers) for setting up NCE memory tracking
         friend Texture;
+        friend HostTexture;
         friend Buffer;
         friend BufferManager;
 

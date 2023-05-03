@@ -61,8 +61,40 @@ namespace skyline::gpu::texture {
         return isMultiLayer ? util::AlignUp(totalSize, layerAlignment) : totalSize;
     }
 
-    std::vector<MipLevelLayout> GetBlockLinearMipLayout(Dimensions dimensions, size_t formatBlockHeight, size_t formatBlockWidth, size_t formatBpb, size_t targetFormatBlockHeight, size_t targetFormatBlockWidth, size_t targetFormatBpb, size_t gobBlockHeight, size_t gobBlockDepth, size_t levelCount) {
-        std::vector<MipLevelLayout> mipLevels;
+    std::vector<MipLevelLayout> CalculateMipLayout(Dimensions dimensions, size_t formatBlockHeight, size_t formatBlockWidth, size_t formatBpb, size_t gobBlockHeight, size_t gobBlockDepth, size_t levelCount) {
+        std::vector<texture::MipLevelLayout> mipLevels;
+        mipLevels.reserve(levelCount);
+
+        size_t gobsWidth{util::DivideCeil<size_t>(util::DivideCeil<size_t>(dimensions.width, formatBlockWidth) * formatBpb, GobWidth)};
+        size_t gobsHeight{util::DivideCeil<size_t>(util::DivideCeil<size_t>(dimensions.height, formatBlockHeight), GobHeight)};
+        // Note: We don't need a separate gobsDepth variable here, since a GOB is always a single slice deep and the value would be the same as the depth dimension
+
+        for (size_t i{}; i < levelCount; i++) {
+            size_t linearSize{util::DivideCeil<size_t>(dimensions.width, formatBlockWidth) * formatBpb * util::DivideCeil<size_t>(dimensions.height, formatBlockHeight) * dimensions.depth};
+
+            mipLevels.emplace_back(
+                dimensions,
+                linearSize,
+                (GobWidth * gobsWidth) * (GobHeight * util::AlignUp(gobsHeight, gobBlockHeight)) * util::AlignUp(dimensions.depth, gobBlockDepth),
+                gobBlockHeight, gobBlockDepth
+            );
+
+            gobsWidth = std::max(util::DivideCeil(gobsWidth, 2UL), 1UL);
+            gobsHeight = std::max(util::DivideCeil(gobsHeight, 2UL), 1UL);
+
+            dimensions.width = std::max(dimensions.width / 2, 1U);
+            dimensions.height = std::max(dimensions.height / 2, 1U);
+            dimensions.depth = std::max(dimensions.depth / 2, 1U);
+
+            gobBlockHeight = CalculateBlockGobs(gobBlockHeight, gobsHeight);
+            gobBlockDepth = CalculateBlockGobs(gobBlockDepth, static_cast<size_t>(dimensions.depth));
+        }
+
+        return mipLevels;
+    }
+/*
+    std::vector<LinearMipLevelLayout> GetLinearMipLayout(Dimensions dimensions, size_t formatBlockHeight, size_t formatBlockWidth, size_t formatBpb, size_t levelCount) {
+        std::vector<LinearMipLevelLayout> mipLevels;
         mipLevels.reserve(levelCount);
 
         size_t gobsWidth{util::DivideCeil<size_t>(util::DivideCeil<size_t>(dimensions.width, formatBlockWidth) * formatBpb, GobWidth)};
@@ -93,7 +125,7 @@ namespace skyline::gpu::texture {
         }
 
         return mipLevels;
-    }
+    }*/
 
     /**
      * @brief Copies pixel data between a pitch-linear and blocklinear texture

@@ -6,6 +6,7 @@
 #include <gpu/interconnect/command_executor.h>
 #include "samplers.h"
 #include <unistd.h>
+#include <gpu/texture_manager.h>
 #include "textures.h"
 
 namespace skyline::gpu::interconnect {
@@ -97,24 +98,34 @@ namespace skyline::gpu::interconnect {
         return {.raw = primaryVal};
     }
 
-    static std::pair<vk::DescriptorImageInfo, TextureView *> GetTextureBinding(InterconnectContext &ctx, const auto &desc,
+    static std::pair<vk::DescriptorImageInfo, HostTextureView *> GetTextureBinding(InterconnectContext &ctx, const auto &desc,
                                                                                Samplers &samplers, Textures &textures,
                                                                                BindlessHandle handle,
                                                                                vk::PipelineStageFlagBits dstStage,
                                                                                vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
         auto sampler{samplers.GetSampler(ctx, handle.samplerIndex, handle.textureIndex)};
         auto texture{textures.GetTexture(ctx, handle.textureIndex, desc.type)};
-        ctx.executor.AttachTexture(texture);
-        auto view{texture->GetView()};
-        texture->texture->PopulateReadBarrier(dstStage, srcStageMask, dstStageMask);
+        if (texture) {
+            ctx.executor.AttachTexture(texture);
+            texture->texture->PopulateReadBarrier(dstStage, srcStageMask, dstStageMask);
 
-        return {
-            vk::DescriptorImageInfo{
-                .sampler = **sampler,
-                .imageView = view,
-                .imageLayout = texture->texture->layout
-            },
-            texture
-        };
+            return {
+                vk::DescriptorImageInfo{
+                    .sampler = **sampler,
+                    .imageView = *texture->vkView,
+                    .imageLayout = texture->hostTexture->layout
+                },
+                texture
+            };
+        } else {
+            return {
+                vk::DescriptorImageInfo{
+                    .sampler = **sampler,
+                    .imageView = ctx.gpu.texture.GetNullView(),
+                    .imageLayout = vk::ImageLayout::eGeneral
+                },
+                nullptr
+            };
+        }
     }
 }

@@ -3,7 +3,7 @@
 // Copyright © 2022 yuzu Emulator Project (https://github.com/yuzu-emu/yuzu/)
 
 #include <gpu/interconnect/command_executor.h>
-#include <gpu/texture/format.h>
+#include <gpu/texture/formats.h>
 #include <gpu/texture/layout.h>
 #include <soc.h>
 #include <soc/gm20b/channel.h>

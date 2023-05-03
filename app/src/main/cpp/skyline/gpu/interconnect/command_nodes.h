@@ -28,44 +28,29 @@ namespace skyline::gpu::interconnect::node {
      */
     struct RenderPassNode {
       private:
-        std::vector<vk::ImageView> attachments;
-        std::vector<vk::FramebufferAttachmentImageInfo> attachmentInfo;
-        std::vector<vk::AttachmentDescription> attachmentDescriptions;
+        struct Attachment {
+            HostTextureView *view{};
+            bool hasClearValue{}; //!< If the attachment has a clear value and should use VK_ATTACHMENT_LOAD_OP_CLEAR
 
-        std::vector<vk::AttachmentReference> attachmentReferences;
-        std::vector<std::vector<u32>> preserveAttachmentReferences; //!< Any attachment that must be preserved to be utilized by a future subpass, these are stored per-subpass to ensure contiguity
-
-        constexpr static uintptr_t NoDepthStencil{std::numeric_limits<uintptr_t>::max()}; //!< A sentinel value to denote the lack of a depth stencil attachment in a VkSubpassDescription
-
-        /**
-         * @brief Rebases a pointer containing an offset relative to the beginning of a container
-         */
-        template<typename Container, typename T>
-        constexpr T *RebasePointer(const Container &container, const T *offset) {
-            return reinterpret_cast<T *>(reinterpret_cast<uintptr_t>(container.data()) + reinterpret_cast<uintptr_t>(offset));
-        }
+            Attachment(HostTextureView *view) : view{view} {}
+        };
+        std::vector<std::optional<Attachment>> colorAttachments; //!< The color attachments bound to the current subpass
+        std::optional<Attachment> depthStencilAttachment; //!< The depth stencil attachment bound to the current subpass
 
       public:
-        std::vector<vk::SubpassDescription> subpassDescriptions;
-        std::vector<vk::SubpassDependency> subpassDependencies;
         vk::PipelineStageFlags dependencySrcStageMask;
         vk::PipelineStageFlags dependencyDstStageMask;
 
         vk::Rect2D renderArea;
         std::vector<vk::ClearValue> clearValues;
 
-        RenderPassNode(vk::Rect2D renderArea);
+        RenderPassNode(vk::Rect2D renderArea, span<HostTextureView *> colorAttachments, HostTextureView *depthStencilAttachment);
 
         /**
-         * @note Any preservation of attachments from previous subpasses is automatically handled by this
-         * @return The index of the attachment in the render pass which can be utilized with VkAttachmentReference
+         * @brief Sets the attachments bound to the renderpass
+         * @return If the attachments could be bound or not due to conflicts with existing attachments
          */
-        u32 AddAttachment(TextureView *view, GPU& gpu);
-
-        /**
-         * @brief Creates a subpass with the attachments bound in the specified order
-         */
-        void AddSubpass(span<TextureView *> inputAttachments, span<TextureView *> colorAttachments, TextureView *depthStencilAttachment, GPU &gpu);
+        bool BindAttachments(span<HostTextureView *> colorAttachments, HostTextureView *depthStencilAttachment);
 
         /**
          * @brief Updates the dependency barrier for the renderpass
@@ -91,29 +76,6 @@ namespace skyline::gpu::interconnect::node {
     };
 
     /**
-     * @brief A node which progresses to the next subpass during a render pass
-     */
-    struct NextSubpassNode {
-        void operator()(vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &cycle, GPU &gpu) {
-            commandBuffer.nextSubpass(vk::SubpassContents::eInline);
-        }
-    };
-
-    using SubpassFunctionNode = FunctionNodeBase<void(vk::raii::CommandBuffer &, const std::shared_ptr<FenceCycle> &, GPU &, vk::RenderPass, u32)>;
-
-    /**
-     * @brief A FunctionNode which progresses to the next subpass prior to calling the function
-     */
-    struct NextSubpassFunctionNode : private SubpassFunctionNode {
-        using SubpassFunctionNode::SubpassFunctionNode;
-
-        void operator()(vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &cycle, GPU &gpu, vk::RenderPass renderPass, u32 subpassIndex) {
-            commandBuffer.nextSubpass(vk::SubpassContents::eInline);
-            SubpassFunctionNode::operator()(commandBuffer, cycle, gpu, renderPass, subpassIndex);
-        }
-    };
-
-    /**
      * @brief Ends a VkRenderPass that would be created prior with RenderPassNode
      */
     struct RenderPassEndNode {
@@ -122,13 +84,5 @@ namespace skyline::gpu::interconnect::node {
         }
     };
 
-    /**
-     * @brief A node which copies the contained ID value to the debug tracking buffer
-     */
-    struct CheckpointNode {
-        BufferBinding binding; //!< Binding for a GPU-side buffer containing the checkpoint ID
-        u32 id;
-    };
-
-    using NodeVariant = std::variant<FunctionNode, CheckpointNode, RenderPassNode, NextSubpassNode, SubpassFunctionNode, NextSubpassFunctionNode, RenderPassEndNode>; //!< A variant encompassing all command nodes types
+    using NodeVariant = std::variant<FunctionNode, RenderPassNode, RenderPassEndNode>; //!< A variant encompassing all command nodes types
 }

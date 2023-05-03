@@ -10,9 +10,10 @@
 #include <soc.h>
 #include <loader/loader.h>
 #include <kernel/types/KProcess.h>
+#include <vulkan/vulkan_enums.hpp>
 #include "presentation_engine.h"
 #include "native_window.h"
-#include "texture/format.h"
+#include "texture/formats.h"
 
 extern jint Fps;
 extern jfloat AverageFrametimeMs;
@@ -26,8 +27,8 @@ namespace skyline::gpu {
     PresentationEngine::PresentationEngine(const DeviceState &state, GPU &gpu)
         : state{state},
           gpu{gpu},
-          presentSemaphores{util::MakeFilledArray<vk::raii::Semaphore, MaxSwapchainImageCount>(gpu.vkDevice, vk::SemaphoreCreateInfo{})},
-          acquireSemaphores{util::MakeFilledArray<vk::raii::Semaphore, MaxSwapchainImageCount>(gpu.vkDevice, vk::SemaphoreCreateInfo{})},
+          images{util::MakeFilledArray<SwapchainImage, MaxSwapchainSlotCount>(gpu.vkDevice)},
+          semaphorePool{util::MakeFilledArray<SemaphoreEntry, MaxSwapchainSlotCount>(gpu.vkDevice)},
           presentationTrack{static_cast<u64>(trace::TrackIds::Presentation), perfetto::ProcessTrack::Current()},
           vsyncEvent{std::make_shared<kernel::type::KEvent>(state, true)},
           choreographerThread{&PresentationEngine::ChoreographerThread, this},
@@ -101,17 +102,89 @@ namespace skyline::gpu {
         }
     }
 
+    std::shared_ptr<FenceCycle> PresentationEngine::CopyIntoSwapchain(HostTextureView *textureView, SwapchainImage &image, vk::Semaphore acquireSemaphore) {
+        auto &texture{textureView->hostTexture};
+
+        if (texture->layout != vk::ImageLayout::eGeneral && texture->layout != vk::ImageLayout::eTransferSrcOptimal)
+            throw exception("Source texture layout is {} but must be either eGeneral or eTransferSrcOptimal", vk::to_string(texture->layout));
+        if (texture->dimensions != swapchainExtent)
+            throw exception("Texture dimensions ({}, {}) do not match swapchain dimensions ({}, {})", texture->dimensions.width, texture->dimensions.height, swapchainExtent.width, swapchainExtent.height);
+
+        TRACE_EVENT("gpu", "PresentationEngine::CopyIntoSwapchain");
+
+        vk::Semaphore presentSemaphore{*image.presentSemaphore};
+        auto cycle{gpu.scheduler.Submit([&](vk::raii::CommandBuffer &commandBuffer) {
+            vk::ImageSubresourceRange subresourceRange{vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1};
+            vk::ImageMemoryBarrier imageBarrier{
+                .srcAccessMask = vk::AccessFlagBits::eMemoryRead,
+                .dstAccessMask = vk::AccessFlagBits::eTransferWrite,
+                .oldLayout = image.layout,
+                .newLayout = vk::ImageLayout::eTransferDstOptimal,
+                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .image = image.vkImage,
+                .subresourceRange = subresourceRange,
+            };
+            commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eTransfer, {}, {}, {}, imageBarrier);
+
+            auto &subresource{textureView->range};
+            vk::ImageSubresourceLayers subresourceLayers{
+                .aspectMask = subresource.aspectMask,
+                .mipLevel = subresource.baseMipLevel,
+                .baseArrayLayer = subresource.baseArrayLayer,
+                .layerCount = subresource.layerCount,
+            };
+
+            auto &dimensions{texture->dimensions};
+            if (textureView->format != swapchainFormat) {
+                commandBuffer.blitImage(image.vkImage, texture->layout, texture->GetImage(), vk::ImageLayout::eTransferDstOptimal, vk::ImageBlit{
+                    .srcSubresource = subresourceLayers,
+                    .srcOffsets = std::array<vk::Offset3D, 2>{
+                        vk::Offset3D{0, 0, 0},
+                        vk::Offset3D{static_cast<i32>(dimensions.width),
+                                     static_cast<i32>(dimensions.height),
+                                     static_cast<i32>(subresourceLayers.layerCount)}
+                    },
+                    .dstSubresource = subresourceLayers,
+                    .dstOffsets = std::array<vk::Offset3D, 2>{
+                        vk::Offset3D{0, 0, 0},
+                        vk::Offset3D{static_cast<i32>(dimensions.width),
+                                     static_cast<i32>(dimensions.height),
+                                     static_cast<i32>(subresourceLayers.layerCount)}
+                    }
+                }, vk::Filter::eLinear);
+            } else {
+                commandBuffer.copyImage(texture->GetImage(), texture->layout, image.vkImage, vk::ImageLayout::eTransferDstOptimal, vk::ImageCopy{
+                    .srcSubresource = subresourceLayers,
+                    .dstSubresource = subresourceLayers,
+                    .extent = dimensions,
+                });
+            }
+
+            imageBarrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+            imageBarrier.dstAccessMask = vk::AccessFlagBits::eMemoryRead;
+            imageBarrier.oldLayout = vk::ImageLayout::eTransferDstOptimal;
+            image.layout = imageBarrier.newLayout = vk::ImageLayout::ePresentSrcKHR;
+            commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eAllCommands, {}, {}, {}, imageBarrier);
+        }, span<vk::Semaphore>{acquireSemaphore}, span<vk::Semaphore>{presentSemaphore})};
+        textureView->texture->AttachCycle(cycle);
+        return cycle;
+    }
+
     void PresentationEngine::PresentFrame(const PresentableFrame &frame) {
-        std::unique_lock lock(mutex);
+        std::unique_lock lock{mutex};
         surfaceCondition.wait(lock, [this]() { return vkSurface.has_value(); });
 
         frame.fence.Wait(state.soc->host1x);
 
-        std::scoped_lock textureLock(*frame.textureView);
+        auto &textureView{frame.textureView};
+        std::scoped_lock textureLock{*textureView};
+        if (textureView->stale)
+            return; // Simply skip this frame if the texture is stale, this isn't optimal and the texture should be looked up again but this is an edge case so this should be fine
 
-        auto texture{frame.textureView->texture};
-        if (frame.textureView->format != swapchainFormat || texture->dimensions != swapchainExtent)
-            UpdateSwapchain(frame.textureView->format, texture->dimensions);
+        auto texture{textureView->texture}; // A shared_ptr to the texture is needed to keep it alive until the frame is presented
+        if (textureView->format != swapchainFormat || textureView->hostTexture->dimensions != swapchainExtent)
+            UpdateSwapchain(textureView->format, textureView->hostTexture->dimensions);
 
         int result;
         if (frame.crop && frame.crop != windowCrop) {
@@ -130,35 +203,23 @@ namespace skyline::gpu {
             throw exception("Setting the buffer transform to '{}' failed with {}", ToString(frame.transform), result);
         windowTransform = frame.transform;
 
-        auto &acquireSemaphore{acquireSemaphores[frameIndex]};
-        auto &frameFence{frameFences[frameIndex]};
-        if (frameFence)
-            frameFence->Wait();
+        auto &currentSlot{semaphorePool.at(semaphoreIndex)};
+        semaphoreIndex = (semaphoreIndex + 1) % semaphorePool.size(); // Increment the semaphore index and wrap around if it exceeds the pool size
+        currentSlot.WaitTillAvailable();
 
-        frameIndex = (frameIndex + 1) % swapchainImageCount;
-
-        std::pair<vk::Result, u32> nextImage;
-        while (nextImage = vkSwapchain->acquireNextImage(std::numeric_limits<u64>::max(), *acquireSemaphore, {}), nextImage.first != vk::Result::eSuccess) [[unlikely]] {
-            if (nextImage.first == vk::Result::eSuboptimalKHR)
+        std::pair<vk::Result, u32> vkNextImage;
+        while (vkNextImage = vkSwapchain->acquireNextImage(std::numeric_limits<u64>::max(), *currentSlot.semaphore, {}), vkNextImage.first != vk::Result::eSuccess) [[unlikely]] {
+            if (vkNextImage.first == vk::Result::eSuboptimalKHR)
                 surfaceCondition.wait(lock, [this]() { return vkSurface.has_value(); });
             else
-                throw exception("vkAcquireNextImageKHR returned an unhandled result '{}'", vk::to_string(nextImage.first));
+                throw exception("vkAcquireNextImageKHR returned an unhandled result '{}'", vk::to_string(vkNextImage.first));
         }
 
-        auto &nextImageTexture{images.at(nextImage.second)};
-        auto &presentSemaphore{presentSemaphores[nextImage.second]};
-
-        texture->SynchronizeHost();
-        nextImageTexture->CopyFrom(texture, *acquireSemaphore, *presentSemaphore, swapchainFormat, vk::ImageSubresourceRange{
-            .aspectMask = vk::ImageAspectFlagBits::eColor,
-            .levelCount = 1,
-            .layerCount = 1,
-        });
-
-        frameFence = nextImageTexture->cycle;
+        auto &swapchainImage{images.at(vkNextImage.second)};
+        currentSlot.freeCycle = CopyIntoSwapchain(textureView, swapchainImage, *currentSlot.semaphore);
 
         auto getMonotonicNsNow{[]() -> i64 {
-            timespec time;
+            timespec time{};
             if (clock_gettime(CLOCK_MONOTONIC, &time))
                 throw exception("Failed to clock_gettime with '{}'", strerror(errno));
             return (time.tv_sec * constant::NsInSecond) + time.tv_nsec;
@@ -205,9 +266,9 @@ namespace skyline::gpu {
             std::ignore = gpu.vkQueue.presentKHR(vk::PresentInfoKHR{
                 .swapchainCount = 1,
                 .pSwapchains = &**vkSwapchain,
-                .pImageIndices = &nextImage.second,
+                .pImageIndices = &vkNextImage.second,
                 .waitSemaphoreCount = 1,
-                .pWaitSemaphores = &*presentSemaphore,
+                .pWaitSemaphores = &*swapchainImage.presentSemaphore,
             }); // We don't care about suboptimal images as they are caused by not respecting the transform hint, we handle transformations externally
         }
 
@@ -296,8 +357,8 @@ namespace skyline::gpu {
 
     void PresentationEngine::UpdateSwapchain(texture::Format format, texture::Dimensions extent) {
         auto minImageCount{std::max(vkSurfaceCapabilities.minImageCount, *state.settings->forceTripleBuffering ? 3U : 2U)};
-        if (minImageCount > MaxSwapchainImageCount)
-            throw exception("Requesting swapchain with higher image count ({}) than maximum slot count ({})", minImageCount, MaxSwapchainImageCount);
+        if (minImageCount > MaxSwapchainSlotCount)
+            throw exception("Requesting swapchain with higher image count ({}) than maximum slot count ({})", minImageCount, MaxSwapchainSlotCount);
 
         const auto &capabilities{vkSurfaceCapabilities};
         if (minImageCount < capabilities.minImageCount || (capabilities.maxImageCount && minImageCount > capabilities.maxImageCount))
@@ -362,21 +423,18 @@ namespace skyline::gpu {
         });
 
         auto vkImages{vkSwapchain->getImages()};
-        if (vkImages.size() > MaxSwapchainImageCount)
-            throw exception("Swapchain has higher image count ({}) than maximum slot count ({})", minImageCount, MaxSwapchainImageCount);
+        if (vkImages.size() > MaxSwapchainSlotCount)
+            throw exception("Swapchain has higher image count ({}) than maximum slot count ({})", minImageCount, MaxSwapchainSlotCount);
 
-        for (size_t index{}; index < vkImages.size(); index++) {
-            auto &slot{images[index]};
-            slot = std::make_shared<Texture>(*state.gpu, vkImages[index], extent, underlyingFormat, vk::ImageLayout::eUndefined, vk::ImageTiling::eOptimal, vk::ImageCreateFlags{}, presentUsage);
-            slot->TransitionLayout(vk::ImageLayout::ePresentSrcKHR);
-        }
-        for (size_t index{vkImages.size()}; index < MaxSwapchainImageCount; index++)
-            // We need to clear all the slots which aren't filled, keeping around stale slots could lead to issues
-            images[index] = {};
-
+        for (size_t index{}; index < vkImages.size(); index++)
+            images[index].SetImage(vkImages[index]);
+/*
+        // We need to clear all the slots which aren't filled, keeping around stale slots could lead to issues
+        for (size_t index{vkImages.size()}; index < images.size(); index++)
+            images[index].ClearImage();
+*/
         swapchainFormat = format;
         swapchainExtent = extent;
-        swapchainImageCount = vkImages.size();
     }
 
     void PresentationEngine::UpdateSurface(jobject newSurface) {
@@ -429,7 +487,7 @@ namespace skyline::gpu {
         }
     }
 
-    u64 PresentationEngine::Present(const std::shared_ptr<TextureView> &texture, i64 timestamp, i64 swapInterval, AndroidRect crop, NativeWindowScalingMode scalingMode, NativeWindowTransform transform, skyline::service::hosbinder::AndroidFence fence, const std::function<void()> &presentCallback) {
+    u64 PresentationEngine::Present(HostTextureView *texture, i64 timestamp, i64 swapInterval, AndroidRect crop, NativeWindowScalingMode scalingMode, NativeWindowTransform transform, skyline::service::hosbinder::AndroidFence fence, const std::function<void()> &presentCallback) {
         if (!vkSurface.has_value()) {
             // We want this function to generally (not necessarily always) block when a surface is not present to implicitly pause the game
             std::unique_lock lock{mutex};

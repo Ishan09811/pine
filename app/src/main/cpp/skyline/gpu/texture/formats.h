@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "texture.h"
+#include "common.h"
 
 namespace skyline::gpu::format {
     // @fmt:off

@@ -58,7 +58,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
         static constexpr size_t DescriptorBatchSize{0x100};
         std::shared_ptr<boost::container::static_vector<DescriptorAllocator::ActiveDescriptorSet, DescriptorBatchSize>> attachedDescriptorSets;
         DescriptorAllocator::ActiveDescriptorSet *activeDescriptorSet{};
-        std::vector<TextureView *> activeDescriptorSetSampledImages{};
+        std::vector<HostTextureView *> activeDescriptorSetSampledImages{};
 
         size_t UpdateQuadConversionBuffer(u32 count, u32 firstVertex);
 

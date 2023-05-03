@@ -4,7 +4,7 @@
 #pragma once
 
 #include <tuple>
-#include <gpu/texture/format.h>
+#include <gpu/texture/formats.h>
 #include <shader_compiler/runtime_info.h>
 #include "common.h"
 

@@ -296,6 +296,8 @@ namespace skyline::soc::gm20b::engine::maxwell3d {
 
             Register<0x56F, float> depthBias;
 
+            Register<0x574, type::MsaaMode> msaaMode;
+
             Register<0x57A, u32> drawInlineIndex;
 
             struct InlineIndex2X16Align {

@@ -4,7 +4,9 @@
 #include <soc/gm20b/channel.h>
 #include <soc/gm20b/gmmu.h>
 #include <gpu/texture_manager.h>
-#include <gpu/texture/format.h>
+#include <gpu/texture/formats.h>
+#include <vulkan/vulkan_enums.hpp>
+#include "gpu/texture/guest_texture.h"
 #include "textures.h"
 
 namespace skyline::gpu::interconnect {
@@ -201,42 +203,7 @@ namespace skyline::gpu::interconnect {
         };
     }
 
-    static std::shared_ptr<TextureView> CreateNullTexture(InterconnectContext &ctx) {
-        constexpr texture::Format NullImageFormat{format::R8G8B8A8Unorm};
-        constexpr texture::Dimensions NullImageDimensions{1, 1, 1};
-        constexpr vk::ImageLayout NullImageInitialLayout{vk::ImageLayout::eUndefined};
-        constexpr vk::ImageTiling NullImageTiling{vk::ImageTiling::eOptimal};
-        constexpr vk::ImageCreateFlags NullImageFlags{};
-        constexpr vk::ImageUsageFlags NullImageUsage{vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled};
-
-        auto vkImage{ctx.gpu.memory.AllocateImage(
-            {
-                .flags = NullImageFlags,
-                .imageType = vk::ImageType::e2D,
-                .format = NullImageFormat->vkFormat,
-                .extent = NullImageDimensions,
-                .mipLevels = 1,
-                .arrayLayers = 1,
-                .samples = vk::SampleCountFlagBits::e1,
-                .tiling = NullImageTiling,
-                .usage = NullImageUsage,
-                .sharingMode = vk::SharingMode::eExclusive,
-                .queueFamilyIndexCount = 1,
-                .pQueueFamilyIndices = &ctx.gpu.vkQueueFamilyIndex,
-                .initialLayout = NullImageInitialLayout
-            }
-        )};
-
-        auto nullTexture{std::make_shared<Texture>(ctx.gpu, std::move(vkImage), NullImageDimensions, NullImageFormat, NullImageInitialLayout, NullImageTiling, NullImageFlags, NullImageUsage)};
-        nullTexture->TransitionLayout(vk::ImageLayout::eGeneral);
-        return nullTexture->GetView(vk::ImageViewType::e2D, vk::ImageSubresourceRange{
-            .aspectMask = vk::ImageAspectFlagBits::eColor,
-            .levelCount = 1,
-            .layerCount = 1,
-        });;
-    }
-
-    TextureView *Textures::GetTexture(InterconnectContext &ctx, u32 index, Shader::TextureType shaderType) {
+    HostTextureView *Textures::GetTexture(InterconnectContext &ctx, u32 index, Shader::TextureType shaderType) {
         auto textureHeaders{texturePool.UpdateGet(ctx).textureHeaders};
         if (textureHeaderCache.size() != textureHeaders.size()) {
             textureHeaderCache.resize(textureHeaders.size());
@@ -246,96 +213,111 @@ namespace skyline::gpu::interconnect {
             if (cached.sequenceNumber == ctx.channelCtx.channelSequenceNumber)
                 return cached.view;
 
-            if (cached.tic == textureHeaders[index] && !cached.view->texture->replaced) {
-                cached.sequenceNumber = ctx.channelCtx.channelSequenceNumber;
+            if (cached.tic == textureHeaders[index] && !cached.view->stale) {
+                cached.executionTag = ctx.executor.executionTag;
                 return cached.view;
             }
         }
 
-        if (index >= textureHeaders.size()) {
-            if (!nullTextureView)
-                nullTextureView = CreateNullTexture(ctx);
-
-            return nullTextureView.get();
-        }
+        if (index >= textureHeaders.size())
+            return nullptr;
 
         TextureImageControl &textureHeader{textureHeaders[index]};
         auto &texture{textureHeaderStore[textureHeader]};
 
-        if (!texture || texture->texture->replaced) {
+        if (!texture || texture->stale) {
             // If the entry didn't exist prior then we need to convert the TIC to a GuestTexture
-            GuestTexture guest{};
-            if (auto format{ConvertTicFormat(textureHeader.formatWord, textureHeader.isSrgb)}) {
-                guest.format = format;
-            } else {
-                if (!nullTextureView)
-                    nullTextureView = CreateNullTexture(ctx);
-
-                return nullTextureView.get();
-            }
-
-            guest.aspect = guest.format->Aspect(textureHeader.formatWord.swizzleX == TextureImageControl::ImageSwizzle::R);
-            guest.swizzle = ConvertTicSwizzleMapping(textureHeader.formatWord, guest.format->swizzleMapping);
+            auto format{ConvertTicFormat(textureHeader.formatWord, textureHeader.isSrgb)};
+            if (!format)
+                return nullptr;
 
             constexpr size_t CubeFaceCount{6};
 
-            guest.baseArrayLayer = static_cast<u16>(textureHeader.BaseLayer());
-            guest.dimensions = texture::Dimensions(textureHeader.widthMinusOne + 1, textureHeader.heightMinusOne + 1, 1);
+            texture::Dimensions imageDimensions{static_cast<u32>(textureHeader.widthMinusOne + 1), static_cast<u32>(textureHeader.heightMinusOne + 1), 1};
             u16 depth{static_cast<u16>(textureHeader.depthMinusOne + 1)};
-
-            guest.mipLevelCount = textureHeader.mipMaxLevels + 1;
-            guest.viewMipBase = textureHeader.viewConfig.mipMinLevel;
-            guest.viewMipCount = textureHeader.viewConfig.mipMaxLevel - textureHeader.viewConfig.mipMinLevel + 1;
-
+            u32 levelCount{static_cast<u32>(textureHeader.mipMaxLevels + 1)}, viewMipBase{textureHeader.viewConfig.mipMinLevel}, viewMipCount{static_cast<u32>(textureHeader.viewConfig.mipMaxLevel - textureHeader.viewConfig.mipMinLevel + 1)};
+            u32 baseArrayLayer{textureHeader.BaseLayer()}, layerCount{};
+            vk::ImageViewType viewType{};
             switch (textureHeader.textureType) {
                 case TextureImageControl::TextureType::e1D:
-                    guest.viewType = shaderType == Shader::TextureType::ColorArray1D ? vk::ImageViewType::e1DArray : vk::ImageViewType::e1D;
-                    guest.layerCount = 1;
+                    viewType = shaderType == Shader::TextureType::ColorArray1D ? vk::ImageViewType::e1DArray : vk::ImageViewType::e1D;
+                    layerCount = 1;
                     break;
                 case TextureImageControl::TextureType::e1DArray:
-                    guest.viewType = vk::ImageViewType::e1DArray;
-                    guest.layerCount = depth;
+                    viewType = vk::ImageViewType::e1DArray;
+                    layerCount = depth;
                     break;
                 case TextureImageControl::TextureType::e1DBuffer:
                     throw exception("1D Buffers are not supported");
 
                 case TextureImageControl::TextureType::e2DNoMipmap:
-                    guest.mipLevelCount = 1;
-                    guest.viewMipBase = 0;
-                    guest.viewMipCount = 1;
+                    levelCount = 1;
+                    viewMipBase = 0;
+                    viewMipCount = 1;
                 case TextureImageControl::TextureType::e2D:
-                    guest.viewType = shaderType == Shader::TextureType::ColorArray2D ? vk::ImageViewType::e2DArray : vk::ImageViewType::e2D;
-                    guest.layerCount = 1;
+                    viewType = shaderType == Shader::TextureType::ColorArray2D ? vk::ImageViewType::e2DArray : vk::ImageViewType::e2D;
+                    layerCount = 1;
                     break;
                 case TextureImageControl::TextureType::e2DArray:
-                    guest.viewType = vk::ImageViewType::e2DArray;
-                    guest.layerCount = depth;
+                    viewType = vk::ImageViewType::e2DArray;
+                    layerCount = depth;
                     break;
 
                 case TextureImageControl::TextureType::e3D:
-                    guest.viewType = vk::ImageViewType::e3D;
-                    guest.layerCount = 1;
-                    guest.dimensions.depth = depth;
+                    viewType = vk::ImageViewType::e3D;
+                    layerCount = 1;
+                    imageDimensions.depth = depth;
                     break;
 
                 case TextureImageControl::TextureType::eCube:
-                    guest.viewType = shaderType == Shader::TextureType::ColorArrayCube ? vk::ImageViewType::eCubeArray : vk::ImageViewType::eCube;
-                    guest.layerCount = CubeFaceCount;
+                    viewType = shaderType == Shader::TextureType::ColorArrayCube ? vk::ImageViewType::eCubeArray : vk::ImageViewType::eCube;
+                    layerCount = CubeFaceCount;
                     break;
                 case TextureImageControl::TextureType::eCubeArray:
-                    guest.viewType = vk::ImageViewType::eCubeArray;
-                    guest.layerCount = depth * CubeFaceCount;
+                    viewType = vk::ImageViewType::eCubeArray;
+                    layerCount = depth * CubeFaceCount;
                     break;
             }
 
-            size_t size; //!< The size of the texture in bytes
+            vk::SampleCountFlagBits sampleCount{};
+            texture::Dimensions sampleDimensions{imageDimensions};
+            switch (textureHeader.viewConfig.msaaMode) {
+                case TextureImageControl::MsaaMode::e1x1:
+                    sampleCount = vk::SampleCountFlagBits::e1;
+                    break;
+                case TextureImageControl::MsaaMode::e2x1:
+                case TextureImageControl::MsaaMode::e2x1D3D:
+                    sampleCount = vk::SampleCountFlagBits::e2;
+                    sampleDimensions.width *= 2;
+                case TextureImageControl::MsaaMode::e2x2:
+                case TextureImageControl::MsaaMode::e2x2Vc4:
+                case TextureImageControl::MsaaMode::e2x2Vc12:
+                    sampleCount = vk::SampleCountFlagBits::e4;
+                    sampleDimensions.width *= 2;
+                    sampleDimensions.height *= 2;
+                case TextureImageControl::MsaaMode::e4x2:
+                case TextureImageControl::MsaaMode::e4x2D3D:
+                case TextureImageControl::MsaaMode::e4x2Vc8:
+                case TextureImageControl::MsaaMode::e4x2Vc24:
+                    sampleCount = vk::SampleCountFlagBits::e8;
+                    sampleDimensions.width *= 4;
+                    sampleDimensions.height *= 2;
+                case TextureImageControl::MsaaMode::e4x4:
+                    sampleCount = vk::SampleCountFlagBits::e16;
+                    sampleDimensions.width *= 4;
+                    sampleDimensions.height *= 4;
+                default:
+                    throw exception("Invalid MSAA mode: {}", static_cast<u32>(textureHeader.viewConfig.msaaMode));
+            }
+
+            texture::TileConfig tileConfig{};
             if (textureHeader.headerType == TextureImageControl::HeaderType::Pitch) {
-                guest.tileConfig = {
+                tileConfig = {
                     .mode = texture::TileMode::Pitch,
                     .pitch = static_cast<u32>(textureHeader.tileConfig.pitchHigh) << TextureImageControl::TileConfig::PitchAlignmentBits,
                 };
             } else if (textureHeader.headerType == TextureImageControl::HeaderType::BlockLinear) {
-                guest.tileConfig = {
+                tileConfig = {
                     .mode = texture::TileMode::Block,
                     .blockHeight = static_cast<u8>(1U << textureHeader.tileConfig.tileHeightGobsLog2),
                     .blockDepth = static_cast<u8>(1U << textureHeader.tileConfig.tileDepthGobsLog2),
@@ -344,20 +326,23 @@ namespace skyline::gpu::interconnect {
                 throw exception("Unsupported TIC Header Type: {}", static_cast<u32>(textureHeader.headerType));
             }
 
-            auto mappings{ctx.channelCtx.asCtx->gmmu.TranslateRange(textureHeader.Iova(), guest.GetSize())};
-            guest.mappings.assign(mappings.begin(), mappings.end());
-            if (guest.mappings.empty() || !std::all_of(guest.mappings.begin(), guest.mappings.end(), [](auto map) { return map.valid(); }) || guest.mappings.front().empty()) {
+            u32 layerStride{texture::CalculateLayerStride(sampleDimensions, format, tileConfig, levelCount, layerCount)};
+            texture::Mappings mappings{ctx.channelCtx.asCtx->gmmu.TranslateRange(textureHeader.Iova(), layerStride * layerCount)};
+            if (mappings.empty() || !ranges::all_of(mappings, [](const auto &mapping) { return mapping.valid(); })) {
                 LOGW("Unmapped texture in pool: 0x{:X}", textureHeader.Iova());
-                if (!nullTextureView)
-                    nullTextureView = CreateNullTexture(ctx);
-
-                return nullTextureView.get();
+                return nullptr;
             }
-            texture = ctx.gpu.texture.FindOrCreate(guest, ctx.executor.tag);
+
+            // TODO: guest.aspect = guest.format->Aspect(textureHeader.formatWord.swizzleX == TextureImageControl::ImageSwizzle::R);
+            auto swizzle{ConvertTicSwizzleMapping(textureHeader.formatWord, format->swizzleMapping)};
+
+            texture = ctx.gpu.texture.FindOrCreate([=](auto &&executionCallback) {
+                ctx.executor.AddOutsideRpCommand(std::forward<decltype(executionCallback)>(executionCallback));
+            }, ctx.executor.tag, texture::Mappings{mappings}, sampleDimensions, imageDimensions, sampleCount, format, viewType, swizzle, tileConfig, levelCount, layerCount, layerStride, viewMipBase, viewMipCount);
         }
 
-        textureHeaderCache[index] = {textureHeader, texture.get(), ctx.channelCtx.channelSequenceNumber};
-        return texture.get();
+        textureHeaderCache[index] = {textureHeader, texture, ctx.executor.executionTag};
+        return texture;
     }
 
     Shader::TextureType Textures::GetTextureType(InterconnectContext &ctx, u32 index) {

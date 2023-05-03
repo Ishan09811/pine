@@ -4,126 +4,15 @@
 #include <gpu.h>
 #include <kernel/memory.h>
 #include <kernel/types/KProcess.h>
-#include <common/trace.h>
 #include <common/settings.h>
+#include "host_texture.h"
 #include "texture.h"
-#include "layout.h"
-#include "adreno_aliasing.h"
-#include "bc_decoder.h"
-#include "format.h"
+#include "formats.h"
+#include "host_compatibility.h"
 
 namespace skyline::gpu {
-    u32 GuestTexture::GetLayerStride() {
-        if (layerStride)
-            return layerStride;
-
-        layerStride = CalculateLayerSize();
-        return layerStride;
-    }
-
-    u32 GuestTexture::CalculateLayerSize() const {
-        switch (tileConfig.mode) {
-            case texture::TileMode::Linear:
-                return static_cast<u32>(format->GetSize(dimensions));
-
-            case texture::TileMode::Pitch:
-                return dimensions.height * tileConfig.pitch;
-
-            case texture::TileMode::Block:
-                return static_cast<u32>(texture::GetBlockLinearLayerSize(dimensions, format->blockHeight, format->blockWidth, format->bpb, tileConfig.blockHeight, tileConfig.blockDepth, mipLevelCount, layerCount > 1));
-        }
-    }
-
-    vk::ImageType GuestTexture::GetImageType() const {
-        switch (viewType) {
-            case vk::ImageViewType::e1D:
-            case vk::ImageViewType::e1DArray:
-                return vk::ImageType::e1D;
-            case vk::ImageViewType::e2D:
-            case vk::ImageViewType::e2DArray:
-                // If depth is > 1 this is a 2D view into a 3D texture so the underlying image needs to be created as 3D yoo
-                if (dimensions.depth > 1)
-                    return vk::ImageType::e3D;
-                else
-                    return vk::ImageType::e2D;
-            case vk::ImageViewType::eCube:
-            case vk::ImageViewType::eCubeArray:
-                return vk::ImageType::e2D;
-            case vk::ImageViewType::e3D:
-                return vk::ImageType::e3D;
-        }
-    }
-
-    u32 GuestTexture::GetViewLayerCount() const {
-        if (GetImageType() == vk::ImageType::e3D && viewType != vk::ImageViewType::e3D)
-            return dimensions.depth;
-        else
-            return layerCount;
-    }
-
-    u32 GuestTexture::GetViewDepth() const {
-        if (GetImageType() == vk::ImageType::e3D && viewType != vk::ImageViewType::e3D)
-            return layerCount;
-        else
-            return dimensions.depth;
-    }
-
-    size_t GuestTexture::GetSize() {
-        return GetLayerStride() * (layerCount - baseArrayLayer);
-    }
-
-    bool GuestTexture::MappingsValid() const {
-        return ranges::all_of(mappings, [](const auto &mapping) { return mapping.valid(); });
-    }
-
-    TextureView::TextureView(std::shared_ptr<Texture> texture, vk::ImageViewType type, vk::ImageSubresourceRange range, texture::Format format, vk::ComponentMapping mapping) : texture(std::move(texture)), type(type), format(format), mapping(mapping), range(range) {}
-
-    Texture::TextureViewStorage::TextureViewStorage(vk::ImageViewType type, texture::Format format, vk::ComponentMapping mapping, vk::ImageSubresourceRange range, vk::raii::ImageView &&vkView) : type(type), format(format), mapping(mapping), range(range), vkView(std::move(vkView)) {}
-
-    vk::ImageView TextureView::GetView() {
-        if (vkView)
-            return vkView;
-
-        auto it{std::find_if(texture->views.begin(), texture->views.end(), [this](const Texture::TextureViewStorage &view) {
-            return view.type == type && view.format == format && view.mapping == mapping && view.range == range;
-        })};
-        if (it == texture->views.end()) {
-            vk::ImageViewCreateInfo createInfo{
-                .image = texture->GetBacking(),
-                .viewType = type,
-                .format = format ? *format : *texture->format,
-                .components = mapping,
-                .subresourceRange = range,
-            };
-
-            it = texture->views.emplace(texture->views.end(), type, format, mapping, range, vk::raii::ImageView{texture->gpu.vkDevice, createInfo});
-        }
-
-        return vkView = *it->vkView;
-    }
-
-    void TextureView::lock() {
-        texture.Lock();
-    }
-
-    bool TextureView::LockWithTag(ContextTag tag) {
-        bool result{};
-        texture.Lock([tag, &result](Texture *pTexture) {
-            result = pTexture->LockWithTag(tag);
-        });
-        return result;
-    }
-
-    void TextureView::unlock() {
-        texture->unlock();
-    }
-
-    bool TextureView::try_lock() {
-        return texture.TryLock();
-    }
-
     void Texture::SetupGuestMappings() {
-        auto &mappings{guest->mappings};
+        auto &mappings{guest.mappings};
         if (mappings.size() == 1) {
             auto mapping{mappings.front()};
             u8 *alignedData{util::AlignDown(mapping.data(), constant::PageSize)};
@@ -177,7 +66,7 @@ namespace skyline::gpu {
                         texture->accumulatedGuestWaitCounter++;
                     }
 
-                    std::scoped_lock lock{*texture};
+                    std::scoped_lock lock{texture->mutex};
                     if (waitCycle && texture->cycle == waitCycle) {
                         texture->cycle = {};
                         waitCycle = {};
@@ -200,7 +89,7 @@ namespace skyline::gpu {
             if (texture->dirtyState != DirtyState::GpuDirty)
                 return true; // If state is already CPU dirty/Clean we don't need to do anything
 
-            std::unique_lock lock{*texture, std::try_to_lock};
+            std::unique_lock lock{texture->mutex, std::try_to_lock};
             if (!lock)
                 return false;
 
@@ -230,7 +119,7 @@ namespace skyline::gpu {
                 return true;
             }
 
-            std::unique_lock lock{*texture, std::try_to_lock};
+            std::unique_lock lock{texture->mutex, std::try_to_lock};
             if (!lock)
                 return false;
 
@@ -242,6 +131,7 @@ namespace skyline::gpu {
         });
     }
 
+<<<<<<< HEAD
     std::shared_ptr<memory::StagingBuffer> Texture::SynchronizeHostImpl() {
         if (guest->dimensions != dimensions)
             throw exception("Guest and host dimensions being different is not supported currently");
@@ -626,11 +516,18 @@ namespace skyline::gpu {
             .initialLayout = layout,
         };
         backing = tiling != vk::ImageTiling::eLinear ? gpu.memory.AllocateImage(imageCreateInfo) : gpu.memory.AllocateMappedImage(imageCreateInfo);
+=======
+    Texture::Texture(GPU &gpu, texture::Mappings mappings, texture::Dimensions sampleDimensions, texture::Dimensions imageDimensions, vk::SampleCountFlagBits sampleCount, texture::Format format, texture::TileConfig tileConfig, u32 levelCount, u32 layerCount, u32 layerStride, bool mutableFormat) : gpu{gpu}, guest{std::move(mappings), sampleDimensions, imageDimensions, sampleCount, format, tileConfig, levelCount, layerCount, layerStride}, dirtyState{DirtyState::CpuDirty}, mutableFormat{mutableFormat || !gpu.traits.quirks.vkImageMutableFormatCostly} {}
+>>>>>>> 24e2f648 (wip texman)
 
+    void Texture::Initialize(vk::ImageViewType viewType) {
         SetupGuestMappings();
+
+        activeHost = &hosts.emplace_back(*this, guest.imageDimensions, guest.sampleCount, guest.format, HostTexture::ConvertViewType(viewType, guest.imageDimensions), mutableFormat);
     }
 
     Texture::~Texture() {
+        std::scoped_lock lock{mutex};
         SynchronizeGuest(true);
         if (trapHandle)
             gpu.state.process->trap.DeleteTrap(*trapHandle);
@@ -640,7 +537,6 @@ namespace skyline::gpu {
 
     void Texture::lock() {
         mutex.lock();
-        accumulatedCpuLockCounter++;
     }
 
     bool Texture::LockWithTag(ContextTag pTag) {
@@ -658,25 +554,67 @@ namespace skyline::gpu {
     }
 
     bool Texture::try_lock() {
-        if (mutex.try_lock()) {
-            accumulatedCpuLockCounter++;
+        if (mutex.try_lock())
             return true;
-        }
 
         return false;
     }
 
-    bool Texture::WaitOnBacking() {
-        TRACE_EVENT("gpu", "Texture::WaitOnBacking");
+    HostTextureView *Texture::FindOrCreateView(texture::Dimensions dimensions, texture::Format format, vk::ImageViewType viewType, vk::ImageSubresourceRange range, vk::ComponentMapping components, vk::SampleCountFlagBits sampleCount) {
+        std::scoped_lock lock{mutex};
 
-        if (GetBacking()) [[likely]] {
-            return false;
-        } else {
-            std::unique_lock lock(mutex, std::adopt_lock);
-            backingCondition.wait(lock, [&]() -> bool { return GetBacking(); });
-            lock.release();
-            return true;
+        auto createView{[this](HostTexture &host, texture::Format viewFormat, vk::ImageViewType viewType, vk::ImageSubresourceRange range, vk::ComponentMapping components) {
+            vk::ImageViewCreateInfo createInfo{
+                .image = host.backing.vkImage,
+                .viewType = viewType,
+                .format = viewFormat->vkFormat,
+                .components = components,
+                .subresourceRange = range,
+            };
+
+            auto view{gpu.texture.viewAllocatorState.EmplaceUntracked<HostTextureView>(&host, viewType, viewFormat, components, range, vk::raii::ImageView{gpu.vkDevice, createInfo})};
+            host.views.emplace_back(view);
+            return view;
+        }};
+
+        vk::ImageType imageType{HostTexture::ConvertViewType(viewType, dimensions)};
+        for (auto &host : hosts) {
+            if (host.dimensions == dimensions && host.imageType == imageType && host.sampleCount == sampleCount) {
+                auto viewFormat{format == guest.format ? host.format : format}; // We want to use the texture's format if it isn't supplied or if the requested format matches the guest format then we want to use the host format just in case it's compressed
+
+                if ((viewFormat->vkAspect & format->vkAspect) == vk::ImageAspectFlagBits{}) {
+                    viewFormat = format; // If the requested format doesn't share any aspects then fallback to the texture's format in the hope it's more likely to function
+                    range.aspectMask = format->Aspect(components.r == vk::ComponentSwizzle::eR);
+                }
+
+                // Workaround to avoid aliasing when sampling from a BGRA texture with a RGBA view and a mapping to counteract that
+                // TODO: drop this after new texture manager
+                if (viewFormat == format::R8G8B8A8Unorm && host.format == format::B8G8R8A8Unorm && components == vk::ComponentMapping{vk::ComponentSwizzle::eB, vk::ComponentSwizzle::eG, vk::ComponentSwizzle::eR, vk::ComponentSwizzle::eA}) {
+                    viewFormat = host.format;
+                    components = vk::ComponentMapping{};
+                }
+
+                auto view{ranges::find_if(host.views, [&](HostTextureView *view) { return view->format == viewFormat && view->type == viewType && view->range == range && view->components == components; })};
+                if (view != host.views.end())
+                    return *view;
+
+                if (host.needsDecompression)
+                    // If the host texture needs decompression then we can't create a view with a different format, we depend on variants to handle that
+                    continue;
+
+                bool isViewFormatCompatible{texture::IsVulkanFormatCompatible(static_cast<VkFormat>(viewFormat->vkFormat), static_cast<VkFormat>(host.format->vkFormat))};
+                if (!isViewFormatCompatible)
+                    continue; // If the view format isn't compatible then we can't create a view
+
+                if (host.format == viewFormat || host.flags & vk::ImageCreateFlagBits::eMutableFormat)
+                    return createView(host, viewFormat, viewType, range, components);
+                else
+                    return nullptr; // We need to create a whole new texture if the host texture doesn't support mutable formats
+            }
         }
+
+        auto &host{hosts.emplace_back(*this, dimensions, sampleCount, format, HostTexture::ConvertViewType(viewType, dimensions), mutableFormat)};
+        return createView(host, format, viewType, range, components);
     }
 
     void Texture::WaitOnFence() {
@@ -688,6 +626,7 @@ namespace skyline::gpu {
         }
     }
 
+<<<<<<< HEAD
     void Texture::SwapBacking(BackingType &&pBacking, vk::ImageLayout pLayout) {
         WaitOnFence();
 
@@ -1019,6 +958,12 @@ namespace skyline::gpu {
         }()};
         newCycle->AttachObjects(std::move(source), shared_from_this());
         cycle = newCycle;
+=======
+    void Texture::AttachCycle(const std::shared_ptr<FenceCycle>& lCycle) {
+        lCycle->AttachObject(shared_from_this());
+        lCycle->ChainCycle(cycle);
+        cycle = lCycle;
+>>>>>>> 24e2f648 (wip texman)
     }
 
     bool Texture::ValidateRenderPassUsage(u32 renderPassIndex, texture::RenderPassUsage renderPassUsage) {
@@ -1061,12 +1006,133 @@ namespace skyline::gpu {
         if (!(pendingStageMask & dstStage))
             return;
 
-        if (format->vkAspect & (vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil))
+        if (activeHost->format->vkAspect & (vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil))
             srcStageMask |= vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests;
-        else if (format->vkAspect & vk::ImageAspectFlagBits::eColor)
+        else if (activeHost->format->vkAspect & vk::ImageAspectFlagBits::eColor)
             srcStageMask |= vk::PipelineStageFlagBits::eColorAttachmentOutput;
 
         pendingStageMask &= ~dstStage;
         dstStageMask |= dstStage;
+    }
+
+    void Texture::SynchronizeHost(bool gpuDirty) {
+        TRACE_EVENT("gpu", "Texture::SynchronizeHost");
+        {
+            std::scoped_lock lock{stateMutex};
+            if (gpuDirty && dirtyState == DirtyState::Clean) {
+                // If a texture is Clean then we can just transition it to being GPU dirty and retrap it
+                dirtyState = DirtyState::GpuDirty;
+                gpu.state.nce->TrapRegions(*trapHandle, false);
+                gpu.state.process->memory.FreeMemory(mirror);
+                return;
+            } else if (dirtyState != DirtyState::CpuDirty) {
+                return; // If the texture has not been modified on the CPU, there is no need to synchronize it
+            }
+
+            dirtyState = gpuDirty ? DirtyState::GpuDirty : DirtyState::Clean;
+            gpu.state.nce->TrapRegions(*trapHandle, !gpuDirty); // Trap any future CPU reads (optionally) + writes to this texture
+        }
+
+        // From this point on Clean -> CPU dirty state transitions can occur, GPU dirty -> * transitions will always require the full lock to be held and thus won't occur
+
+        auto stagingBuffer{activeHost->SynchronizeHostImpl()};
+        if (stagingBuffer) {
+            if (cycle)
+                cycle->WaitSubmit();
+            auto lCycle{gpu.scheduler.Submit([&](vk::raii::CommandBuffer &commandBuffer) {
+                activeHost->CopyFromStagingBuffer(commandBuffer, stagingBuffer);
+            })};
+            lCycle->AttachObjects(stagingBuffer, shared_from_this());
+            lCycle->ChainCycle(cycle);
+            cycle = lCycle;
+        }
+
+        {
+            std::scoped_lock lock{stateMutex};
+
+            if (dirtyState != DirtyState::CpuDirty && gpuDirty)
+                gpu.state.process->memory.FreeMemory(mirror); // All data can be paged out from the guest as the guest mirror won't be used
+        }
+    }
+
+    void Texture::SynchronizeHostInline(const vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &pCycle, bool gpuDirty) {
+        TRACE_EVENT("gpu", "Texture::SynchronizeHostInline");
+
+        {
+            std::scoped_lock lock{stateMutex};
+            if (gpuDirty && dirtyState == DirtyState::Clean) {
+                dirtyState = DirtyState::GpuDirty;
+                gpu.state.nce->TrapRegions(*trapHandle, false);
+                gpu.state.process->memory.FreeMemory(mirror);
+                return;
+            } else if (dirtyState != DirtyState::CpuDirty) {
+                return;
+            }
+
+            dirtyState = gpuDirty ? DirtyState::GpuDirty : DirtyState::Clean;
+            gpu.state.nce->TrapRegions(*trapHandle, !gpuDirty); // Trap any future CPU reads (optionally) + writes to this texture
+        }
+
+        auto stagingBuffer{activeHost->SynchronizeHostImpl()};
+        if (stagingBuffer) {
+            activeHost->CopyFromStagingBuffer(commandBuffer, stagingBuffer);
+            pCycle->AttachObjects(stagingBuffer, shared_from_this());
+            pCycle->ChainCycle(cycle);
+            cycle = pCycle;
+        }
+
+        {
+            std::scoped_lock lock{stateMutex};
+
+            if (dirtyState != DirtyState::CpuDirty && gpuDirty)
+                gpu.state.process->memory.FreeMemory(mirror); // All data can be paged out from the guest as the guest mirror won't be used
+        }
+    }
+
+    void Texture::SynchronizeGuest(bool cpuDirty, bool skipTrap) {
+        TRACE_EVENT("gpu", "Texture::SynchronizeGuest");
+
+        {
+            std::scoped_lock lock{stateMutex};
+            if (cpuDirty && dirtyState == DirtyState::Clean) {
+                dirtyState = DirtyState::CpuDirty;
+                if (!skipTrap)
+                    gpu.state.nce->RemoveTrap(*trapHandle);
+                return;
+            } else if (dirtyState != DirtyState::GpuDirty) {
+                return;
+            }
+
+            dirtyState = cpuDirty ? DirtyState::CpuDirty : DirtyState::Clean;
+        }
+
+        if (activeHost->layout == vk::ImageLayout::eUndefined || activeHost->needsDecompression)
+            // We cannot sync the contents of an undefined texture and we don't support recompression of a decompressed texture
+            return;
+
+        if (activeHost->tiling == vk::ImageTiling::eOptimal) {
+            if (!downloadStagingBuffer)
+                downloadStagingBuffer = gpu.memory.AllocateStagingBuffer(guest.size);
+
+            WaitOnFence();
+            auto lCycle{gpu.scheduler.Submit([&](vk::raii::CommandBuffer &commandBuffer) {
+                activeHost->CopyIntoStagingBuffer(commandBuffer, downloadStagingBuffer);
+            })};
+            lCycle->Wait(); // We block till the copy is complete
+
+            activeHost->CopyToGuest(downloadStagingBuffer->data());
+        } else if (activeHost->tiling == vk::ImageTiling::eLinear) {
+            // We can optimize linear texture sync on a UMA by mapping the texture onto the CPU and copying directly from it rather than using a staging buffer
+            WaitOnFence();
+            activeHost->CopyToGuest(activeHost->backing.data());
+        } else {
+            throw exception("Host -> Guest synchronization of images tiled as '{}' isn't implemented", vk::to_string(activeHost->tiling));
+        }
+
+        if (!skipTrap)
+            if (cpuDirty)
+                gpu.state.nce->RemoveTrap(*trapHandle);
+            else
+                gpu.state.nce->TrapRegions(*trapHandle, true); // Trap any future CPU writes to this texture
     }
 }

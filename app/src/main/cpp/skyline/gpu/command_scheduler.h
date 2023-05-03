@@ -5,6 +5,7 @@
 
 #include <common/thread_local.h>
 #include <common/circular_queue.h>
+#include <cstddef>
 #include "fence_cycle.h"
 
 namespace skyline::gpu {
@@ -60,6 +61,8 @@ namespace skyline::gpu {
           public:
             constexpr ActiveCommandBuffer(CommandBufferSlot &slot) : slot{&slot} {}
 
+            constexpr ActiveCommandBuffer(std::nullptr_t) : slot{nullptr} {}
+
             constexpr ActiveCommandBuffer &operator=(ActiveCommandBuffer &&other) {
                 if (slot)
                     slot->active.clear(std::memory_order_release);
@@ -79,6 +82,10 @@ namespace skyline::gpu {
 
             std::shared_ptr<FenceCycle> GetFenceCycle() {
                 return slot->cycle;
+            }
+
+            operator bool() {
+                return slot != nullptr;
             }
 
             vk::raii::CommandBuffer &operator*() {

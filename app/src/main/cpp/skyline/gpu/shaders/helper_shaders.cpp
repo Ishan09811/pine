@@ -229,8 +229,8 @@ namespace skyline::gpu {
                                 vk::Extent2D srcImageDimensions, vk::Extent2D dstImageDimensions,
                                 float dstSrcScaleFactorX, float dstSrcScaleFactorY,
                                 bool bilinearFilter,
-                                TextureView *srcImageView, TextureView *dstImageView,
-                                std::function<void(std::function<void(vk::raii::CommandBuffer &, const std::shared_ptr<FenceCycle> &, GPU &, vk::RenderPass, u32)> &&)> &&recordCb) {
+                                HostTextureView *srcImageView, HostTextureView *dstImageView,
+                                std::function<void(std::function<void(vk::raii::CommandBuffer &, const std::shared_ptr<FenceCycle> &, GPU &)> &&)> &&recordCb) {
         struct DrawState {
             blit::VertexPushConstantLayout vertexPushConstants;
             blit::FragmentPushConstantLayout fragmentPushConstants;
@@ -268,7 +268,7 @@ namespace skyline::gpu {
 
         vk::DescriptorImageInfo imageInfo{
             .imageLayout = vk::ImageLayout::eGeneral,
-            .imageView = srcImageView->GetView(),
+            .imageView = *srcImageView->vkView,
             .sampler = bilinearFilter ? *bilinearSampler : *nearestSampler
         };
 
@@ -282,7 +282,7 @@ namespace skyline::gpu {
 
         gpu.vkDevice.updateDescriptorSets(writes, nullptr);
 
-        recordCb([drawState = std::move(drawState)](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &cycle, GPU &gpu, vk::RenderPass, u32) {
+        recordCb([drawState = std::move(drawState)](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &cycle, GPU &gpu) {
             cycle->AttachObject(drawState);
 
             vk::Viewport viewport{
@@ -330,8 +330,8 @@ namespace skyline::gpu {
     ClearHelperShader::ClearHelperShader(GPU &gpu, std::shared_ptr<vfs::FileSystem> shaderFileSystem)
         : SimpleSingleRtShader{gpu, shaderFileSystem->OpenFile("shaders/clear.vert.spv"), shaderFileSystem->OpenFile("shaders/clear.frag.spv")} {}
 
-    void ClearHelperShader::Clear(GPU &gpu, vk::ImageAspectFlags mask, vk::ColorComponentFlags components, vk::ClearValue value, TextureView *dstImageView,
-                                 std::function<void(std::function<void(vk::raii::CommandBuffer &, const std::shared_ptr<FenceCycle> &, GPU &, vk::RenderPass, u32)> &&)> &&recordCb) {
+    void ClearHelperShader::Clear(GPU &gpu, vk::ImageAspectFlags mask, vk::ColorComponentFlags components, vk::ClearValue value, HostTextureView *dstImageView,
+                                 std::function<void(std::function<void(vk::raii::CommandBuffer &, const std::shared_ptr<FenceCycle> &, GPU &)> &&)> &&recordCb) {
         struct DrawState {
             clear::FragmentPushConstantLayout fragmentPushConstants;
             const GraphicsPipelineAssembler::CompiledPipeline &pipeline;
@@ -364,10 +364,10 @@ namespace skyline::gpu {
                          VkColorComponentFlags{components},
                          writeDepth, writeStencil},
                          {}, clear::PushConstantRanges),
-            dstImageView->texture->dimensions
+            dstImageView->hostTexture->dimensions
         )};
 
-        recordCb([drawState = std::move(drawState)](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &cycle, GPU &gpu, vk::RenderPass, u32) {
+        recordCb([drawState = std::move(drawState)](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &cycle, GPU &gpu) {
             cycle->AttachObject(drawState);
 
             vk::Viewport viewport{

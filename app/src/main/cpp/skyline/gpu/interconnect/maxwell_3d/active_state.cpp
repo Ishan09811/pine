@@ -462,19 +462,19 @@ namespace skyline::gpu::interconnect::maxwell3d {
         return pipeline.Get().pipeline;
     }
 
-    span<TextureView *> ActiveState::GetColorAttachments() {
+    span<HostTextureView *> ActiveState::GetColorAttachments() {
         return pipeline.Get().colorAttachments;
     }
 
-    TextureView *ActiveState::GetDepthAttachment() {
+    HostTextureView *ActiveState::GetDepthAttachment() {
         return pipeline.Get().depthAttachment;
     }
 
-    std::shared_ptr<TextureView> ActiveState::GetColorRenderTargetForClear(InterconnectContext &ctx, size_t index) {
+    HostTextureView * ActiveState::GetColorRenderTargetForClear(InterconnectContext &ctx, size_t index) {
         return pipeline.Get().GetColorRenderTargetForClear(ctx, index);
     }
 
-    std::shared_ptr<TextureView> ActiveState::GetDepthRenderTargetForClear(InterconnectContext &ctx) {
+    HostTextureView * ActiveState::GetDepthRenderTargetForClear(InterconnectContext &ctx) {
         return pipeline.Get().GetDepthRenderTargetForClear(ctx);
     }
 }

@@ -194,11 +194,6 @@ namespace skyline::gpu::interconnect {
         std::vector<LockedBuffer> preserveAttachedBuffers;
         std::vector<LockedBuffer> attachedBuffers; //!< All textures that are attached to the current execution
 
-
-        std::vector<vk::ImageView> lastSubpassInputAttachments; //!< The set of input attachments used in the last subpass
-        std::vector<vk::ImageView> lastSubpassColorAttachments; //!< The set of color attachments used in the last subpass
-        vk::ImageView lastSubpassDepthStencilAttachment{}; //!< The depth stencil attachment used in the last subpass
-
         std::vector<std::function<void()>> flushCallbacks; //!< Set of persistent callbacks that will be called at the start of Execute in order to flush data required for recording
         std::vector<std::function<void()>> pipelineChangeCallbacks; //!< Set of persistent callbacks that will be called after any non-Maxwell 3D engine changes the active pipeline
 
@@ -209,12 +204,10 @@ namespace skyline::gpu::interconnect {
         void RotateRecordSlot();
 
         /**
-         * @brief Create a new render pass and subpass with the specified attachments, if one doesn't already exist or the current one isn't compatible
-         * @param noSubpassCreation Forces creation of a renderpass when a new subpass would otherwise be created
-         * @note This also checks for subpass coalescing and will merge the new subpass with the previous one when possible
-         * @return If the next subpass must be started prior to issuing any commands
+         * @brief Create a new render pass with the specified attachments or reuses the current render pass if compatible
+         * @return If a new render pass was created or not
          */
-        bool CreateRenderPassWithSubpass(vk::Rect2D renderArea, span<TextureView *> sampledImages, span<TextureView *> inputAttachments, span<TextureView *> colorAttachments, TextureView *depthStencilAttachment, bool noSubpassCreation = false, vk::PipelineStageFlags srcStageMask = {}, vk::PipelineStageFlags dstStageMask = {});
+        bool CreateRenderPassWithAttachments(vk::Rect2D renderArea, span<HostTextureView *> sampledImages, span<HostTextureView *> colorAttachments, HostTextureView *depthStencilAttachment, vk::PipelineStageFlags srcStageMask = {}, vk::PipelineStageFlags dstStageMask = {});
 
         /**
          * @brief Ends a render pass if one is currently active and resets all corresponding state
@@ -241,7 +234,7 @@ namespace skyline::gpu::interconnect {
 
       public:
         std::shared_ptr<FenceCycle> cycle; //!< The fence cycle that this command executor uses to wait for the GPU to finish executing commands
-        LinearAllocatorState<> *allocator;
+        LinearAllocatorState<> *allocator{};
         ContextTag tag; //!< The tag associated with this command executor, any tagged resource locking must utilize this tag
         size_t submissionNumber{};
         ContextTag executionTag{};
@@ -258,7 +251,7 @@ namespace skyline::gpu::interconnect {
          * @note The supplied texture will be locked automatically until the command buffer is submitted and must **not** be locked by the caller
          * @note This'll automatically handle syncing of the texture in the most optimal way possible
          */
-        bool AttachTexture(TextureView *view);
+        bool AttachTexture(HostTextureView *view);
 
         /**
          * @brief Attach the lifetime of a buffer view to the command buffer
@@ -293,20 +286,21 @@ namespace skyline::gpu::interconnect {
          * @brief Adds a command that needs to be executed inside a subpass configured with certain attachments
          * @param exclusiveSubpass If this subpass should be the only subpass in a render pass
          * @note Any supplied texture should be attached prior and not undergo any persistent layout transitions till execution
+         * @note Any texture views may be nullptr, in which case the texture will be ignored
          */
-        void AddSubpass(std::function<void(vk::raii::CommandBuffer &, const std::shared_ptr<FenceCycle> &, GPU &, vk::RenderPass, u32)> &&function, vk::Rect2D renderArea, span<TextureView *> sampledImages, span<TextureView *> inputAttachments = {}, span<TextureView *> colorAttachments = {}, TextureView *depthStencilAttachment = {}, bool noSubpassCreation = false, vk::PipelineStageFlags srcStageMask = {}, vk::PipelineStageFlags dstStageMask = {});
+        void AddSubpass(std::function<void(vk::raii::CommandBuffer &, const std::shared_ptr<FenceCycle> &, GPU &)> &&function, vk::Rect2D renderArea, span<HostTextureView *> sampledImages, span<HostTextureView *> colorAttachments = {}, HostTextureView *depthStencilAttachment = {}, vk::PipelineStageFlags srcStageMask = {}, vk::PipelineStageFlags dstStageMask = {});
 
         /**
          * @brief Adds a subpass that clears the entirety of the specified attachment with a color value, it may utilize VK_ATTACHMENT_LOAD_OP_CLEAR for a more efficient clear when possible
          * @note Any supplied texture should be attached prior and not undergo any persistent layout transitions till execution
          */
-        void AddClearColorSubpass(TextureView *attachment, const vk::ClearColorValue &value);
+        void AddClearColorSubpass(HostTextureView *attachment, const vk::ClearColorValue &value);
 
         /**
          * @brief Adds a subpass that clears the entirety of the specified attachment with a depth/stencil value, it may utilize VK_ATTACHMENT_LOAD_OP_CLEAR for a more efficient clear when possible
          * @note Any supplied texture should be attached prior and not undergo any persistent layout transitions till execution
          */
-        void AddClearDepthStencilSubpass(TextureView *attachment, const vk::ClearDepthStencilValue &value);
+        void AddClearDepthStencilSubpass(HostTextureView *attachment, const vk::ClearDepthStencilValue &value);
 
         /**
          * @brief Adds a command that needs to be executed outside the scope of a render pass

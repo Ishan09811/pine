@@ -11,7 +11,7 @@
 #include "native_window.h"
 
 namespace skyline::gpu {
-    class TextureView;
+    struct HostTextureView;
 }
 
 namespace skyline::service::nvdrv::core {
@@ -45,7 +45,7 @@ namespace skyline::service::hosbinder {
         bool wasBufferRequested{}; //!< If GraphicBufferProducer::RequestBuffer has been called with this buffer
         bool isPreallocated{}; //!< If this slot's graphic buffer has been preallocated or attached
         AndroidFence fence{};
-        std::shared_ptr<gpu::TextureView> texture{};
+        gpu::HostTextureView *texture{};
         std::unique_ptr<GraphicBuffer> graphicBuffer{};
     };
 

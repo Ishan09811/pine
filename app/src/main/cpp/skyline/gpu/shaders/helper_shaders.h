@@ -88,8 +88,8 @@ namespace skyline::gpu {
                       vk::Extent2D srcImageDimensions, vk::Extent2D dstImageDimensions,
                       float dstSrcScaleFactorX, float dstSrcScaleFactorY,
                       bool bilinearFilter,
-                      TextureView *srcImageView, TextureView *dstImageView,
-                      std::function<void(std::function<void(vk::raii::CommandBuffer &, const std::shared_ptr<FenceCycle> &, GPU &, vk::RenderPass, u32)> &&)> &&recordCb);
+                      HostTextureView *srcImageView, HostTextureView *dstImageView,
+                      std::function<void(std::function<void(vk::raii::CommandBuffer &, const std::shared_ptr<FenceCycle> &, GPU &)> &&)> &&recordCb);
     };
 
     /**
@@ -106,8 +106,8 @@ namespace skyline::gpu {
          * @param value The value to clear to
          * @param recordCb Callback used to record the blit commands for sequenced execution on the GPU
          */
-        void Clear(GPU &gpu, vk::ImageAspectFlags mask, vk::ColorComponentFlags components, vk::ClearValue value, TextureView *dstImageView,
-                  std::function<void(std::function<void(vk::raii::CommandBuffer &, const std::shared_ptr<FenceCycle> &, GPU &, vk::RenderPass, u32)> &&)> &&recordCb);
+        void Clear(GPU &gpu, vk::ImageAspectFlags mask, vk::ColorComponentFlags components, vk::ClearValue value, HostTextureView *dstImageView,
+                  std::function<void(std::function<void(vk::raii::CommandBuffer &, const std::shared_ptr<FenceCycle> &, GPU &)> &&)> &&recordCb);
     };
 
     /**

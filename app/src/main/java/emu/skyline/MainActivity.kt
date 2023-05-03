@@ -200,7 +200,6 @@ class MainActivity : AppCompatActivity() {
             while (itemDecorationCount > 0) removeItemDecorationAt(0)
             when (layoutType) {
                 LayoutType.List -> Unit
-
                 LayoutType.Grid, LayoutType.GridCompact -> addItemDecoration(GridSpacingItemDecoration(resources.getDimensionPixelSize(R.dimen.grid_padding)))
             }
         }

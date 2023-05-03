@@ -9,6 +9,9 @@
 #include <common/circular_queue.h>
 #include <kernel/types/KEvent.h>
 #include <services/hosbinder/GraphicBufferProducer.h>
+#include <vulkan/vulkan_handles.hpp>
+#include "fence_cycle.h"
+#include "texture/host_texture.h"
 #include "texture/texture.h"
 
 struct ANativeWindow;
@@ -38,13 +41,36 @@ namespace skyline::gpu {
         texture::Format swapchainFormat{}; //!< The image format of the textures in the current swapchain
         texture::Dimensions swapchainExtent{}; //!< The extent of images in the current swapchain
 
-        static constexpr size_t MaxSwapchainImageCount{10}; //!< The maximum amount of swapchain textures, this affects the amount of images that can be in the swapchain
-        std::array<std::shared_ptr<Texture>, MaxSwapchainImageCount> images; //!< All the swapchain textures in the same order as supplied by the host swapchain
-        std::array<vk::raii::Semaphore, MaxSwapchainImageCount> presentSemaphores; //!< Array of semaphores used to signal that swapchain images are ready to be completed, indexed by Vulkan swapchain index
-        std::array<vk::raii::Semaphore, MaxSwapchainImageCount> acquireSemaphores; //!< Array of semaphores used to wait on the GPU for swapchain images to be acquired, indexed by `frameIndex`
-        std::array<std::shared_ptr<FenceCycle>, MaxSwapchainImageCount> frameFences{}; //!< Array of fences used to wait on the GPU for copying of swapchain images to be completed, indexed by `frameIndex`
-        size_t frameIndex{}; //!< The index of the next semaphore/fence to be used for acquiring swapchain images
-        size_t swapchainImageCount{}; //!< The number of images in the current swapchain
+        struct SwapchainImage {
+            vk::Image vkImage;
+            vk::ImageLayout layout{vk::ImageLayout::eUndefined};
+            vk::raii::Semaphore presentSemaphore; //!< Semaphore used to signal that the swapchain image is ready to be presented
+
+            SwapchainImage(vk::raii::Device &device) : presentSemaphore{device, vk::SemaphoreCreateInfo{}} {}
+
+            void SetImage(vk::Image vkImage) {
+                this->vkImage = vkImage;
+                layout = vk::ImageLayout::eUndefined;
+            }
+        };
+
+        static constexpr size_t MaxSwapchainSlotCount{10}; //!< The maximum amount of swapchain slots, this affects the amount of images that can be in the swapchain
+        std::array<SwapchainImage, MaxSwapchainSlotCount> images; //!< All the swapchain textures in the same order as supplied by the host swapchain
+
+        struct SemaphoreEntry {
+            vk::raii::Semaphore semaphore;
+            std::shared_ptr<FenceCycle> freeCycle{}; //!< A FenceCycle that indicates when the semaphore is free to be reused
+
+            SemaphoreEntry(vk::raii::Device &device) : semaphore{device, vk::SemaphoreCreateInfo{}} {}
+
+            void WaitTillAvailable() {
+                if (freeCycle)
+                    freeCycle->Wait();
+            }
+        };
+
+        std::array<SemaphoreEntry, MaxSwapchainSlotCount> semaphorePool; //!< A pool of semaphores that can be reused for acquiring swapchain images
+        size_t semaphoreIndex{}; //!< The index of the next slot to be used for acquiring swapchain images
 
         i64 frameTimestamp{}; //!< The timestamp of the last frame being shown in nanoseconds
         i64 averageFrametimeNs{}; //!< The average time between frames in nanoseconds
@@ -63,7 +89,7 @@ namespace skyline::gpu {
         std::thread choreographerThread; //!< A thread for signalling the V-Sync event and measure the refresh cycle duration using AChoreographer
 
         struct PresentableFrame {
-            std::shared_ptr<TextureView> textureView{};
+            HostTextureView *textureView{};
             skyline::service::hosbinder::AndroidFence fence{}; //!< The fence that must be waited on prior to using the texture
             i64 timestamp{}; //!< The earliest timestamp (relative to ARM CPU timer) that this frame must be presented at
             i64 swapInterval{}; //!< The interval between frames in terms of 60Hz display refreshes (1/60th of a second)
@@ -89,6 +115,8 @@ namespace skyline::gpu {
          * @brief The entry point for the the Choreographer thread, sets up the AChoreographer callback then runs ALooper on the thread
          */
         void ChoreographerThread();
+
+        std::shared_ptr<FenceCycle> CopyIntoSwapchain(HostTextureView *textureView, SwapchainImage &image, vk::Semaphore acquireSemaphore);
 
         /**
          * @brief Submits a single frame to the host API for presentation with the appropriate waits and copies
@@ -132,7 +160,7 @@ namespace skyline::gpu {
          * @return The ID of this frame for correlating it with presentation timing readouts
          * @note The texture **must** be locked prior to calling this
          */
-        u64 Present(const std::shared_ptr<TextureView> &texture, i64 timestamp, i64 swapInterval, service::hosbinder::AndroidRect crop, service::hosbinder::NativeWindowScalingMode scalingMode, service::hosbinder::NativeWindowTransform transform, skyline::service::hosbinder::AndroidFence fence, const std::function<void()>& presentCallback);
+        u64 Present(HostTextureView *texture, i64 timestamp, i64 swapInterval, service::hosbinder::AndroidRect crop, service::hosbinder::NativeWindowScalingMode scalingMode, service::hosbinder::NativeWindowTransform transform, skyline::service::hosbinder::AndroidFence fence, const std::function<void()>& presentCallback);
 
         /**
          * @return A transform that the application should render with to elide costly transforms later

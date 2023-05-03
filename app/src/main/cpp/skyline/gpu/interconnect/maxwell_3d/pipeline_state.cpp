@@ -9,21 +9,44 @@
 #include <soc/gm20b/channel.h>
 #include <soc/gm20b/gmmu.h>
 #include <gpu.h>
+#include <vulkan/vulkan_enums.hpp>
+#include "gpu/texture/common.h"
+#include "gpu/texture/guest_texture.h"
 #include "pipeline_state.h"
 
 namespace skyline::gpu::interconnect::maxwell3d {
-    static void DetermineRenderTargetDimensions(GuestTexture &guest, const engine::SurfaceClip &clip) {
-        // RT dimensions always include block linear alignment and contain the unaligned dimensions in surface clip, we ideally want to create the texture using the unaligned dimensions since the texture manager doesn't support resolving such overlaps yet. By checking that the layer size calculated is equal to the RT size we can eliminate most cases where the clip is used not just for aligmnent
-        u32 underlyingRtLayerSize{guest.CalculateLayerSize()};
-        texture::Dimensions underlyingRtDimensions{guest.dimensions};
-        guest.dimensions = texture::Dimensions{static_cast<u32>(clip.horizontal.width + clip.horizontal.x),
-                                               static_cast<u32>(clip.vertical.height + clip.vertical.y),
-                                               guest.dimensions.depth};
-        u32 clippedRtLayerSize{guest.CalculateLayerSize()};
-
-        // If the calculated sizes don't match then always use the RT dimensions
-        if (clippedRtLayerSize != underlyingRtLayerSize)
-            guest.dimensions = underlyingRtDimensions;
+    std::pair<vk::SampleCountFlagBits, texture::Dimensions> GetMsaaState(engine::MsaaMode msaaMode, texture::Dimensions imageDimensions) {
+        vk::SampleCountFlagBits sampleCount{};
+        texture::Dimensions sampleDimensions{imageDimensions};
+        switch (msaaMode) {
+            case engine::MsaaMode::e1x1:
+                sampleCount = vk::SampleCountFlagBits::e1;
+                break;
+            case engine::MsaaMode::e2x1:
+            case engine::MsaaMode::e2x1D3D:
+                sampleCount = vk::SampleCountFlagBits::e2;
+                sampleDimensions.width *= 2;
+            case engine::MsaaMode::e2x2:
+            case engine::MsaaMode::e2x2Vc4:
+            case engine::MsaaMode::e2x2Vc12:
+                sampleCount = vk::SampleCountFlagBits::e4;
+                sampleDimensions.width *= 2;
+                sampleDimensions.height *= 2;
+            case engine::MsaaMode::e4x2:
+            case engine::MsaaMode::e4x2D3D:
+            case engine::MsaaMode::e4x2Vc8:
+            case engine::MsaaMode::e4x2Vc24:
+                sampleCount = vk::SampleCountFlagBits::e8;
+                sampleDimensions.width *= 4;
+                sampleDimensions.height *= 2;
+            case engine::MsaaMode::e4x4:
+                sampleCount = vk::SampleCountFlagBits::e16;
+                sampleDimensions.width *= 4;
+                sampleDimensions.height *= 4;
+            default:
+                throw exception("Invalid MSAA mode: {}", static_cast<u32>(msaaMode));
+        }
+        return {sampleCount, sampleDimensions};
     }
 
     /* Colour Render Target */
@@ -43,41 +66,37 @@ namespace skyline::gpu::interconnect::maxwell3d {
             return;
         }
 
-        GuestTexture guest{};
-        guest.format = packedState.GetColorRenderTargetFormat(index);
-        guest.aspect = vk::ImageAspectFlagBits::eColor;
-        guest.baseArrayLayer = target.layerOffset;
+        auto hostFormat{packedState.GetColorRenderTargetFormat(index)};
 
         bool thirdDimensionDefinesArraySize{target.memory.thirdDimensionControl == engine::TargetMemory::ThirdDimensionControl::ThirdDimensionDefinesArraySize};
-        guest.layerCount = thirdDimensionDefinesArraySize ? target.thirdDimension : 1;
-        guest.viewType = target.thirdDimension > 1 ? vk::ImageViewType::e2DArray : vk::ImageViewType::e2D;
-
         u32 depth{thirdDimensionDefinesArraySize ? 1U : target.thirdDimension};
+        texture::Dimensions imageDimensions{};
+        texture::TileConfig tileConfig{};
         if (target.memory.layout == engine::TargetMemory::Layout::Pitch) {
-            guest.dimensions = texture::Dimensions{target.width / guest.format->bpb, target.height, depth};
-            guest.tileConfig = texture::TileConfig{
+            imageDimensions = texture::Dimensions{target.width / hostFormat->bpb, target.height, depth};
+            tileConfig = texture::TileConfig{
                 .mode = gpu::texture::TileMode::Pitch,
                 .pitch = target.width,
             };
         } else {
-            guest.dimensions = gpu::texture::Dimensions{target.width, target.height, depth};
-            guest.tileConfig = gpu::texture::TileConfig{
+            imageDimensions = gpu::texture::Dimensions{target.width, target.height, depth};
+            tileConfig = gpu::texture::TileConfig{
                 .mode = gpu::texture::TileMode::Block,
                 .blockHeight = target.memory.BlockHeight(),
                 .blockDepth = target.memory.BlockDepth(),
             };
         }
 
-        guest.layerStride = (guest.baseArrayLayer > 1 || guest.layerCount > 1) ? target.ArrayPitch() : 0;
+        auto [sampleCount, sampleDimensions]{GetMsaaState(engine->msaaMode, imageDimensions)};
+        u32 baseArrayLayer{target.layerOffset}, layerCount{static_cast<u32>(thirdDimensionDefinesArraySize ? target.thirdDimension : 1)};
+        auto layerStride{(baseArrayLayer > 1 || layerCount > 1) ? target.ArrayPitch() : texture::CalculateLayerStride(sampleDimensions, hostFormat, tileConfig, 1, layerCount)};
+        auto viewType{target.thirdDimension > 1 ? vk::ImageViewType::e2DArray : vk::ImageViewType::e2D};
 
-        auto mappings{ctx.channelCtx.asCtx->gmmu.TranslateRange(target.offset, guest.GetSize())};
-        guest.mappings.assign(mappings.begin(), mappings.end());
-
-        if (guest.MappingsValid()) {
-            if (guest.tileConfig.mode == gpu::texture::TileMode::Block)
-                DetermineRenderTargetDimensions(guest, engine->surfaceClip);
-
-            view = ctx.gpu.texture.FindOrCreate(guest, ctx.executor.tag);
+        auto mappings{ctx.channelCtx.asCtx->gmmu.TranslateRange(target.offset, layerStride * layerCount)};
+        if (ranges::all_of(mappings, [](const auto &mapping) { return mapping.valid(); })) {
+            view = ctx.gpu.texture.FindOrCreate([=](auto &&executionCallback) {
+                ctx.executor.AddOutsideRpCommand(std::forward<decltype(executionCallback)>(executionCallback));
+            }, ctx.executor.tag, texture::Mappings{mappings}, sampleDimensions, imageDimensions, sampleCount, hostFormat, viewType, {}, tileConfig, 1, layerCount, layerStride);
         } else {
             format = engine::ColorTarget::Format::Disabled;
             packedState.SetColorRenderTargetFormat(index, engine::ColorTarget::Format::Disabled);
@@ -100,37 +119,33 @@ namespace skyline::gpu::interconnect::maxwell3d {
             return;
         }
 
-        GuestTexture guest{};
-        guest.format = packedState.GetDepthRenderTargetFormat();
-        guest.aspect = guest.format->vkAspect;
-        guest.baseArrayLayer = engine->ztLayer.offset;
+        auto hostFormat{packedState.GetDepthRenderTargetFormat()};
+        u32 baseArrayLayer{engine->ztLayer.offset}, layerCount{};
+        vk::ImageViewType viewType{};
 
         bool thirdDimensionDefinesArraySize{engine->ztSize.control == engine::ZtSize::Control::ThirdDimensionDefinesArraySize};
         if (engine->ztSize.control == engine::ZtSize::Control::ThirdDimensionDefinesArraySize) {
-            guest.layerCount = engine->ztSize.thirdDimension;
-            guest.viewType = engine->ztSize.thirdDimension > 1 ? vk::ImageViewType::e2DArray : vk::ImageViewType::e2D;
+            layerCount = engine->ztSize.thirdDimension;
+            viewType = engine->ztSize.thirdDimension > 1 ? vk::ImageViewType::e2DArray : vk::ImageViewType::e2D;
         } else if (engine->ztSize.control == engine::ZtSize::Control::ArraySizeIsOne) {
-            guest.layerCount = 1;
-            guest.viewType = vk::ImageViewType::e2D;
+            layerCount = 1;
+            viewType = vk::ImageViewType::e2D;
         }
 
-        guest.dimensions = gpu::texture::Dimensions{engine->ztSize.width, engine->ztSize.height, 1};
-        guest.tileConfig = gpu::texture::TileConfig{
+        gpu::texture::Dimensions imageDimensions{engine->ztSize.width, engine->ztSize.height, 1};
+        auto [sampleCount, sampleDimensions]{GetMsaaState(engine->msaaMode, imageDimensions)};
+        gpu::texture::TileConfig tileConfig{
             .mode = gpu::texture::TileMode::Block,
             .blockHeight = engine->ztBlockSize.BlockHeight(),
             .blockDepth = engine->ztBlockSize.BlockDepth(),
         };
 
-        guest.layerStride = (guest.baseArrayLayer > 1 || guest.layerCount > 1) ? engine->ZtArrayPitch() : 0;
-
-        auto mappings{ctx.channelCtx.asCtx->gmmu.TranslateRange(engine->ztOffset, guest.GetSize())};
-        guest.mappings.assign(mappings.begin(), mappings.end());
-
-        if (guest.MappingsValid()) {
-            if (guest.tileConfig.mode == gpu::texture::TileMode::Block)
-                DetermineRenderTargetDimensions(guest, engine->surfaceClip);
-
-            view = ctx.gpu.texture.FindOrCreate(guest, ctx.executor.tag);
+        auto layerStride{(baseArrayLayer > 1 || layerCount > 1) ? engine->ZtArrayPitch() : texture::CalculateLayerStride(sampleDimensions, hostFormat, tileConfig, 1, layerCount)};
+        auto mappings{ctx.channelCtx.asCtx->gmmu.TranslateRange(engine->ztOffset, layerStride * layerCount)};
+        if (ranges::all_of(mappings, [](const auto &mapping) { return mapping.valid(); })) {
+            view = ctx.gpu.texture.FindOrCreate([=](auto &&executionCallback) {
+                ctx.executor.AddOutsideRpCommand(std::forward<decltype(executionCallback)>(executionCallback));
+            }, ctx.executor.tag, texture::Mappings{mappings}, sampleDimensions, imageDimensions, sampleCount, hostFormat, viewType, {}, tileConfig, 1, layerCount, layerStride);
         } else {
             packedState.SetDepthRenderTargetFormat(engine->ztFormat, false);
             view = {};
@@ -404,7 +419,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
         for (size_t i{}; i < engine::ColorTargetCount; i++) {
             if (i < ctSelect.count && colorBlend.Get().writtenCtMask.test(i)) {
                 const auto &rt{colorRenderTargets[ctSelect[i]].UpdateGet(ctx, packedState)};
-                const auto view{rt.view.get()};
+                const auto view{rt.view};
                 packedState.SetColorRenderTargetFormat(ctSelect[i], rt.format);
                 colorAttachments.push_back(view);
 
@@ -415,7 +430,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
             }
         }
 
-        depthAttachment = depthRenderTarget.UpdateGet(ctx, packedState).view.get();
+        depthAttachment = depthRenderTarget.UpdateGet(ctx, packedState).view;
         if (depthAttachment)
             ctx.executor.AttachTexture(depthAttachment);
 
@@ -446,11 +461,11 @@ namespace skyline::gpu::interconnect::maxwell3d {
             stage.MarkDirty(true);
     }
 
-    std::shared_ptr<TextureView> PipelineState::GetColorRenderTargetForClear(InterconnectContext &ctx, size_t index) {
+    HostTextureView *PipelineState::GetColorRenderTargetForClear(InterconnectContext &ctx, size_t index) {
         return colorRenderTargets[index].UpdateGet(ctx, packedState).view;
     }
 
-    std::shared_ptr<TextureView> PipelineState::GetDepthRenderTargetForClear(InterconnectContext &ctx) {
+    HostTextureView *PipelineState::GetDepthRenderTargetForClear(InterconnectContext &ctx) {
         return depthRenderTarget.UpdateGet(ctx, packedState).view;
     }
 }

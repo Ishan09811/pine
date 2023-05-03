@@ -9,6 +9,7 @@
 #include "common.h"
 #include "packed_pipeline_state.h"
 #include "pipeline_manager.h"
+#include "soc/gm20b/engines/maxwell/types.h"
 
 namespace skyline::gpu::interconnect::maxwell3d {
     class ColorRenderTargetState : dirty::ManualDirty {
@@ -16,6 +17,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
         struct EngineRegisters {
             const engine::ColorTarget &colorTarget;
             const engine::SurfaceClip &surfaceClip;
+            const engine::MsaaMode &msaaMode;
 
             void DirtyBind(DirtyManager &manager, dirty::Handle handle) const;
         };
@@ -27,7 +29,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
       public:
         ColorRenderTargetState(dirty::Handle dirtyHandle, DirtyManager &manager, const EngineRegisters &engine, size_t index);
 
-        std::shared_ptr<TextureView> view;
+        HostTextureView *view{};
         engine::ColorTarget::Format format{engine::ColorTarget::Format::Disabled};
 
         void Flush(InterconnectContext &ctx, PackedPipelineState &packedState);
@@ -44,6 +46,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
             const engine::ZtSelect &ztSelect;
             const engine::ZtLayer &ztLayer;
             const engine::SurfaceClip &surfaceClip;
+            const engine::MsaaMode &msaaMode;
 
             void DirtyBind(DirtyManager &manager, dirty::Handle handle) const;
 
@@ -58,7 +61,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
       public:
         DepthRenderTargetState(dirty::Handle dirtyHandle, DirtyManager &manager, const EngineRegisters &engine);
 
-        std::shared_ptr<TextureView> view;
+        HostTextureView *view{};
 
         void Flush(InterconnectContext &ctx, PackedPipelineState &packedState);
     };
@@ -322,8 +325,8 @@ namespace skyline::gpu::interconnect::maxwell3d {
       public:
         DirectPipelineState directState;
         Pipeline *pipeline{};
-        boost::container::static_vector<TextureView *, engine::ColorTargetCount> colorAttachments;
-        TextureView *depthAttachment{};
+        boost::container::static_vector<HostTextureView *, engine::ColorTargetCount> colorAttachments;
+        HostTextureView *depthAttachment{};
 
         PipelineState(dirty::Handle dirtyHandle, DirtyManager &manager, const EngineRegisters &engine);
 
@@ -331,8 +334,8 @@ namespace skyline::gpu::interconnect::maxwell3d {
 
         void PurgeCaches();
 
-        std::shared_ptr<TextureView> GetColorRenderTargetForClear(InterconnectContext &ctx, size_t index);
+        HostTextureView *GetColorRenderTargetForClear(InterconnectContext &ctx, size_t index);
 
-        std::shared_ptr<TextureView> GetDepthRenderTargetForClear(InterconnectContext &ctx);
+        HostTextureView *GetDepthRenderTargetForClear(InterconnectContext &ctx);
     };
 }
