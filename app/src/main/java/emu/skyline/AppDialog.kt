@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
-import emu.skyline.data.AppItem
+import emu.skyline.data.BaseAppItem
 import emu.skyline.data.AppItemTag
 import emu.skyline.databinding.AppDialogBinding
 import emu.skyline.loader.LoaderResult
@@ -46,9 +46,9 @@ import java.io.OutputStream
 class AppDialog : BottomSheetDialogFragment() {
     companion object {
         /**
-         * @param item This is used to hold the [AppItem] between instances
+         * @param item This is used to hold the [BaseAppItem] between instances
          */
-        fun newInstance(item : AppItem) : AppDialog {
+        fun newInstance(item : BaseAppItem) : AppDialog {
             val args = Bundle()
             args.putSerializable(AppItemTag, item)
 
@@ -60,7 +60,7 @@ class AppDialog : BottomSheetDialogFragment() {
 
     private lateinit var binding : AppDialogBinding
 
-    private val item by lazy { requireArguments().serializable<AppItem>(AppItemTag)!! }
+    private val item by lazy { requireArguments().serializable<BaseAppItem>(AppItemTag)!! }
 
     /**
      * Used to manage save files
@@ -138,7 +138,7 @@ class AppDialog : BottomSheetDialogFragment() {
 
         binding.gamePin.setOnClickListener {
             val info = ShortcutInfo.Builder(context, item.title)
-            info.setShortLabel(item.title)
+            item.title?.let { title -> info.setShortLabel(title) }
             info.setActivity(ComponentName(requireContext(), EmulationActivity::class.java))
             info.setIcon(Icon.createWithAdaptiveBitmap(item.bitmapIcon))
 

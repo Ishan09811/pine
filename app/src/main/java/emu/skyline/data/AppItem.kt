@@ -27,62 +27,13 @@ private val missingIcon by lazy { ContextCompat.getDrawable(SkylineApplication.i
  * This class is a wrapper around [AppEntry], it is used for passing around game metadata
  */
 @Suppress("SERIAL")
-data class AppItem(private val meta : AppEntry) : Serializable {
-    /**
-     * The icon of the application
-     */
-    val icon get() = meta.icon
+class AppItem(meta : AppEntry, private val updates : List<BaseAppItem>, private val dlcs : List<BaseAppItem>) : BaseAppItem(meta), Serializable {
 
-    val bitmapIcon : Bitmap get() = meta.icon ?: missingIcon
+    fun getEnabledDlcs() : List<BaseAppItem> {
+        return dlcs.filter { it.enabled }
+    }
 
-    /**
-     * The title of the application
-     */
-    val title get() = meta.name
-
-    /**
-     * The title ID of the application
-     */
-    val titleId get() = meta.titleId
-
-    /**
-     * The application version
-     */
-    val version get() = meta.version
-
-    /**
-     * The application author
-     */
-    val author get() = meta.author
-
-    /**
-     * The URI of the application's image file
-     */
-    val uri get() = meta.uri
-
-    /**
-     * The format of the application
-     */
-    val format get() = meta.format
-
-    val loaderResult get() = meta.loaderResult
-
-    fun loaderResultString(context : Context) = context.getString(
-        when (meta.loaderResult) {
-            LoaderResult.Success -> R.string.metadata_missing
-
-            LoaderResult.ParsingError -> R.string.invalid_file
-
-            LoaderResult.MissingTitleKey -> R.string.missing_title_key
-
-            LoaderResult.MissingHeaderKey,
-            LoaderResult.MissingTitleKek,
-            LoaderResult.MissingKeyArea -> R.string.incomplete_prod_keys
-        }
-    )
-
-    /**
-     * The name and author is used as the key
-     */
-    fun key() = "${meta.name}${meta.author.let { it ?: "" }}"
+    fun getEnabledUpdate() : BaseAppItem? {
+        return updates.firstOrNull { it.enabled }
+    }
 }

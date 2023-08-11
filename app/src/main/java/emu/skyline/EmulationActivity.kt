@@ -24,6 +24,7 @@ import android.graphics.PointF
 import android.graphics.drawable.Icon
 import android.hardware.display.DisplayManager
 import android.net.DhcpInfo
+import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.*
 import android.os.PowerManager
@@ -105,9 +106,13 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     private val binding by lazy { EmuActivityBinding.inflate(layoutInflater) }
 
     /**
-     * The [AppItem] of the app that is being emulated
+     * The [BaseAppItem] of the app that is being emulated
      */
     lateinit var item : AppItem
+
+    lateinit var dlcUris : ArrayList<Uri>
+
+    lateinit var updateUri : Uri
 
     /**
      * The built-in [Vibrator] of the device
@@ -171,7 +176,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
      * @param nativeLibraryPath The full path to the app native library directory
      * @param assetManager The asset manager used for accessing app assets
      */
-    private external fun executeApplication(romUri : String, romType : Int, romFd : Int, nativeSettings : NativeSettings, publicAppFilesPath : String, privateAppFilesPath : String, nativeLibraryPath : String, assetManager : AssetManager)
+    private external fun executeApplication(romUri : String, romType : Int, romFd : Int, dlcFds : IntArray?, updateFd : Int, nativeSettings : NativeSettings, publicAppFilesPath : String, privateAppFilesPath : String, nativeLibraryPath : String, assetManager : AssetManager)
 
     /**
      * @param join If the function should only return after all the threads join or immediately
@@ -286,9 +291,19 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         @SuppressLint("Recycle")
         val romFd = contentResolver.openFileDescriptor(rom, "r")!!
 
+        var dlcFds : IntArray? = null
+        if (dlcUris.isNotEmpty())
+            dlcFds = dlcUris.map { contentResolver.openFileDescriptor(it, "r")!!.detachFd() }.toIntArray()
+
+        var updateFd : Int = -1
+        if (updateUri != Uri.EMPTY) {
+            @SuppressLint("Recycle")
+            updateFd = contentResolver.openFileDescriptor(updateUri, "r")!!.detachFd()
+        }
+
         GpuDriverHelper.ensureFileRedirectDir(this)
         emulationThread = Thread {
-            executeApplication(rom.toString(), romType, romFd.detachFd(), NativeSettings(this, emulationSettings), applicationContext.getPublicFilesDir().canonicalPath + "/", applicationContext.filesDir.canonicalPath + "/", applicationInfo.nativeLibraryDir + "/", assets)
+            executeApplication(rom.toString(), romType, romFd.detachFd(), dlcFds, updateFd, NativeSettings(this, emulationSettings), applicationContext.getPublicFilesDir().canonicalPath + "/", applicationContext.filesDir.canonicalPath + "/", applicationInfo.nativeLibraryDir + "/", assets)
             returnFromEmulation()
         }
 
@@ -302,6 +317,10 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         val intentItem = intent.serializable(AppItemTag) as AppItem?
         if (intentItem != null) {
             item = intentItem
+
+            dlcUris = item.getEnabledDlcs().map { it.uri }.toCollection(ArrayList())
+
+            updateUri = item.getEnabledUpdate()?.uri ?: Uri.EMPTY
             return
         }
 
@@ -310,7 +329,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         val romFormat = getRomFormat(uri, contentResolver)
         val romFile = RomFile(this, romFormat, uri, EmulationSettings.global.systemLanguage)
 
-        item = AppItem(romFile.takeIf { it.valid }!!.appEntry)
+        item = AppItem(romFile.takeIf { it.valid }!!.appEntry, emptyList(), emptyList())
     }
 
     @SuppressLint("SetTextI18n", "ClickableViewAccessibility")
