@@ -68,6 +68,8 @@ namespace skyline {
         std::shared_ptr<JvmManager> jvm;
         std::shared_ptr<Settings> settings;
         std::shared_ptr<loader::Loader> loader;
+        std::vector<std::shared_ptr<loader::Loader>> dlcLoaders;
+        std::shared_ptr<loader::Loader> updateLoader;
         std::shared_ptr<nce::NCE> nce;
         std::shared_ptr<jit::Jit32> jit32;
         std::shared_ptr<kernel::type::KProcess> process{};

@@ -73,6 +73,8 @@ extern "C" JNIEXPORT void Java_emu_skyline_EmulationActivity_executeApplication(
     jstring romUriJstring,
     jint romType,
     jint romFd,
+    jintArray dlcFds,
+    jint updateFd,
     jobject settingsInstance,
     jstring publicAppFilesPathJstring,
     jstring privateAppFilesPathJstring,
@@ -86,6 +88,12 @@ extern "C" JNIEXPORT void Java_emu_skyline_EmulationActivity_executeApplication(
     pthread_setname_np(pthread_self(), "EmuMain");
 
     auto jvmManager{std::make_shared<skyline::JvmManager>(env, instance)};
+
+    jsize dlcArrSize = dlcFds != nullptr ? env->GetArrayLength(dlcFds) : 0;
+    std::vector<int> dlcFdsVector(dlcArrSize);
+
+    if (dlcArrSize > 0)
+        env->GetIntArrayRegion(dlcFds, 0, dlcArrSize, &dlcFdsVector[0]);
 
     std::shared_ptr<skyline::Settings> settings{std::make_shared<skyline::AndroidSettings>(env, settingsInstance)};
 
@@ -126,7 +134,7 @@ extern "C" JNIEXPORT void Java_emu_skyline_EmulationActivity_executeApplication(
 
         LOGDNF("Launching ROM {}", skyline::JniString(env, romUriJstring));
 
-        os->Execute(romFd, static_cast<skyline::loader::RomFormat>(romType));
+        os->Execute(romFd, dlcFdsVector, updateFd, static_cast<skyline::loader::RomFormat>(romType));
     } catch (std::exception &e) {
         LOGENF("An uncaught exception has occurred: {}", e.what());
     } catch (const skyline::signal::SignalException &e) {
@@ -144,6 +152,13 @@ extern "C" JNIEXPORT void Java_emu_skyline_EmulationActivity_executeApplication(
 
     skyline::AsyncLogger::Finalize(true);
     close(romFd);
+
+    close(updateFd);
+
+    if (dlcArrSize > 0)
+        for (int i = 0; i < dlcArrSize; i++)
+            close(env->GetIntArrayElements(dlcFds, nullptr)[i]);
+
 }
 
 extern "C" JNIEXPORT jboolean Java_emu_skyline_EmulationActivity_stopEmulation(JNIEnv *, jobject, jboolean join) {
