@@ -53,11 +53,12 @@ jobs:
         if: env.IS_BUILD_SIGNED == 'true'
         env:
           KEYSTORE_ENCODED: ${{ secrets.KEYSTORE }}
-        run: echo $KEYSTORE_ENCODED | base64 --decode > "/home/runner/keystore.jks"
+        run: | 
+          echo "$KEYSTORE_ENCODED" | base64 --decode > ${{ github.workspace }}/app/ks.jks
 
       - name: Android Assemble
         env:
-          SIGNING_STORE_PATH: "/home/runner/keystore.jks"
+          SIGNING_STORE_PATH: "ks.jks"
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
