@@ -20,7 +20,7 @@ android {
     var isBuildSigned = (System.getenv("CI") == "true") && (System.getenv("IS_SKYLINE_SIGNED") == "true")
 
     defaultConfig {
-        applicationId "skyline.emu"
+        applicationId "io.github.pine.emu"
 
         minSdk 29
         targetSdk 33
