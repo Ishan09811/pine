@@ -15,6 +15,7 @@ import android.graphics.Typeface
 import android.os.SystemClock
 import androidx.core.content.res.use
 import androidx.core.graphics.minus
+import com.google.android.material.R as MaterialR
 import emu.skyline.R
 import emu.skyline.input.ButtonId
 import emu.skyline.input.ButtonId.*
@@ -94,7 +95,7 @@ open class JoystickButton(
     override fun renderCenteredText(canvas : Canvas, text : String, size : Float, x : Float, y : Float, alpha : Int) = Unit
 
     private val activationRadiusPaint = Paint().apply {
-        color = onScreenControllerView.context.obtainStyledAttributes(intArrayOf(R.attr.colorPrimary)).use { it.getColor(0, Color.RED) }
+        color = onScreenControllerView.context.obtainStyledAttributes(intArrayOf(MaterialR.attr.colorPrimary)).use { it.getColor(0, Color.RED) }
         alpha = 64
     }
 

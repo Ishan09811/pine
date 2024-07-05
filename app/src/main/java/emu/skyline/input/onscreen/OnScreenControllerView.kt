@@ -22,7 +22,7 @@ import android.view.View
 import android.view.View.OnTouchListener
 import androidx.annotation.IntRange
 import androidx.core.content.res.use
-import emu.skyline.R
+import com.google.android.material.R as MaterialR
 import emu.skyline.input.ButtonId
 import emu.skyline.input.ButtonState
 import emu.skyline.input.ControllerType
@@ -84,7 +84,7 @@ class OnScreenControllerView @JvmOverloads constructor(context : Context, attrs 
     }
 
     private val selectionPaint = Paint().apply {
-        color = context.obtainStyledAttributes(intArrayOf(R.attr.colorPrimary)).use { it.getColor(0, Color.RED) }
+        color = context.obtainStyledAttributes(intArrayOf(MaterialR.attr.colorPrimary)).use { it.getColor(0, Color.RED) }
         style = Paint.Style.STROKE
         strokeWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2f, context.resources.displayMetrics)
     }

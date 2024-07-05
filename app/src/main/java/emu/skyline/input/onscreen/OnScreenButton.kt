@@ -17,7 +17,7 @@ import android.graphics.drawable.LayerDrawable
 import android.util.TypedValue
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.use
-import emu.skyline.R
+import com.google.android.material.R as MaterialR
 import emu.skyline.input.ButtonId
 import kotlin.math.roundToInt
 
@@ -47,7 +47,7 @@ abstract class OnScreenButton(
     init {
         if (disabledSelectionPaint == null) {
             disabledSelectionPaint = Paint().apply {
-                color = onScreenControllerView.context.obtainStyledAttributes(intArrayOf(R.attr.colorTertiary)).use { it.getColor(0, Color.GREEN) }
+                color = onScreenControllerView.context.obtainStyledAttributes(intArrayOf(MaterialR.attr.colorTertiary)).use { it.getColor(0, Color.GREEN) }
                 style = Paint.Style.STROKE
                 strokeWidth = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2f, onScreenControllerView.context.resources.displayMetrics)
             }
