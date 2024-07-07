@@ -19,6 +19,7 @@ jobs:
       UPLOAD_ARTIFACTS: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci') }}
       CMAKE_VERSION: "3.22.1"
       NDK_VERSION: "26.1.10909125"
+      BUILD_TYPE: release
 
     steps:
       - name: Git Checkout
@@ -71,44 +72,28 @@ jobs:
           CMAKE_C_COMPILER_LAUNCHER: "ccache"
           CMAKE_CXX_COMPILER_LAUNCHER: "ccache"
           CCACHE_COMPILERCHECK: "string:${{ env.NDK_VERSION }}"
-        run: ./gradlew --build-cache assembleFullRelease
+        run: ./gradlew --build-cache assembleFull${{ env.BUILD_TYPE }}
 
       - name: Rename APKs (Signed)
         if: env.IS_BUILD_SIGNED == 'true' && env.UPLOAD_ARTIFACTS == 'true'
         run: |
-          mv app/build/outputs/apk/full/reldebug/app-full-reldebug.apk pine-emu-$GITHUB_RUN_NUMBER-reldebug.apk
-          mv app/build/outputs/apk/full/release/app-full-release.apk pine-emu-$GITHUB_RUN_NUMBER-release.apk
+          mv app/build/outputs/apk/full/${{ env.BUILD_TYPE }}/app-full-${{ env.BUILD_TYPE }}.apk pine-emu-$GITHUB_RUN_NUMBER-${{ env.BUILD_TYPE }}.apk
 
-      - name: Upload Signed Debug APK
+      - name: Upload Signed APK
         if: env.IS_BUILD_SIGNED == 'true' && env.UPLOAD_ARTIFACTS == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: pine-emu-${{ github.run_number }}-reldebug.apk
-          path: pine-emu-${{ github.run_number }}-reldebug.apk
-
-      - name: Upload Signed Release APK
-        if: env.IS_BUILD_SIGNED == 'true' && env.UPLOAD_ARTIFACTS == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: pine-emu-${{ github.run_number }}-release.apk
-          path: pine-emu-${{ github.run_number }}-release.apk
+          name: pine-emu-${{ github.run_number }}-${{ env.BUILD_TYPE }}.apk
+          path: pine-emu-${{ github.run_number }}-${{ env.BUILD_TYPE }}.apk
 
       - name: Rename APKs (Unsigned)
         if: env.IS_BUILD_SIGNED == 'false' && env.UPLOAD_ARTIFACTS == 'true'
         run: |
-          mv app/build/outputs/apk/full/reldebug/app-full-reldebug.apk pine-emu-$GITHUB_RUN_NUMBER-unsigned-reldebug.apk
-          mv app/build/outputs/apk/full/release/app-full-release.apk pine-emu-$GITHUB_RUN_NUMBER-unsigned-release.apk
+          mv app/build/outputs/apk/full/${{ env.BUILD_TYPE }}/app-full-${{ env.BUILD_TYPE }}.apk pine-emu-$GITHUB_RUN_NUMBER-unsigned-${{ env.BUILD_TYPE }}.apk
 
-      - name: Upload Unsigned Debug APK
+      - name: Upload Unsigned APK
         if: env.IS_BUILD_SIGNED == 'false' && env.UPLOAD_ARTIFACTS == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: pine-emu-${{ github.run_number }}-unsigned-reldebug.apk
-          path: pine-emu-${{ github.run_number }}-unsigned-reldebug.apk
-
-      - name: Upload Unsigned Release APK
-        if: env.IS_BUILD_SIGNED == 'false' && env.UPLOAD_ARTIFACTS == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: pine-emu-${{ github.run_number }}-unsigned-release.apk
-          path: pine-emu-${{ github.run_number }}-unsigned-release.apk
+          name: pine-emu-${{ github.run_number }}-unsigned-${{ env.BUILD_TYPE }}.apk
+          path: pine-emu-${{ github.run_number }}-unsigned-${{ env.BUILD_TYPE }}.apk
