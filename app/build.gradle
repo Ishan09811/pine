@@ -110,14 +110,14 @@ android {
     productFlavors {
         full {
             dimension = "version"
-            manifestPlaceholders += [appLabel: "Skyline"]
+            manifestPlaceholders += [appLabel: "Pine"]
         }
 
         dev {
             dimension = "version"
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
-            manifestPlaceholders += [appLabel: "Skyline Dev"]
+            manifestPlaceholders += [appLabel: "Pine Dev"]
         }
     }
 
