@@ -57,9 +57,9 @@
     <!-- Settings - Appearance -->
     <string name="appearance">Appearance</string>
     <string name="theme">Theme</string>
-    <string name="use_material_you">Use Material You</string>
-    <string name="use_material_you_desc_off">Skyline colors will be used</string>
-    <string name="use_material_you_desc_on">Material You will be used</string>
+    <string name="use_material_you">Use Dynamic Colors</string>
+    <string name="use_material_you_desc_off">Pine colors will be used</string>
+    <string name="use_material_you_desc_on"> dynamic colors will be used</string>
     <string name="app_language">App Language</string>
     <string name="app_language_default">Use System Default</string>
     <string name="layout_type">Game Display Layout</string>
@@ -264,10 +264,10 @@
     <string name="credits">Credits</string>
     <!-- Licenses -->
     <string name="licenses">Licenses</string>
-    <string name="skyline_license_description">Skyline is licensed under Mozilla Public License 2.0</string>
-    <string name="ryujinx_description">Ryujinx has been used for reference throughout the project due to their highly accurate implementations\n\n<b>Note: Skyline is not based on Ryujinx</b></string>
-    <string name="shader_compiler_description">Skyline\'s shader compiler is a <b>fork</b> of <i>yuzu</i>\'s shader compiler with Skyline-specific changes while other changes are shared between them allowing both projects to benefit from the development of it\n\n<b>Note:</b> Using it in Skyline is only possible due to the licensing exemption granted to Skyline by the <i>yuzu</i> team</string>
-    <string name="sirit_description">Skyline\'s shader compiler internally uses Sirit to emit SPIR-V in an efficient manner</string>
+    <string name="skyline_license_description">Pine is licensed under GNU General Public License 3.0</string>
+    <string name="ryujinx_description">Ryujinx has been used for reference throughout the project due to their highly accurate implementations\n\n<b>Note: Pine is not based on Ryujinx</b></string>
+    <string name="shader_compiler_description">Pine\'s shader compiler is a <b>fork</b> of <i>strato</i>\'s shader compiler with pine-specific changes</string>
+    <string name="sirit_description">Pine\'s shader compiler internally uses Sirit to emit SPIR-V in an efficient manner</string>
     <string name="vkhpp_description">Vulkan-Hpp provides a C++ API for Vulkan</string>
     <string name="vkma_description">Vulkan Memory Allocator provides a high-quality GPU memory allocator with UMA support</string>
     <string name="khvkval_description">Khronos\'s Vulkan Validation Layer provides error-checking for Vulkan API calls in debug builds</string>

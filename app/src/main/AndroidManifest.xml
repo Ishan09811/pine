@@ -17,7 +17,7 @@
         android:allowBackup="true"
         android:extractNativeLibs="true"
         android:fullBackupContent="@xml/backup_descriptor"
-        android:icon="@drawable/logo_skyline"
+        android:icon="@drawable/logo_pine"
         android:isGame="true"
         android:label="${appLabel}"
         android:localeConfig="@xml/locales_config"
