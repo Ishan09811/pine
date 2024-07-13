@@ -17,7 +17,7 @@ android {
     namespace 'emu.skyline'
     compileSdk 34
 
-    var isBuildSigned = (System.getenv("CI") == "true") && (System.getenv("IS_SKYLINE_SIGNED") == "true")
+    var isBuildSigned = (System.getenv("CI") == "true") && (System.getenv("IS_BUILD_SIGNED") == "true")
 
     defaultConfig {
         applicationId "io.github.pine.emu"
@@ -64,7 +64,7 @@ android {
 
     signingConfigs {
         ci {
-            storeFile file(System.getenv("SIGNING_STORE_PATH") ?: "${System.getenv("user.home")}/keystore.jks")
+            storeFile file(System.getenv("SIGNING_STORE_PATH"))
             storePassword System.getenv("SIGNING_STORE_PASSWORD")
             keyAlias System.getenv("SIGNING_KEY_ALIAS")
             keyPassword System.getenv("SIGNING_KEY_PASSWORD")
