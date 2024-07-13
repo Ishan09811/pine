@@ -83,7 +83,7 @@ class DocumentsProvider : DocumentsProvider() {
             add(DocumentsContract.Root.COLUMN_DOCUMENT_ID, getDocumentId(baseDirectory))
             add(DocumentsContract.Root.COLUMN_MIME_TYPES, "*/*")
             add(DocumentsContract.Root.COLUMN_AVAILABLE_BYTES, baseDirectory.freeSpace)
-            add(DocumentsContract.Root.COLUMN_ICON, R.drawable.logo_skyline)
+            add(DocumentsContract.Root.COLUMN_ICON, R.drawable.logo_pine)
         }
 
         return cursor
@@ -240,7 +240,7 @@ class DocumentsProvider : DocumentsProvider() {
             add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, localFile.lastModified())
             add(DocumentsContract.Document.COLUMN_FLAGS, flags)
             if (localFile == baseDirectory)
-                add(DocumentsContract.Root.COLUMN_ICON, R.drawable.logo_skyline)
+                add(DocumentsContract.Root.COLUMN_ICON, R.drawable.logo_pine)
         }
 
         return cursor
