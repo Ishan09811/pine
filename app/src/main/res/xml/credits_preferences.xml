@@ -8,23 +8,17 @@
         android:title="@string/licenses"
         app:initialExpandedChildrenCount="5">
         <emu.skyline.preference.LicensePreference
-            app:libraryCopyright="Copyright © 2019-2021\nSkyline Team and Contributors"
-            app:libraryLicense="@string/mpl2_license"
-            app:libraryUrl="https://github.com/skyline-emu/skyline"
-            app:summary="@string/skyline_license_description"
-            app:title="@string/app_name" />
-        <emu.skyline.preference.LicensePreference
             app:libraryCopyright="Copyright (c) Ryujinx Team and Contributors"
             app:libraryLicense="@string/mit_license"
             app:libraryUrl="https://github.com/Ryujinx/Ryujinx"
             app:summary="@string/ryujinx_description"
             app:title="Ryujinx" />
         <emu.skyline.preference.LicensePreference
-            app:libraryCopyright="Copyright 2021 yuzu Emulator Project\nCopyright © 2021 Skyline Team and Contributors"
+            app:libraryCopyright="Copyright 2024 Strato Emulator Project\nCopyright © 2024 Pine Team and Contributors"
             app:libraryLicense="@string/mpl2_license"
             app:libraryUrl="https://github.com/skyline-emu/shader-compiler"
             app:summary="@string/shader_compiler_description"
-            app:title="yuzu Shader Compiler" />
+            app:title="Strato Shader Compiler" />
         <emu.skyline.preference.LicensePreference
             app:libraryCopyright="Copyright (c) 2019, sirit\nAll rights reserved."
             app:libraryLicense="@string/bsd_3_clause_license"
