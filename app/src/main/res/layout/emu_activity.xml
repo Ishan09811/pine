@@ -11,6 +11,10 @@
     tools:openDrawer="start"
     tools:ignore="RtlHardcoded">
 
+ <androidx.coordinatorlayout.widget.CoordinatorLayout
+     android:layout_width="match_parent"
+     android:layout_height="match_parent">
+
     <FrameLayout
         android:id="@+id/game_view_container"
         android:layout_width="match_parent"
@@ -74,6 +78,7 @@
             android:layout_height="match_parent" />
 
     </FrameLayout>
+   </androidx.coordinatorlayout.widget.CoordinatorLayout>  
     
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/in_game_menu"
