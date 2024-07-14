@@ -391,6 +391,20 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             }
         }
 
+        binding.drawerLayout.addDrawerListener(object : DrawerListener {
+            override fun onDrawerOpened(drawerView: View) {
+                pauseEmulator()
+            }
+
+            override fun onDrawerClosed(drawerView: View) {
+                resumeEmulator()
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {
+                // No op
+            }
+        })
+
         executeApplication(intent!!)
     }
 
@@ -423,7 +437,11 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
         onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                returnFromEmulation()
+                if (binding.drawerLayout.isOpen) {
+                        binding.drawerLayout.close()
+                    } else {
+                        binding.drawerLayout.open()
+                    }
             }
         })
     }
