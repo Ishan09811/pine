@@ -12,14 +12,9 @@
         android:title="@string/emulation_rotate_screen" />
 
     <item
-        android:id="@+id/menu_landscape_screen_layout"
-        android:icon="@drawable/ic_fit_screen"
-        android:title="@string/emulation_switch_screen_layout" />
-
-    <item
         android:id="@+id/menu_settings"
         android:icon="@drawable/ic_settings"
-        android:title="@string/preferences_settings" />
+        android:title="@string/settings" />
 
     <item
         android:id="@+id/menu_exit"
