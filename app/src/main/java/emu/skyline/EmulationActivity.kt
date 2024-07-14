@@ -417,6 +417,12 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                     }
                     true
                 }
+                R.id.menu_settings -> {
+                    startActivity(Intent(this@EmulationActivity, SettingsActivity::class.java).apply {
+                      putExtras(requireArguments())
+                    })
+                    true
+                }
                 else -> true
             }
         }
