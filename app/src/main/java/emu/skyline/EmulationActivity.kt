@@ -409,6 +409,17 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                // No op
             }
         })
+        binding.inGameMenu.setNavigationItemSelectedListener {
+            when (it.itemId) {
+                R.id.menu_emulation_resume -> {
+                    if (binding.drawerLayout.isOpen) {
+                        binding.drawerLayout.close()
+                    }
+                    true
+                }
+                else -> true
+            }
+        }
 
         executeApplication(intent!!)
     }
