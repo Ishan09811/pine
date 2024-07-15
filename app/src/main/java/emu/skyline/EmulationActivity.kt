@@ -18,6 +18,7 @@ import android.content.res.AssetManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.content.DialogInterface
+import androidx.core.content.res.ResourcesCompat
 import android.graphics.Color
 import android.graphics.PointF
 import android.graphics.drawable.Icon
