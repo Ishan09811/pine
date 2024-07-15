@@ -430,6 +430,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                             R.drawable.ic_play,
                             this.theme
                         )
+                    }
                     true
                 }
                 R.id.menu_settings -> {
