@@ -422,6 +422,21 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                     startActivity(Intent(this@EmulationActivity, SettingsActivity::class.java)
                     true
                 }
+                R.id.menu_exit -> {
+                    pauseEmulator()
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle(R.string.emulation_close_game)
+                        .setMessage(R.string.emulation_close_game_message)
+                        .setPositiveButton(android.R.string.ok) { _: DialogInterface?, _: Int ->
+                            returnFromEmulation()
+                        }
+                        .setNegativeButton(android.R.string.cancel) { _: DialogInterface?, _: Int ->
+                            resumeEmulator()
+                        }
+                        .setOnCancelListener { resumeEmulator() }
+                        .show()
+                    true
+                }
                 else -> true
             }
         }
