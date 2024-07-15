@@ -59,6 +59,7 @@ import emu.skyline.loader.getRomFormat
 import emu.skyline.settings.AppSettings
 import emu.skyline.settings.EmulationSettings
 import emu.skyline.settings.NativeSettings
+import emu.skyline.settings.SettingsActivity
 import emu.skyline.utils.ByteBufferSerializable
 import emu.skyline.utils.GpuDriverHelper
 import emu.skyline.utils.serializable
@@ -418,9 +419,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                     true
                 }
                 R.id.menu_settings -> {
-                    startActivity(Intent(this@EmulationActivity, SettingsActivity::class.java).apply {
-                      putExtras(requireArguments())
-                    })
+                    startActivity(Intent(this@EmulationActivity, SettingsActivity::class.java)
                     true
                 }
                 else -> true
