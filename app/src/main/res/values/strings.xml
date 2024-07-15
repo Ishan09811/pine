@@ -318,4 +318,7 @@
     <string name="pause_emulation">Pause Emulation</string>
     <string name="emulation_close_game">Close Game</string>
     <string name="emulation_close_game_message">Are you sure that you would like to close the current game?</string>
+    <string name="emulation_show_fps">Show FPS</string>
+    <string name="emulation_haptic_feedback">Haptic Feedback</string>
+    <string name="emulation_show_overlay">Show Overlay</string>
 </resources>
