@@ -397,11 +397,11 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
         binding.drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
             override fun onDrawerOpened(drawerView: View) {
-                pauseEmulator()
+                // No op
             }
 
             override fun onDrawerClosed(drawerView: View) {
-                resumeEmulator()
+                // No op
             }
 
             override fun onDrawerStateChanged(newState: Int) {
