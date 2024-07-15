@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_show_overlay"
+        android:title="@string/emulation_show_overlay"
+        android:checkable="true" />
+
+    <item
+        android:id="@+id/menu_show_fps"
+        android:title="@string/emulation_show_fps"
+        android:checkable="true" />
+
+    <item
+        android:id="@+id/menu_haptic_feedback"
+        android:title="@string/emulation_haptic_feedback"
+        android:checkable="true" />
+
+</menu>
