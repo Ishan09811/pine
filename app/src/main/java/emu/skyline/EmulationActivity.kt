@@ -550,6 +550,43 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         }
     }
 
+    private fun showOverlayMenu() {
+        val popupMenu = PopupMenu(
+            this,
+            binding.inGameMenu.findViewById(R.id.menu_overlay_options)
+        )
+
+        popupMenu.menuInflater.inflate(R.menu.menu_overlay_options, popupMenu.menu)
+
+        popupMenu.menu.apply {
+            findItem(R.id.menu_show_overlay).isChecked = false
+            findItem(R.id.menu_show_fps).isChecked = false
+            findItem(R.id.menu_haptic_feedback).isChecked = false
+        }
+
+        popupMenu.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.menu_show_overlay -> {
+                    // TODO
+                    true
+                }
+
+                R.id.menu_show_fps -> {
+                    // TODO
+                    true
+                }
+
+                R.id.menu_haptic_feedback -> {
+                    // TODO
+                    true
+                }
+                else -> true
+            }
+        }
+
+        popupMenu.show()
+    }
+
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode : Boolean, newConfig : Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         if (isInPictureInPictureMode) {
