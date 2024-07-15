@@ -315,6 +315,7 @@
     <!-- Emulation Menu -->
     <string name="emulation_rotate_screen">Rotate Screen</string> 
     <string name="resume_emulation">Resume Emulation</string>
+    <string name="pause_emulation">Pause Emulation</string>
     <string name="emulation_close_game">Close Game</string>
     <string name="emulation_close_game_message">Are you sure that you would like to close the current game?</string>
 </resources>

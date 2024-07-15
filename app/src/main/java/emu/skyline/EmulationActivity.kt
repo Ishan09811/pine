@@ -414,9 +414,22 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         binding.inGameMenu.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.menu_emulation_resume -> {
-                    if (binding.drawerLayout.isOpen) {
-                        binding.drawerLayout.close()
-                    }
+                    if (isEmulatorPaused) {
+                        pauseEmulator()
+                        it.title = resources.getString(R.string.pause_emulation)
+                        it.icon = ResourcesCompat.getDrawable(
+                            resources,
+                            R.drawable.ic_pause,
+                            this.theme
+                        )
+                    } else {
+                        resumeEmulator()
+                        it.title = resources.getString(R.string.resume_emulation)
+                        it.icon = ResourcesCompat.getDrawable(
+                            resources,
+                            R.drawable.ic_play,
+                            this.theme
+                        )
                     true
                 }
                 R.id.menu_settings -> {
