@@ -128,7 +128,11 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
     private var isEmulatorPaused = false
 
+    private var isPerfStatsRunnableCallbackExist = false
+
     private lateinit var pictureInPictureParamsBuilder : PictureInPictureParams.Builder
+
+    private lateinit var perfStatsRunnable: Runnable
 
     @Inject
     lateinit var appSettings : AppSettings
@@ -343,17 +347,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             if (emulationSettings.disableFrameThrottling)
                 binding.perfStats.setTextColor(getColor(R.color.colorPerfStatsSecondary))
 
-            binding.perfStats.apply {
-                postDelayed(object : Runnable {
-                    override fun run() {
-                        updatePerformanceStatistics()
-                        // We read the `VmRSS` value from the kernel
-                        ramUsage = File("/proc/self/statm").readLines()[0].split(' ')[1].toLong() * 4096 / 1000000
-                        text = "$fps FPS • $ramUsage MB"
-                        postDelayed(this, 250)
-                    }
-                }, 250)
-            }
+            enablePerfStats(true)
         }
 
         force60HzRefreshRate(!emulationSettings.maxRefreshRate)
@@ -577,7 +571,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 }
 
                 R.id.menu_show_fps -> {
-                    // TODO
+                    enablePerfStats(!emulationSettings.perfStats)
                     true
                 }
 
@@ -591,6 +585,33 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
         popupMenu.show()
     }
+
+    private fun enablePerfStats(isEnable : Boolean) {
+        if (isEnable) {
+            if (isPerfStatsRunnableCallbackExist) {
+                binding.perfStats.apply {
+                    removeCallbacks(perfStatsRunnable)
+                    text = ""
+                }
+                isPerfStatsRunnableCallbackExist = false
+            }
+        } else {
+            binding.perfStats.apply {
+                perfStatsRunnable = object : Runnable {
+                    override fun run() {
+                        updatePerformanceStatistics()
+                        // We read the `VmRSS` value from the kernel
+                        val ramUsage = File("/proc/self/statm").readLines()[0].split(' ')[1].toLong() * 4096 / 1000000
+                        text = "$fps FPS • $ramUsage MB"
+                        postDelayed(this, 250)
+                    }
+                 }
+                 postDelayed(perfStatsRunnable, 250)
+            }
+            isPerfStatsRunnableCallbackExist = true
+        }
+    }
+            
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode : Boolean, newConfig : Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
