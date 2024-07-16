@@ -559,15 +559,15 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         popupMenu.menuInflater.inflate(R.menu.menu_overlay_options, popupMenu.menu)
 
         popupMenu.menu.apply {
-            findItem(R.id.menu_show_overlay).isChecked = false
-            findItem(R.id.menu_show_fps).isChecked = false
+            findItem(R.id.menu_show_overlay).isChecked = !binding.onScreenControllerView.isInvisible
+            findItem(R.id.menu_show_fps).isChecked = emulationSettings.perfStats
             findItem(R.id.menu_haptic_feedback).isChecked = false
         }
 
         popupMenu.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.menu_show_overlay -> {
-                    // TODO
+                    binding.onScreenControllerView.isInvisible = !binding.onScreenControllerView.isInvisible
                     true
                 }
 
