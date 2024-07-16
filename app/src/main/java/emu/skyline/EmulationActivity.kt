@@ -580,12 +580,14 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 R.id.menu_show_fps -> {
                     enablePerfStats(!sharedPreferences.getBoolean("menu_show_fps", false))
                     editor.putBoolean("menu_show_fps", !sharedPreferences.getBoolean("menu_show_fps", false))
+                    editor.apply()
                     true
                 }
 
                 R.id.menu_haptic_feedback -> {
                     binding.onScreenControllerView.hapticFeedback = !sharedPreferences.getBoolean("menu_show_fps", false)
                     editor.putBoolean("menu_show_fps", !sharedPreferences.getBoolean("menu_haptic_feedback", false))
+                    editor.apply()
                     true
                 }
                 else -> true
