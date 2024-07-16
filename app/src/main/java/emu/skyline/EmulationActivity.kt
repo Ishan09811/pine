@@ -290,7 +290,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         emulationSettings = EmulationSettings.forEmulation(item.titleId ?: item.key())
 
         requestedOrientation = emulationSettings.orientation
-        window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
         inputHandler = InputHandler(inputManager, emulationSettings)
         setContentView(binding.root)
 
@@ -566,7 +566,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         popupMenu.menu.apply {
             findItem(R.id.menu_show_overlay).isChecked = !binding.onScreenControllerView.isInvisible
             findItem(R.id.menu_show_fps).isChecked = emulationSettings.perfStats
-            findItem(R.id.menu_haptic_feedback).isChecked = false
+            findItem(R.id.menu_haptic_feedback).isChecked = appSettings.onScreenControlFeedback
         }
 
         popupMenu.setOnMenuItemClickListener {
@@ -582,7 +582,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 }
 
                 R.id.menu_haptic_feedback -> {
-                    // TODO
+                    binding.onScreenControllerView.hapticFeedback = !appSettings.onScreenControlFeedback
                     true
                 }
                 else -> true
