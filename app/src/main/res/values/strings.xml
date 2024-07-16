@@ -321,4 +321,5 @@
     <string name="emulation_show_fps">Show FPS</string>
     <string name="emulation_haptic_feedback">Haptic Feedback</string>
     <string name="emulation_show_overlay">Show Overlay</string>
+    <string name="emulation_overlay_options">Overlay Options</string>
 </resources>

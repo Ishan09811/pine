@@ -434,6 +434,10 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                     }
                     true
                 }
+                R.id.menu_overlay_options -> {
+                    showOverlayMenu()
+                    true
+                }
                 R.id.menu_settings -> {
                     startActivity(Intent(this@EmulationActivity, SettingsActivity::class.java))
                     true
