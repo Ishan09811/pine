@@ -557,10 +557,16 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
         popupMenu.menuInflater.inflate(R.menu.menu_overlay_options, popupMenu.menu)
 
+        val sharedPreferences = getSharedPreferences("EmulationMenuSettings", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putBoolean("menu_show_fps", emulationSettings.perfStats)
+        editor.putBoolean("menu_haptic_feedback", appSettings.onScreenControlFeedback)
+        editor.apply()
+
         popupMenu.menu.apply {
             findItem(R.id.menu_show_overlay).isChecked = !binding.onScreenControllerView.isInvisible
-            findItem(R.id.menu_show_fps).isChecked = emulationSettings.perfStats
-            findItem(R.id.menu_haptic_feedback).isChecked = appSettings.onScreenControlFeedback
+            findItem(R.id.menu_show_fps).isChecked = sharedPreferences.getBoolean("menu_show_fps", false)
+            findItem(R.id.menu_haptic_feedback).isChecked = sharedPreferences.getBoolean("menu_haptic_feedback", false)
         }
 
         popupMenu.setOnMenuItemClickListener {
@@ -571,12 +577,14 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 }
 
                 R.id.menu_show_fps -> {
-                    enablePerfStats(!emulationSettings.perfStats)
+                    enablePerfStats(!sharedPreferences.getBoolean("menu_show_fps", false))
+                    editor.putBoolean("menu_show_fps", !sharedPreferences.getBoolean("menu_show_fps", false))
                     true
                 }
 
                 R.id.menu_haptic_feedback -> {
-                    binding.onScreenControllerView.hapticFeedback = !appSettings.onScreenControlFeedback
+                    binding.onScreenControllerView.hapticFeedback = !sharedPreferences.getBoolean("menu_show_fps", false)
+                    editor.putBoolean("menu_show_fps", !sharedPreferences.getBoolean("menu_haptic_feedback", false))
                     true
                 }
                 else -> true
