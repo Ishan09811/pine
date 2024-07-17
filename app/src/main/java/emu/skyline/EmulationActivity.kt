@@ -463,7 +463,6 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         sharedPreferences = getSharedPreferences("EmulationMenuSettings", Context.MODE_PRIVATE)
         editor = sharedPreferences.edit()
         editor.putBoolean("menu_show_fps", emulationSettings.perfStats)
-        editor.putBoolean("menu_haptic_feedback", appSettings.onScreenControlFeedback)
         editor.apply()
 
         executeApplication(intent!!)
@@ -570,7 +569,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         popupMenu.menu.apply {
             findItem(R.id.menu_show_overlay).isChecked = !binding.onScreenControllerView.isInvisible
             findItem(R.id.menu_show_fps).isChecked = sharedPreferences.getBoolean("menu_show_fps", false)
-            findItem(R.id.menu_haptic_feedback).isChecked = sharedPreferences.getBoolean("menu_haptic_feedback", false)
+            findItem(R.id.menu_haptic_feedback).isChecked = binding.onScreenControllerView.hapticFeedback
         }
 
         popupMenu.setOnMenuItemClickListener {
@@ -581,16 +580,15 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 }
 
                 R.id.menu_show_fps -> {
-                    enablePerfStats(!sharedPreferences.getBoolean("menu_show_fps", false))
-                    editor.putBoolean("menu_show_fps", !sharedPreferences.getBoolean("menu_show_fps", false))
+                    val isShowPerfStats = !sharedPreferences.getBoolean("menu_show_fps", false)
+                    enablePerfStats(isShowPerfStats)
+                    editor.putBoolean("menu_show_fps", isShowPerfStats)
                     editor.apply()
                     true
                 }
 
                 R.id.menu_haptic_feedback -> {
-                    binding.onScreenControllerView.hapticFeedback = !sharedPreferences.getBoolean("menu_haptic_feedback", false)
-                    editor.putBoolean("menu_haptic_feedback", !sharedPreferences.getBoolean("menu_haptic_feedback", false))
-                    editor.apply()
+                    binding.onScreenControllerView.hapticFeedback = !binding.onScreenControllerView.hapticFeedback
                     true
                 }
                 else -> true
