@@ -135,6 +135,9 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
     private lateinit var perfStatsRunnable: Runnable
 
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var editor: SharedPreferences.Editor
+
     @Inject
     lateinit var appSettings : AppSettings
 
@@ -457,6 +460,12 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             }
         }
 
+        sharedPreferences = getSharedPreferences("EmulationMenuSettings", Context.MODE_PRIVATE)
+        editor = sharedPreferences.edit()
+        editor.putBoolean("menu_show_fps", emulationSettings.perfStats)
+        editor.putBoolean("menu_haptic_feedback", appSettings.onScreenControlFeedback)
+        editor.apply()
+
         executeApplication(intent!!)
     }
 
@@ -557,12 +566,6 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         )
 
         popupMenu.menuInflater.inflate(R.menu.menu_overlay_options, popupMenu.menu)
-
-        val sharedPreferences = getSharedPreferences("EmulationMenuSettings", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putBoolean("menu_show_fps", emulationSettings.perfStats)
-        editor.putBoolean("menu_haptic_feedback", appSettings.onScreenControlFeedback)
-        editor.apply()
 
         popupMenu.menu.apply {
             findItem(R.id.menu_show_overlay).isChecked = !binding.onScreenControllerView.isInvisible
