@@ -311,4 +311,15 @@
     <string name="global_save_data_zip_name">Strato save data</string>
     <string name="game_crash">The game has crashed</string>
     <string name="game_crash_message">A fatal error occurred. Check the log for details.</string>
+
+    <!-- Emulation Menu -->
+    <string name="emulation_rotate_screen">Rotate Screen</string> 
+    <string name="resume_emulation">Resume Emulation</string>
+    <string name="pause_emulation">Pause Emulation</string>
+    <string name="emulation_close_game">Close Game</string>
+    <string name="emulation_close_game_message">Are you sure that you would like to close the current game?</string>
+    <string name="emulation_show_fps">Show FPS</string>
+    <string name="emulation_haptic_feedback">Haptic Feedback</string>
+    <string name="emulation_show_overlay">Show Overlay</string>
+    <string name="emulation_overlay_options">Overlay Options</string>
 </resources>

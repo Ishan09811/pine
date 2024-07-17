@@ -31,7 +31,7 @@
     </style>
 
     <style name="BaseAppTheme" parent="ColorAppTheme">
-        <item name="android:statusBarColor">?android:attr/colorBackground</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="chipChoiceStyle">@style/ChipChoice</item>
 

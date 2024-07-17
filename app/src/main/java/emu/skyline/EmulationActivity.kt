@@ -17,6 +17,9 @@ import android.content.pm.ActivityInfo
 import android.content.res.AssetManager
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.content.DialogInterface
+import android.content.SharedPreferences
+import androidx.core.content.res.ResourcesCompat
 import android.graphics.Color
 import android.graphics.PointF
 import android.graphics.drawable.Icon
@@ -29,6 +32,7 @@ import android.util.Rational
 import android.util.TypedValue
 import android.view.*
 import android.widget.Toast
+import android.widget.PopupMenu
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -44,6 +48,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
 import androidx.window.layout.WindowLayoutInfo
+import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import emu.skyline.applet.swkbd.SoftwareKeyboardConfig
@@ -58,6 +63,7 @@ import emu.skyline.loader.getRomFormat
 import emu.skyline.settings.AppSettings
 import emu.skyline.settings.EmulationSettings
 import emu.skyline.settings.NativeSettings
+import emu.skyline.settings.SettingsActivity
 import emu.skyline.utils.ByteBufferSerializable
 import emu.skyline.utils.GpuDriverHelper
 import emu.skyline.utils.serializable
@@ -123,7 +129,14 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
     private var isEmulatorPaused = false
 
+    private var isPerfStatsRunnableCallbackExist = false
+
     private lateinit var pictureInPictureParamsBuilder : PictureInPictureParams.Builder
+
+    private lateinit var perfStatsRunnable: Runnable
+
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var editor: SharedPreferences.Editor
 
     @Inject
     lateinit var appSettings : AppSettings
@@ -285,7 +298,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         emulationSettings = EmulationSettings.forEmulation(item.titleId ?: item.key())
 
         requestedOrientation = emulationSettings.orientation
-        window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
         inputHandler = InputHandler(inputManager, emulationSettings)
         setContentView(binding.root)
 
@@ -338,17 +351,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             if (emulationSettings.disableFrameThrottling)
                 binding.perfStats.setTextColor(getColor(R.color.colorPerfStatsSecondary))
 
-            binding.perfStats.apply {
-                postDelayed(object : Runnable {
-                    override fun run() {
-                        updatePerformanceStatistics()
-                        // We read the `VmRSS` value from the kernel
-                        ramUsage = File("/proc/self/statm").readLines()[0].split(' ')[1].toLong() * 4096 / 1000000
-                        text = "$fps FPS • $ramUsage MB"
-                        postDelayed(this, 250)
-                    }
-                }, 250)
-            }
+            enablePerfStats(true)
         }
 
         force60HzRefreshRate(!emulationSettings.maxRefreshRate)
@@ -391,6 +394,77 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             }
         }
 
+        binding.drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
+            override fun onDrawerOpened(drawerView: View) {
+                // No op
+            }
+
+            override fun onDrawerClosed(drawerView: View) {
+                // No op
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {
+               // No op
+            }
+
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+               // No op
+            }
+        })
+        binding.inGameMenu.setNavigationItemSelectedListener {
+            when (it.itemId) {
+                R.id.menu_emulation_resume -> {
+                    if (isEmulatorPaused) {
+                        pauseEmulator()
+                        it.title = resources.getString(R.string.pause_emulation)
+                        it.icon = ResourcesCompat.getDrawable(
+                            resources,
+                            R.drawable.ic_pause,
+                            this.theme
+                        )
+                    } else {
+                        resumeEmulator()
+                        it.title = resources.getString(R.string.resume_emulation)
+                        it.icon = ResourcesCompat.getDrawable(
+                            resources,
+                            R.drawable.ic_play,
+                            this.theme
+                        )
+                    }
+                    true
+                }
+                R.id.menu_overlay_options -> {
+                    showOverlayMenu()
+                    true
+                }
+                R.id.menu_settings -> {
+                    startActivity(Intent(this@EmulationActivity, SettingsActivity::class.java))
+                    true
+                }
+                R.id.menu_exit -> {
+                    pauseEmulator()
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle(R.string.emulation_close_game)
+                        .setMessage(R.string.emulation_close_game_message)
+                        .setPositiveButton(android.R.string.ok) { _: DialogInterface?, _: Int ->
+                            returnFromEmulation()
+                        }
+                        .setNegativeButton(android.R.string.cancel) { _: DialogInterface?, _: Int ->
+                            resumeEmulator()
+                        }
+                        .setOnCancelListener { resumeEmulator() }
+                        .show()
+                    true
+                }
+                else -> true
+            }
+        }
+
+        sharedPreferences = getSharedPreferences("EmulationMenuSettings", Context.MODE_PRIVATE)
+        editor = sharedPreferences.edit()
+        editor.putBoolean("menu_show_fps", emulationSettings.perfStats)
+        editor.apply()
+
         executeApplication(intent!!)
     }
 
@@ -423,7 +497,11 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
         onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                returnFromEmulation()
+                if (binding.drawerLayout.isOpen) {
+                        binding.drawerLayout.close()
+                    } else {
+                        binding.drawerLayout.open()
+                    }
             }
         })
     }
@@ -479,6 +557,73 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 changeAudioStatus(false)
         }
     }
+
+    private fun showOverlayMenu() {
+        val popupMenu = PopupMenu(
+            this,
+            binding.inGameMenu.findViewById(R.id.menu_overlay_options)
+        )
+
+        popupMenu.menuInflater.inflate(R.menu.menu_overlay_options, popupMenu.menu)
+
+        popupMenu.menu.apply {
+            findItem(R.id.menu_show_overlay).isChecked = !binding.onScreenControllerView.isInvisible
+            findItem(R.id.menu_show_fps).isChecked = sharedPreferences.getBoolean("menu_show_fps", false)
+            findItem(R.id.menu_haptic_feedback).isChecked = binding.onScreenControllerView.hapticFeedback
+        }
+
+        popupMenu.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.menu_show_overlay -> {
+                    binding.onScreenControllerView.isInvisible = !binding.onScreenControllerView.isInvisible
+                    true
+                }
+
+                R.id.menu_show_fps -> {
+                    val isShowPerfStats = !sharedPreferences.getBoolean("menu_show_fps", false)
+                    enablePerfStats(isShowPerfStats)
+                    editor.putBoolean("menu_show_fps", isShowPerfStats)
+                    editor.apply()
+                    true
+                }
+
+                R.id.menu_haptic_feedback -> {
+                    binding.onScreenControllerView.hapticFeedback = !binding.onScreenControllerView.hapticFeedback
+                    true
+                }
+                else -> true
+            }
+        }
+
+        popupMenu.show()
+    }
+
+    private fun enablePerfStats(isEnable : Boolean) {
+        if (!isEnable) {
+            if (isPerfStatsRunnableCallbackExist) {
+                binding.perfStats.apply {
+                    removeCallbacks(perfStatsRunnable)
+                    text = ""
+                }
+                isPerfStatsRunnableCallbackExist = false
+            }
+        } else {
+            binding.perfStats.apply {
+                perfStatsRunnable = object : Runnable {
+                    override fun run() {
+                        updatePerformanceStatistics()
+                        // We read the `VmRSS` value from the kernel
+                        val ramUsage = File("/proc/self/statm").readLines()[0].split(' ')[1].toLong() * 4096 / 1000000
+                        text = "$fps FPS • $ramUsage MB"
+                        postDelayed(this, 250)
+                    }
+                 }
+                 postDelayed(perfStatsRunnable, 250)
+            }
+            isPerfStatsRunnableCallbackExist = true
+        }
+    }
+            
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode : Boolean, newConfig : Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
