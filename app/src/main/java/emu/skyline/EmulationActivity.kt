@@ -599,7 +599,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     }
 
     private fun enablePerfStats(isEnable : Boolean) {
-        if (isEnable) {
+        if (!isEnable) {
             if (isPerfStatsRunnableCallbackExist) {
                 binding.perfStats.apply {
                     removeCallbacks(perfStatsRunnable)
