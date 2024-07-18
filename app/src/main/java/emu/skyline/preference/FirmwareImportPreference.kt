@@ -11,6 +11,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.Preference
 import androidx.preference.Preference.SummaryProvider
+import androidx.preference.PreferenceViewHolder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import emu.skyline.R
@@ -95,7 +96,7 @@ class FirmwareImportPreference @JvmOverloads constructor(context: Context, attrs
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
         holder.itemView.setOnLongClickListener {
-            showRemoveFirmwareDialog()
+            showRemoveFirmwareConfirmationDialog()
             true
         }
     }
