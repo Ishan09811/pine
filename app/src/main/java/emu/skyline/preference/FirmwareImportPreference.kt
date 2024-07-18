@@ -24,8 +24,8 @@ import java.io.File
 import java.io.FilenameFilter
 import java.io.IOException
 
-class FirmwareImportPreference @JvmOverloads constructor(context : Context, attrs : AttributeSet? = null, defStyleAttr : Int = androidx.preference.R.attr.preferenceStyle) : Preference(context, attrs, defStyleAttr) {
-    private class Firmware(val valid : Boolean, val version : String)
+class FirmwareImportPreference @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = androidx.preference.R.attr.preferenceStyle) : Preference(context, attrs, defStyleAttr) {
+    private class Firmware(val valid: Boolean, val version: String)
 
     private val firmwarePath = File(context.getPublicFilesDir().canonicalPath + "/switch/nand/system/Contents/registered/")
     private val keysPath = "${context.filesDir.canonicalPath}/keys/"
@@ -41,8 +41,8 @@ class FirmwareImportPreference @JvmOverloads constructor(context : Context, attr
 
             val cacheFirmwareDir = File("${context.cacheDir.path}/registered/")
 
-            val task : () -> Unit = {
-                var messageToShow : Int
+            val task: () -> Unit = {
+                var messageToShow: Int
 
                 try {
                     // Unzip in cache dir to not delete previous firmware in case the zip given doesn't contain a valid one
@@ -61,7 +61,7 @@ class FirmwareImportPreference @JvmOverloads constructor(context : Context, attr
                         }
                         R.string.import_firmware_success
                     }
-                } catch (e : IOException) {
+                } catch (e: IOException) {
                     messageToShow = R.string.error
                 } finally {
                     cacheFirmwareDir.deleteRecursively()
@@ -87,16 +87,34 @@ class FirmwareImportPreference @JvmOverloads constructor(context : Context, attr
 
             getPersistedString(defaultString)
         }
+        
+        setOnPreferenceLongClickListener {
+            removeFirmware()
+            true
+        }
     }
 
     override fun onClick() = documentPicker.launch(arrayOf("application/zip"))
+
+    private fun removeFirmware() {
+        if (firmwarePath.exists()) {
+            firmwarePath.deleteRecursively()
+            Snackbar.make((context as SettingsActivity).binding.root, R.string.firmware_removed, Snackbar.LENGTH_LONG).show()
+            persistString(context.getString(R.string.firmware_not_installed))
+            CoroutineScope(Dispatchers.Main).launch {
+                notifyChanged()
+            }
+        } else {
+            Snackbar.make((context as SettingsActivity).binding.root, R.string.firmware_not_found, Snackbar.LENGTH_LONG).show()
+        }
+    }
 
     /**
      * Checks if the given directory stores a valid firmware. For that, all files must be NCAs and
      * one of them must store the firmware version.
      * @return A pair that tells if the firmware is valid, and if so, which firmware version it is
      */
-    private fun isFirmwareValid(cacheFirmwareDir : File) : Firmware {
+    private fun isFirmwareValid(cacheFirmwareDir: File): Firmware {
         val filterNCA = FilenameFilter { _, dirName -> dirName.endsWith(".nca") }
 
         val unfilteredNumOfFiles = cacheFirmwareDir.list()?.size ?: -1
@@ -108,6 +126,6 @@ class FirmwareImportPreference @JvmOverloads constructor(context : Context, attr
         } else Firmware(false, "")
     }
 
-    private external fun fetchFirmwareVersion(systemArchivesPath : String, keysPath : String) : String
-    private external fun extractFonts(systemArchivesPath : String, keysPath : String, fontsPath : String)
+    private external fun fetchFirmwareVersion(systemArchivesPath: String, keysPath: String): String
+    private external fun extractFonts(systemArchivesPath: String, keysPath: String, fontsPath: String)
 }
