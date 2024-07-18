@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <org.stratoemu.strato.views.DragHandleView
+    <emu.skyline.views.DragHandleView
         android:id="@+id/drag_indicator"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
