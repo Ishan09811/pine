@@ -88,14 +88,11 @@ class FirmwareImportPreference @JvmOverloads constructor(context: Context, attrs
 
             getPersistedString(defaultString)
         }
-        
-        setOnPreferenceLongClickListener {
-            showRemoveFirmwareConfirmationDialog()
-            true
-        }
     }
 
     override fun onClick() = documentPicker.launch(arrayOf("application/zip"))
+
+    override fun onLongClick() = showRemoveFirmwareConfirmationDialog()
 
     private fun showRemoveFirmwareConfirmationDialog() {
         MaterialAlertDialogBuilder(context)
