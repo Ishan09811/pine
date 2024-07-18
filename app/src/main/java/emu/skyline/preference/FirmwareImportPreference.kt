@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.Preference
 import androidx.preference.Preference.SummaryProvider
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import emu.skyline.R
 import emu.skyline.fragments.IndeterminateProgressDialogFragment
 import emu.skyline.getPublicFilesDir
@@ -89,12 +90,23 @@ class FirmwareImportPreference @JvmOverloads constructor(context: Context, attrs
         }
         
         setOnPreferenceLongClickListener {
-            removeFirmware()
+            showRemoveFirmwareConfirmationDialog()
             true
         }
     }
 
     override fun onClick() = documentPicker.launch(arrayOf("application/zip"))
+
+    private fun showRemoveFirmwareConfirmationDialog() {
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.remove_firmware_title)
+            .setMessage(R.string.remove_firmware_confirmation)
+            .setPositiveButton(R.string.remove) { _, _ ->
+                removeFirmware()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
 
     private fun removeFirmware() {
         if (firmwarePath.exists()) {
