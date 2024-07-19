@@ -54,6 +54,11 @@
     <string name="import_firmware_invalid_contents">The supplied firmware package does not contain a valid firmware</string>
     <string name="firmware_keys_needed">Valid keys are required for firmware installation</string>
     <string name="firmware_not_installed">No firmware installed</string>
+    <string name="firmware_removed">Firmware removed successfully</string>
+    <string name="firmware_not_found">Firmware not found</string>
+    <string name="remove_firmware_title">Remove Firmware</string>
+    <string name="remove_firmware_confirmation">Are you sure you want to remove the firmware?</string>
+    <string name="remove">Remove</string>
     <!-- Settings - Appearance -->
     <string name="appearance">Appearance</string>
     <string name="theme">Theme</string>
