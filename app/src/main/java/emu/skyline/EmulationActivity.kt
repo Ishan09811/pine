@@ -18,7 +18,6 @@ import android.content.res.AssetManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.content.DialogInterface
-import android.content.SharedPreferences
 import androidx.core.content.res.ResourcesCompat
 import android.graphics.Color
 import android.graphics.PointF
@@ -130,13 +129,12 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     private var isEmulatorPaused = false
 
     private var isPerfStatsRunnableCallbackExist = false
+    private var isThermalIndicatorRunnableCallbackExist = false
 
     private lateinit var pictureInPictureParamsBuilder : PictureInPictureParams.Builder
 
     private lateinit var perfStatsRunnable: Runnable
-
-    private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var editor: SharedPreferences.Editor
+    private lateinit var thermalIndicatorRunnable: Runnable
 
     @Inject
     lateinit var appSettings : AppSettings
@@ -354,6 +352,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             enablePerfStats(true)
         }
 
+        enableThermalIndicator(emulationSettings.perfStats)
+
         force60HzRefreshRate(!emulationSettings.maxRefreshRate)
         getSystemService<DisplayManager>()?.registerDisplayListener(this, null)
 
@@ -459,11 +459,6 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 else -> true
             }
         }
-
-        sharedPreferences = getSharedPreferences("EmulationMenuSettings", Context.MODE_PRIVATE)
-        editor = sharedPreferences.edit()
-        editor.putBoolean("menu_show_fps", emulationSettings.perfStats)
-        editor.apply()
 
         executeApplication(intent!!)
     }
@@ -580,10 +575,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 }
 
                 R.id.menu_show_fps -> {
-                    val isShowPerfStats = !sharedPreferences.getBoolean("menu_show_fps", false)
-                    enablePerfStats(isShowPerfStats)
-                    editor.putBoolean("menu_show_fps", isShowPerfStats)
-                    editor.apply()
+                    enablePerfStats(!isPerfStatsRunnableCallbackExist)
                     true
                 }
 
@@ -623,6 +615,19 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             isPerfStatsRunnableCallbackExist = true
         }
     }
+
+    private fun enableThermalIndicator(isEnable: Boolean) {
+        if (!isEnable) {
+            if (isThermalIndicatorRunnableCallbackExist) {
+                binding.thermalIndicator.apply {
+                    removeCallbacks(thermalIndicatorRunnable)
+                    text = ""
+                }
+                isThermalIndicatorRunnableCallbackExist = false
+            }
+        } else {
+            // TODO: Implement thermal indicator logic
+        }    
             
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode : Boolean, newConfig : Configuration) {
