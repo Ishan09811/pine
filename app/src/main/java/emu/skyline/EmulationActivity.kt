@@ -579,6 +579,11 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                     true
                 }
 
+                R.id.menu_thermal_indicator {
+                    enableThermalIndicator(!isThermalIndicatorRunnableCallbackExist)
+                    true
+                }
+
                 R.id.menu_haptic_feedback -> {
                     binding.onScreenControllerView.hapticFeedback = !binding.onScreenControllerView.hapticFeedback
                     true
@@ -617,18 +622,63 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     }
 
     private fun enableThermalIndicator(isEnable: Boolean) {
-        if (!isEnable) {
-            if (isThermalIndicatorRunnableCallbackExist) {
-                binding.thermalIndicator.apply {
-                    removeCallbacks(thermalIndicatorRunnable)
-                    text = ""
+            if (!isEnable) {
+                if (isThermalIndicatorRunnableCallbackExist) {
+                    binding.thermalIndicator.apply {
+                        removeCallbacks(thermalIndicatorRunnable)
+                        text = ""
+                    }
                 }
                 isThermalIndicatorRunnableCallbackExist = false
-            }
-        } else {
-            // TODO: Implement thermal indicator logic
-        }    
-            
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    isThermalIndicatorRunnableCallbackExist = true
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        thermalIndicatorRunnable = object : Runnable {
+                             override fun run() {
+                                 updateTemperature()
+                             }
+                        }
+                        postDelayed(thermalIndicatorRunnable, 250)
+                    } else {
+                        thermalIndicatorRunnable = object : Runnable {
+                             override fun run() {
+                                 thermalService = getSystemService(ThermalService::class.java)
+                                 thermalService.registerThermalStatusListener { status ->
+                                     updateThermalStatus(status)
+                                 }
+                             }
+                        }
+                        postDelayed(thermalIndicatorRunnable, 250)
+                   }
+               } else {
+                   binding.thermalIndicator.text = "Thermal monitoring not supported on this device"
+               }
+           }
+       }
+
+    private fun updateThermalStatus(status: Int) {
+        val statusText = when (status) {
+            ThermalService.THERMAL_STATUS_NONE -> "NORMAL"
+            ThermalService.THERMAL_STATUS_LIGHT -> "LIGHT THROTTLING"
+            ThermalService.THERMAL_STATUS_MODERATE -> "MODERATE THROTTLING"
+            ThermalService.THERMAL_STATUS_SEVERE -> "SEVERE THROTTLING"
+            ThermalService.THERMAL_STATUS_CRITICAL -> "CRITICAL THROTTLING"
+            ThermalService.THERMAL_STATUS_EMERGENCY -> "EMERGENCY THROTTLING"
+            else -> "UNKNOWN"
+        }
+        binding.thermalIndicator.text = "$statusText"
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    private fun updateTemperature() {
+        val temperatures: List<Temperature> = thermalService.currentTemperatures
+        val skinTemperature = temperatures.find { it.type == TEMPERATURE_TYPE_SKIN }
+        skinTemperature?.let {
+            val tempCelsius = it.value
+            binding.thermalIndicator.text = "$tempCelsius°C"
+        }
+    }
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode : Boolean, newConfig : Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
