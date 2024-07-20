@@ -26,6 +26,9 @@ import android.hardware.display.DisplayManager
 import android.net.DhcpInfo
 import android.net.wifi.WifiManager
 import android.os.*
+import android.os.Temperature
+import android.os.Temperature.TEMPERATURE_TYPE_SKIN
+import android.os.ThermalService
 import android.util.Log
 import android.util.Rational
 import android.util.TypedValue
@@ -135,6 +138,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
     private lateinit var perfStatsRunnable: Runnable
     private lateinit var thermalIndicatorRunnable: Runnable
+
+    private lateinit var thermalService: ThermalService
 
     @Inject
     lateinit var appSettings : AppSettings
