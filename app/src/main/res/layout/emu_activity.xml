@@ -47,6 +47,14 @@
             android:layout_marginTop="5dp"
             android:textColor="@color/colorPerfStatsPrimary"
             tools:text="60 FPS • 2000 MB" />
+        
+        <TextView
+            android:id="@+id/thermal_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|right"
+            android:layout_marginRight="@dimen/onScreenItemHorizontalMargin"
+            android:layout_marginTop="5dp" />
 
         <ImageButton
             android:id="@+id/on_screen_pause_toggle"

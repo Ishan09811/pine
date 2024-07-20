@@ -18,7 +18,6 @@ import android.content.res.AssetManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.content.DialogInterface
-import android.content.SharedPreferences
 import androidx.core.content.res.ResourcesCompat
 import android.graphics.Color
 import android.graphics.PointF
@@ -27,6 +26,7 @@ import android.hardware.display.DisplayManager
 import android.net.DhcpInfo
 import android.net.wifi.WifiManager
 import android.os.*
+import android.os.PowerManager
 import android.util.Log
 import android.util.Rational
 import android.util.TypedValue
@@ -130,13 +130,14 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     private var isEmulatorPaused = false
 
     private var isPerfStatsRunnableCallbackExist = false
+    private var isThermalIndicatorRunnableCallbackExist = false
 
     private lateinit var pictureInPictureParamsBuilder : PictureInPictureParams.Builder
 
     private lateinit var perfStatsRunnable: Runnable
+    private lateinit var thermalIndicatorRunnable: Runnable
 
-    private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var editor: SharedPreferences.Editor
+    private lateinit var powerManager: PowerManager
 
     @Inject
     lateinit var appSettings : AppSettings
@@ -297,6 +298,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         populateAppItem()
         emulationSettings = EmulationSettings.forEmulation(item.titleId ?: item.key())
 
+        powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+
         requestedOrientation = emulationSettings.orientation
         window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
         inputHandler = InputHandler(inputManager, emulationSettings)
@@ -353,6 +356,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
             enablePerfStats(true)
         }
+
+        enableThermalIndicator(emulationSettings.perfStats)
 
         force60HzRefreshRate(!emulationSettings.maxRefreshRate)
         getSystemService<DisplayManager>()?.registerDisplayListener(this, null)
@@ -460,11 +465,6 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             }
         }
 
-        sharedPreferences = getSharedPreferences("EmulationMenuSettings", Context.MODE_PRIVATE)
-        editor = sharedPreferences.edit()
-        editor.putBoolean("menu_show_fps", emulationSettings.perfStats)
-        editor.apply()
-
         executeApplication(intent!!)
     }
 
@@ -568,7 +568,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
         popupMenu.menu.apply {
             findItem(R.id.menu_show_overlay).isChecked = !binding.onScreenControllerView.isInvisible
-            findItem(R.id.menu_show_fps).isChecked = sharedPreferences.getBoolean("menu_show_fps", false)
+            findItem(R.id.menu_show_fps).isChecked = isPerfStatsRunnableCallbackExist
+            findItem(R.id.menu_thermal_indicator).isChecked = isThermalIndicatorRunnableCallbackExist
             findItem(R.id.menu_haptic_feedback).isChecked = binding.onScreenControllerView.hapticFeedback
         }
 
@@ -580,10 +581,12 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 }
 
                 R.id.menu_show_fps -> {
-                    val isShowPerfStats = !sharedPreferences.getBoolean("menu_show_fps", false)
-                    enablePerfStats(isShowPerfStats)
-                    editor.putBoolean("menu_show_fps", isShowPerfStats)
-                    editor.apply()
+                    enablePerfStats(!isPerfStatsRunnableCallbackExist)
+                    true
+                }
+
+                R.id.menu_thermal_indicator -> {
+                    enableThermalIndicator(!isThermalIndicatorRunnableCallbackExist)
                     true
                 }
 
@@ -623,7 +626,46 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             isPerfStatsRunnableCallbackExist = true
         }
     }
-            
+
+    private fun enableThermalIndicator(isEnable: Boolean) {
+            if (!isEnable) {
+                if (isThermalIndicatorRunnableCallbackExist) {
+                    binding.thermalIndicator.apply {
+                        removeCallbacks(thermalIndicatorRunnable)
+                        text = ""
+                    }
+                }
+                isThermalIndicatorRunnableCallbackExist = false
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    isThermalIndicatorRunnableCallbackExist = true
+                    updateThermalStatus()        
+               } else {
+                   binding.thermalIndicator.text = "Thermal monitoring not supported on this device"
+               }
+           }
+       }
+
+    private fun updateThermalStatus() {
+        binding.thermalIndicator.apply {
+            thermalIndicatorRunnable = object : Runnable {
+                 override fun run() {
+                     val statusText = when (powerManager.currentThermalStatus) {
+                         PowerManager.THERMAL_STATUS_NONE -> "NORMAL"
+                         PowerManager.THERMAL_STATUS_LIGHT -> "LIGHT THROTTLING"
+                         PowerManager.THERMAL_STATUS_MODERATE -> "MODERATE THROTTLING"
+                         PowerManager.THERMAL_STATUS_SEVERE -> "SEVERE THROTTLING"
+                         PowerManager.THERMAL_STATUS_CRITICAL -> "CRITICAL THROTTLING"
+                         PowerManager.THERMAL_STATUS_EMERGENCY -> "EMERGENCY THROTTLING"
+                         else -> "NORMAL"
+                     }
+                     text = "$statusText"
+                     postDelayed(this, 250)
+                 }
+            }
+            postDelayed(thermalIndicatorRunnable, 250)
+        } 
+    }
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode : Boolean, newConfig : Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
