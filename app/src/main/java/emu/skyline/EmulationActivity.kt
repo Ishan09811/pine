@@ -585,7 +585,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                     true
                 }
 
-                R.id.menu_thermal_indicator {
+                R.id.menu_thermal_indicator -> {
                     enableThermalIndicator(!isThermalIndicatorRunnableCallbackExist)
                     true
                 }
