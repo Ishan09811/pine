@@ -298,6 +298,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         populateAppItem()
         emulationSettings = EmulationSettings.forEmulation(item.titleId ?: item.key())
 
+        powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+
         requestedOrientation = emulationSettings.orientation
         window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
         inputHandler = InputHandler(inputManager, emulationSettings)
