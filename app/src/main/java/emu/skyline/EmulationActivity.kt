@@ -568,7 +568,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
         popupMenu.menu.apply {
             findItem(R.id.menu_show_overlay).isChecked = !binding.onScreenControllerView.isInvisible
-            findItem(R.id.menu_show_fps).isChecked = sharedPreferences.getBoolean("menu_show_fps", false)
+            findItem(R.id.menu_show_fps).isChecked = isPerfStatsRunnableCallbackExist
+            findItem(R.id.menu_thermal_indicator).isChecked = isThermalIndicatorRunnableCallbackExist
             findItem(R.id.menu_haptic_feedback).isChecked = binding.onScreenControllerView.hapticFeedback
         }
 
