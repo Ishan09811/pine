@@ -640,6 +640,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                     thermalIndicatorRunnable = object : Runnable {
                          override fun run() {
                              updateThermalStatus()
+                             postDelayed(this, 250)
                          }
                     }
                     postDelayed(thermalIndicatorRunnable, 250)
