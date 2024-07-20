@@ -26,9 +26,7 @@ import android.hardware.display.DisplayManager
 import android.net.DhcpInfo
 import android.net.wifi.WifiManager
 import android.os.*
-import android.os.Temperature
-import android.os.Temperature.TEMPERATURE_TYPE_SKIN
-import android.os.ThermalService
+import android.os.PowerManager
 import android.util.Log
 import android.util.Rational
 import android.util.TypedValue
@@ -139,7 +137,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     private lateinit var perfStatsRunnable: Runnable
     private lateinit var thermalIndicatorRunnable: Runnable
 
-    private lateinit var thermalService: ThermalService
+    private lateinit var powerManager: PowerManager
 
     @Inject
     lateinit var appSettings : AppSettings
@@ -639,51 +637,29 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             } else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     isThermalIndicatorRunnableCallbackExist = true
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        thermalIndicatorRunnable = object : Runnable {
-                             override fun run() {
-                                 updateTemperature()
-                             }
-                        }
-                        postDelayed(thermalIndicatorRunnable, 250)
-                    } else {
-                        thermalIndicatorRunnable = object : Runnable {
-                             override fun run() {
-                                 thermalService = getSystemService(ThermalService::class.java)
-                                 thermalService.registerThermalStatusListener { status ->
-                                     updateThermalStatus(status)
-                                 }
-                             }
-                        }
-                        postDelayed(thermalIndicatorRunnable, 250)
-                   }
+                    thermalIndicatorRunnable = object : Runnable {
+                         override fun run() {
+                             updateThermalStatus()
+                         }
+                    }
+                    postDelayed(thermalIndicatorRunnable, 250)
                } else {
                    binding.thermalIndicator.text = "Thermal monitoring not supported on this device"
                }
            }
        }
 
-    private fun updateThermalStatus(status: Int) {
-        val statusText = when (status) {
-            ThermalService.THERMAL_STATUS_NONE -> "NORMAL"
-            ThermalService.THERMAL_STATUS_LIGHT -> "LIGHT THROTTLING"
-            ThermalService.THERMAL_STATUS_MODERATE -> "MODERATE THROTTLING"
-            ThermalService.THERMAL_STATUS_SEVERE -> "SEVERE THROTTLING"
-            ThermalService.THERMAL_STATUS_CRITICAL -> "CRITICAL THROTTLING"
-            ThermalService.THERMAL_STATUS_EMERGENCY -> "EMERGENCY THROTTLING"
-            else -> "UNKNOWN"
+    private fun updateThermalStatus() {
+        val statusText = when (powerManager.currentThermalStatus) {
+            PowerManager.THERMAL_STATUS_NONE -> "NORMAL"
+            PowerManager.THERMAL_STATUS_LIGHT -> "LIGHT THROTTLING"
+            PowerManager.THERMAL_STATUS_MODERATE -> "MODERATE THROTTLING"
+            PowerManager.THERMAL_STATUS_SEVERE -> "SEVERE THROTTLING"
+            PowerManager.THERMAL_STATUS_CRITICAL -> "CRITICAL THROTTLING"
+            PowerManager.THERMAL_STATUS_EMERGENCY -> "EMERGENCY THROTTLING"
+            else -> "NORMAL"
         }
         binding.thermalIndicator.text = "$statusText"
-    }
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    private fun updateTemperature() {
-        val temperatures: List<Temperature> = thermalService.currentTemperatures
-        val skinTemperature = temperatures.find { it.type == TEMPERATURE_TYPE_SKIN }
-        skinTemperature?.let {
-            val tempCelsius = it.value
-            binding.thermalIndicator.text = "$tempCelsius°C"
-        }
     }
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode : Boolean, newConfig : Configuration) {
