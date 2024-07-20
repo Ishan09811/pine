@@ -637,13 +637,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             } else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     isThermalIndicatorRunnableCallbackExist = true
-                    thermalIndicatorRunnable = object : Runnable {
-                         override fun run() {
-                             updateThermalStatus()
-                             postDelayed(this, 250)
-                         }
-                    }
-                    postDelayed(thermalIndicatorRunnable, 250)
+                    updateThermalStatus()        
                } else {
                    binding.thermalIndicator.text = "Thermal monitoring not supported on this device"
                }
@@ -651,16 +645,24 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
        }
 
     private fun updateThermalStatus() {
-        val statusText = when (powerManager.currentThermalStatus) {
-            PowerManager.THERMAL_STATUS_NONE -> "NORMAL"
-            PowerManager.THERMAL_STATUS_LIGHT -> "LIGHT THROTTLING"
-            PowerManager.THERMAL_STATUS_MODERATE -> "MODERATE THROTTLING"
-            PowerManager.THERMAL_STATUS_SEVERE -> "SEVERE THROTTLING"
-            PowerManager.THERMAL_STATUS_CRITICAL -> "CRITICAL THROTTLING"
-            PowerManager.THERMAL_STATUS_EMERGENCY -> "EMERGENCY THROTTLING"
-            else -> "NORMAL"
-        }
-        binding.thermalIndicator.text = "$statusText"
+        binding.thermalIndicator.apply {
+            thermalIndicatorRunnable = object : Runnable {
+                 override fun run() {
+                     val statusText = when (powerManager.currentThermalStatus) {
+                         PowerManager.THERMAL_STATUS_NONE -> "NORMAL"
+                         PowerManager.THERMAL_STATUS_LIGHT -> "LIGHT THROTTLING"
+                         PowerManager.THERMAL_STATUS_MODERATE -> "MODERATE THROTTLING"
+                         PowerManager.THERMAL_STATUS_SEVERE -> "SEVERE THROTTLING"
+                         PowerManager.THERMAL_STATUS_CRITICAL -> "CRITICAL THROTTLING"
+                         PowerManager.THERMAL_STATUS_EMERGENCY -> "EMERGENCY THROTTLING"
+                         else -> "NORMAL"
+                     }
+                     text = "$statusText"
+                     postDelayed(this, 250)
+                 }
+            }
+            postDelayed(thermalIndicatorRunnable, 250)
+        } 
     }
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode : Boolean, newConfig : Configuration) {
