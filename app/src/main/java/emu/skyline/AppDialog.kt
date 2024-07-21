@@ -5,17 +5,20 @@
 
 package emu.skyline
 
+import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -29,6 +32,9 @@ import emu.skyline.utils.CacheManagementUtils
 import emu.skyline.utils.SaveManagementUtils
 import emu.skyline.utils.serializable
 import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * This dialog is used to show extra game metadata and provide extra options such as pinning the game to the home screen
