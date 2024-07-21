@@ -339,7 +339,9 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         binding.gameView.setAspectRatio(
             when (emulationSettings.aspectRatio) {
                 0 -> Rational(16, 9)
-                1 -> Rational(21, 9)
+                1 -> Rational(4, 3)
+                2 -> Rational(21, 9)
+                3 -> Rational(16, 10)
                 else -> null
             }
         )

@@ -82,7 +82,9 @@
     </integer-array>
     <string-array name="aspect_ratios">
         <item>16:9 (Switch, Recommended)</item>
+        <item>4:3</item>
         <item>21:9 (Ultrawide Mods)</item>
+        <item>16:10</item>
         <item>Device Aspect Ratio (Stretch to fit)</item>
     </string-array>
     <string-array name="orientation_entries">
