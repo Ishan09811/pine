@@ -245,6 +245,6 @@ extern "C" JNIEXPORT void JNICALL Java_emu_skyline_settings_NativeSettings_updat
     settings->Update();
 }
 
-extern "C" JNIEXPORT void JNICALL Java_emu_skyline_settings_EmulationActivity_enableDynamicResolution(JNIEnv *env, jobject obj, jboolean enable) {
+extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_enableDynamicResolution(JNIEnv *env, jobject obj, jboolean enable) {
     enableDynamicResolution(enable);
 }
