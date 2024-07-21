@@ -38,6 +38,7 @@ interface SaveManagementUtils {
 
     companion object {
         val savesFolderRoot = "${SkylineApplication.instance.getPublicFilesDir().canonicalPath}/switch/nand/user/save/0000000000000000/00000000000000000000000000000001"
+        lateinit var saveZipName: String
 
         fun registerDocumentPicker(context : Context) : ActivityResultLauncher<Array<String>> {
             return (context as ComponentActivity).registerForActivityResult(ActivityResultContracts.OpenDocument()) {
@@ -138,6 +139,7 @@ interface SaveManagementUtils {
                 }
 
                 withContext(Dispatchers.Main) {
+                    saveZipName = "${zipCreated.name}"
                     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
                     startForResultExportSave.launch(intent)
                 }
