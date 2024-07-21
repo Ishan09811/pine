@@ -152,6 +152,14 @@
             android:summaryOn="@string/shader_cache_disabled"
             app:key="disable_shader_cache"
             app:title="@string/shader_cache" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:summaryOff="@string/enable_dynamic_resolution_enabled"
+            android:summaryOn="@string/enable_dynamic_resolution_disabled"
+            app:key="enable_dynamic_resolution" 
+            app:title="@string/enable_dynamic_resolution" />
+            
     </PreferenceCategory>
     <PreferenceCategory
         android:key="category_hacks"

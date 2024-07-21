@@ -4,6 +4,13 @@
 #include "engine.h"
 
 namespace skyline::soc::gm20b::engine {
+
+    bool isDynamicResolutionEnabled = false;
+
+    void enableDynamicResolution(bool enable) {
+        isDynamicResolutionEnabled = enable;
+    }
+
     u64 GetGpuTimeTicks() {
         constexpr i64 NsToTickNumerator{384};
         constexpr i64 NsToTickDenominator{625};
@@ -11,9 +18,13 @@ namespace skyline::soc::gm20b::engine {
         i64 nsTime{util::GetTimeNs()};
         i64 timestamp{(nsTime / NsToTickDenominator) * NsToTickNumerator + ((nsTime % NsToTickDenominator) * NsToTickNumerator) / NsToTickDenominator};
 
-        // By reporting that less time has passed on the  GPU than has actually passed we can avoid dynamic resolution kicking in
-        // TODO: add a setting for this after global settings
-        return static_cast<u64>(timestamp / 256);
+        if (isDynamicResolutionEnabled) {
+            // Default behavior
+            return static_cast<u64>(timestamp);
+        } else {
+            // Avoid dynamic resolution
+            return static_cast<u64>(timestamp / 256);
+        }
     }
 
     MacroEngineBase::MacroEngineBase(MacroState &macroState) : macroState(macroState) {}
