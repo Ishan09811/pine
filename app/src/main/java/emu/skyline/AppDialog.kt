@@ -81,7 +81,7 @@ class AppDialog : BottomSheetDialogFragment() {
                 result.data?.data?.let { uri ->
                     val pickedDir = DocumentFile.fromTreeUri(requireContext(), uri) ?: return@let
                     CoroutineScope(Dispatchers.IO).launch {
-                        val zipFilePath = "${SkylineApplication.instance.getPublicFilesDir().canonicalPath}/temp/${item.title} (v${binding.gameVersion.text}) [${item.titleId}].zip"
+                        val zipFilePath = "${SkylineApplication.instance.getPublicFilesDir().canonicalPath}/temp/${SaveManagementUtils.saveZipName}"
                         val zipFile = File(zipFilePath)
                         val inputStream: InputStream = zipFile.inputStream()
                         val outputStream: OutputStream? = requireContext().contentResolver.openOutputStream(pickedDir.createFile("application/zip", zipFile.name)?.uri!!)
