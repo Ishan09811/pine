@@ -96,26 +96,6 @@
         <item>8</item>
     </integer-array>
     <string-array name="credits_entries">
-        <item>j0hnnybrav0</item>
-        <item>Ell Jensen</item>
-        <item>Pete y los Androides</item>
-        <item>ArkSource</item>
-        <item>程家小将</item>
-        <item>Mored4u</item>
-        <item>Formerxlegit</item>
-        <item>GaboCorella</item>
-        <item>扭TYPE-小光</item>
-        <item>Enan</item>
-        <item>Snake13555</item>
-        <item>DreamFyre</item>
-        <item>DraycosRyse</item>
-        <item>James Gorman</item>
-        <item>Visual Vortex</item>
-        <item>Old Man Royus Boyus</item>
-        <item>Undeadbob</item>
-        <item>Maple</item>
-        <item>Dorntastic</item>
-        <item>Mars</item>
-        <item>Jessica Plants (jersker)</item>
+        <item>github.com/Ishan09811/pine/contributors</item>
     </string-array>
 </resources>

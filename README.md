@@ -1,6 +1,7 @@
 <h1 align="center">
     <a href="https://github.com/ishan09811/pine/" target="_blank">
-        <img height="60%" width="60%" src="https://raw.github.com/ishan09811/pine/branding/pine.png"><br>
+
+![pine](./app/src/main/res/mipmap-xxxhdpi/logo_pine.png)<br>
     </a>
     <a href="https://discord.gg/" target="_blank">
         <img src="https://img.shields.io/discord/1104386300750082081.svg?label=&logo=discord&logoColor=ffffff&color=5865F2&labelColor=404EED">
