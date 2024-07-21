@@ -65,7 +65,26 @@ class AppDialog : BottomSheetDialogFragment() {
             binding.deleteSave.isEnabled = isSaveFileOfThisGame
             binding.exportSave.isEnabled = isSaveFileOfThisGame
         }
-        startForResultExportSave = SaveManagementUtils.registerStartForResultExportSave(requireActivity())
+        
+        startForResultExportSave = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    val pickedDir = DocumentFile.fromTreeUri(requireContext(), uri) ?: return@let
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val zipFilePath = "${SaveManagementUtils.savesFolderRoot}/${item.titleId}/${item.title} (v${binding.gameVersion.text}) [${item.titleId}].zip"
+                        val zipFile = File(zipFilePath)
+                        val inputStream: InputStream = zipFile.inputStream()
+                        val outputStream: OutputStream? = requireContext().contentResolver.openOutputStream(pickedDir.createFile("application/zip", zipFile.name)?.uri!!)
+                        
+                        inputStream.use { input ->
+                            outputStream?.use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
