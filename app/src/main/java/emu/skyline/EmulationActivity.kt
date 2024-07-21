@@ -194,7 +194,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
      */
     private external fun updatePerformanceStatistics()
 
-    private external fun enableDynamicResolution(boolean enable)
+    private external fun enableDynamicResolution(enable: Boolean)
 
     /**
      * @see [InputHandler.initializeControllers]
