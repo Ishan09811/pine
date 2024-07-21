@@ -5,18 +5,25 @@
 
 package emu.skyline
 
+import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.documentfile.provider.DocumentFile
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
@@ -29,6 +36,9 @@ import emu.skyline.utils.CacheManagementUtils
 import emu.skyline.utils.SaveManagementUtils
 import emu.skyline.utils.serializable
 import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * This dialog is used to show extra game metadata and provide extra options such as pinning the game to the home screen
@@ -65,7 +75,26 @@ class AppDialog : BottomSheetDialogFragment() {
             binding.deleteSave.isEnabled = isSaveFileOfThisGame
             binding.exportSave.isEnabled = isSaveFileOfThisGame
         }
-        startForResultExportSave = SaveManagementUtils.registerStartForResultExportSave(requireActivity())
+        
+        startForResultExportSave = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    val pickedDir = DocumentFile.fromTreeUri(requireContext(), uri) ?: return@let
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val zipFilePath = "${SkylineApplication.instance.getPublicFilesDir().canonicalPath}/temp/${SaveManagementUtils.saveZipName}"
+                        val zipFile = File(zipFilePath)
+                        val inputStream: InputStream = zipFile.inputStream()
+                        val outputStream: OutputStream? = requireContext().contentResolver.openOutputStream(pickedDir.createFile("application/zip", zipFile.name)?.uri!!)
+                        
+                        inputStream.use { input ->
+                            outputStream?.use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**

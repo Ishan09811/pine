@@ -37,7 +37,8 @@ import java.util.zip.ZipOutputStream
 interface SaveManagementUtils {
 
     companion object {
-        private val savesFolderRoot = "${SkylineApplication.instance.getPublicFilesDir().canonicalPath}/switch/nand/user/save/0000000000000000/00000000000000000000000000000001"
+        val savesFolderRoot = "${SkylineApplication.instance.getPublicFilesDir().canonicalPath}/switch/nand/user/save/0000000000000000/00000000000000000000000000000001"
+        lateinit var saveZipName: String
 
         fun registerDocumentPicker(context : Context) : ActivityResultLauncher<Array<String>> {
             return (context as ComponentActivity).registerForActivityResult(ActivityResultContracts.OpenDocument()) {
@@ -138,9 +139,9 @@ interface SaveManagementUtils {
                 }
 
                 withContext(Dispatchers.Main) {
-                    val file = DocumentFile.fromSingleUri(context, DocumentsContract.buildDocumentUri(DocumentsProvider.AUTHORITY, "${DocumentsProvider.ROOT_ID}/temp/${zipCreated.name}"))!!
-                    val intent = Intent(Intent.ACTION_SEND).setDataAndType(file.uri, "application/zip").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION).putExtra(Intent.EXTRA_STREAM, file.uri)
-                    startForResultExportSave.launch(Intent.createChooser(intent, context.getString(R.string.save_file_share)))
+                    saveZipName = "${zipCreated.name}"
+                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+                    startForResultExportSave.launch(intent)
                 }
             }
         }
