@@ -194,6 +194,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
      */
     private external fun updatePerformanceStatistics()
 
+    private external fun enableDynamicResolution(enable: Boolean)
+
     /**
      * @see [InputHandler.initializeControllers]
      */
@@ -359,6 +361,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
         enableThermalIndicator(emulationSettings.perfStats)
 
+        enableDynamicResolution(emulationSettings.enableDynamicResolution)
+
         force60HzRefreshRate(!emulationSettings.maxRefreshRate)
         getSystemService<DisplayManager>()?.registerDisplayListener(this, null)
 
@@ -512,6 +516,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         resumeEmulator()
 
         GpuDriverHelper.forceMaxGpuClocks(emulationSettings.forceMaxGpuClocks)
+
+        enableDynamicResolution(emulationSettings.enableDynamicResolution)
 
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
             @Suppress("DEPRECATION")

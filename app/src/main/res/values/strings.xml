@@ -147,6 +147,9 @@
     <string name="shader_cache">Disable Shader Cache</string>
     <string name="shader_cache_disabled">Cached shaders won\'t be loaded, will cause stutters</string>
     <string name="shader_cache_enabled">Cached shaders will be loaded, can heavily reduce stuttering</string>
+    <string name="enable_dynamic_resolution">Enable Dynamic Resolution</string>
+    <string name="enable_dynamic_resolution_enabled">the emulator will allow the GPU to dynamically adjust the resolution based on the current load. This can help maintain performance by lowering the resolution during high-load scenarios</string>
+    <string name="enable_dynamic_resolution_disabled">the emulator will report less elapsed GPU time than actually passed. This prevents the GPU from lowering the resolution, maintaining a consistent resolution regardless of load. This can result in smoother and more consistent visuals at the cost of potentially higher performance requirements</string>
     <!-- Settings - Hacks -->
     <string name="hacks">Hacks</string>
     <string name="enable_fast_gpu_readback">Enable Fast GPU Readback</string>
