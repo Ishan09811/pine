@@ -98,7 +98,7 @@ class SearchLocationActivity : AppCompatActivity() {
         setSupportActionBar(binding.titlebar.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
-            title = getString(R.string.search_location_config)
+            title = getString(R.string.search_location)
             subtitle = item?.title
         }
 
