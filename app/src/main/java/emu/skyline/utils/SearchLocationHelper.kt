@@ -15,18 +15,18 @@ interface SearchLocationHelper {
 
         /**
          * Returns the list of selected search locations.
-         * @return An uris array of selected search locations
+         * @return A list of URIs of selected search locations
          */
-        fun getSearchLocations(context : Context) : Array<Uri?> {
-            var locations = context.getSettings().searchLocation.split("|");
-            var urisArray = arrayOf<Uri?>();
+        fun getSearchLocations(context: Context): List<Uri> {
+            val locations = context.getSettings().searchLocation.split("|")
+            val urisList = mutableListOf<Uri>()
 
-            locations.forEach{
-                val array = urisArray.copyOf(urisArray.size + 1)
-                array[urisArray.size] = Uri.parse(it);
-                urisArray = array;
+            locations.forEach {
+                if (it.isNotEmpty()) {
+                    urisList.add(Uri.parse(it))
+                }
             }
-            return urisArray;
+            return urisList
         }
 
         /**
