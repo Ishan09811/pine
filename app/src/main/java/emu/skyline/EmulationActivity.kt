@@ -67,6 +67,7 @@ import emu.skyline.settings.SettingsActivity
 import emu.skyline.utils.ByteBufferSerializable
 import emu.skyline.utils.GpuDriverHelper
 import emu.skyline.utils.serializable
+import emu.skyline.input.onscreen.OnScreenEditActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
