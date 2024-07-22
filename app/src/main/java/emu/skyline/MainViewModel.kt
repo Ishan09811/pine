@@ -41,7 +41,7 @@ class MainViewModel @Inject constructor(@ApplicationContext context : Context, p
      *
      * @param loadFromFile If this is false then trying to load cached adapter data is skipped entirely
      */
-    fun loadRoms(context : Context, loadFromFile : Boolean, searchLocations : Array<Uri?>, systemLanguage : Int) {
+    fun loadRoms(context: Context, loadFromFile: Boolean, searchLocations: List<Uri>, systemLanguage: Int) {
         if (state == MainState.Loading)
             return
         state = MainState.Loading
@@ -54,30 +54,29 @@ class MainViewModel @Inject constructor(@ApplicationContext context : Context, p
                     state = MainState.Loaded(fromFile(romsFile))
                     checkRomHash(searchLocations, systemLanguage)
                     return@launch
-                } catch (e : Exception) {
+                } catch (e: Exception) {
                     Log.w(TAG, "Ran into exception while loading: ${e.message}")
                 }
             }
 
-            state = if (searchLocations.toString().isEmpty()) {
+            state = if (searchLocations.isEmpty()) {
                 MainState.Loaded(ArrayList())
             } else {
                 try {
-                    var romElements = ArrayList<AppEntry>()
+                    val romElements = ArrayList<AppEntry>()
                     searchLocations.forEach { searchLocation ->
-                        KeyReader.importFromLocation(context, searchLocation!!)
+                        KeyReader.importFromLocation(context, searchLocation)
                         romElements.addAll(romProvider.loadRoms(searchLocation, systemLanguage))
                     }
                     romElements.toFile(romsFile)
                     MainState.Loaded(romElements)
-                } catch (e : Exception) {
+                } catch (e: Exception) {
                     Log.w(TAG, "Ran into exception while saving: ${e.message}")
                     MainState.Error(e)
                 }
             }
         }
     }
-
     /**
      * Tracks whether an auto refresh is already in progress
      */
@@ -86,7 +85,7 @@ class MainViewModel @Inject constructor(@ApplicationContext context : Context, p
     /**
      * This checks if the roms have changed since the last time they were loaded and if so it reloads them
      */
-    fun checkRomHash(searchLocations : Array<Uri?>, systemLanguage : Int) {
+    fun checkRomHash(searchLocations: List<Uri>, systemLanguage: Int) {
         // Skip if an auto refresh is already in progress or if the state hasn't already loaded
         if (isAutoRefreshingRoms || state !is MainState.Loaded)
             return
@@ -99,7 +98,7 @@ class MainViewModel @Inject constructor(@ApplicationContext context : Context, p
             }
             val romElements = ArrayList<AppEntry>()
             searchLocations.forEach { searchLocation ->
-                romElements.addAll(romProvider.loadRoms(searchLocation!!, systemLanguage))
+                romElements.addAll(romProvider.loadRoms(searchLocation, systemLanguage))
             }
             val newHash = romElements.hashCode()
             if (newHash != currentHash)
