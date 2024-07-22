@@ -155,8 +155,8 @@
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
-            android:summaryOff="@string/enable_dynamic_resolution_enabled"
-            android:summaryOn="@string/enable_dynamic_resolution_disabled"
+            android:summaryOff="@string/enable_dynamic_resolution_disabled"
+            android:summaryOn="@string/enable_dynamic_resolution_enabled"
             app:key="enable_dynamic_resolution" 
             app:title="@string/enable_dynamic_resolution" />
             
