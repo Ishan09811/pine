@@ -17,6 +17,11 @@
         android:checkable="true" />
 
     <item
+        android:id="@+id/menu_edit_overlay"
+        android:title="@string/emulation_edit_overlay"
+        android:checkable="false" />
+
+    <item
         android:id="@+id/menu_haptic_feedback"
         android:title="@string/emulation_haptic_feedback"
         android:checkable="true" />

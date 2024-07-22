@@ -598,6 +598,11 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                     true
                 }
 
+                R.id.menu_edit_overlay -> {
+                    startActivity(Intent(this, OnScreenEditActivity::class.java))
+                    true
+                }
+
                 R.id.menu_haptic_feedback -> {
                     binding.onScreenControllerView.hapticFeedback = !binding.onScreenControllerView.hapticFeedback
                     true
