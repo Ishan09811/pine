@@ -14,7 +14,7 @@ namespace skyline::soc::gm20b::engine {
         i64 nsTime{util::GetTimeNs()};
         i64 timestamp{(nsTime / NsToTickDenominator) * NsToTickNumerator + ((nsTime % NsToTickDenominator) * NsToTickNumerator) / NsToTickDenominator};
 
-        const DeviceState &state = skyline::gpu::GetDeviceState();
+        const DeviceState &state = skyline::gpu::GPU::GetDeviceState();
 
         if (*state.settings->enableDynamicResolution) {
             // Default behavior

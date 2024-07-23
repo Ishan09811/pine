@@ -71,7 +71,7 @@ namespace skyline::gpu {
         static constexpr size_t DebugTracingBufferSize{0x80000}; //!< 512KiB
         memory::Buffer debugTracingBuffer; //!< General use buffer for debug tracing, first 4 bytes are allocated for checkpoints
 
-        const DeviceState& GetDeviceState() const {
+        static const DeviceState& GetDeviceState() const {
             return state;
         }
 
