@@ -72,10 +72,6 @@ namespace skyline::soc::gm20b::engine {
      */
     u64 GetGpuTimeTicks();
 
-    extern bool isDynamicResolutionEnabled;
-
-    void enableDynamicResolution(bool enable);
-
     /**
      * @brief The MacroEngineBase interface provides an interface that can be used by engines to allow interfacing with the macro executer
      */

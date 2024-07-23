@@ -46,6 +46,7 @@ namespace skyline {
             useDirectMemoryImport = ktSettings.GetBool("useDirectMemoryImport");
             forceMaxGpuClocks = ktSettings.GetBool("forceMaxGpuClocks");
             disableShaderCache = ktSettings.GetBool("disableShaderCache");
+            enableDynamicResolution = ktSettings.GetBool("enableDynamicResolution");
             freeGuestTextureMemory = ktSettings.GetBool("freeGuestTextureMemory");
             enableFastGpuReadbackHack = ktSettings.GetBool("enableFastGpuReadbackHack");
             enableFastReadbackWrites = ktSettings.GetBool("enableFastReadbackWrites");
