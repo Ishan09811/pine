@@ -225,7 +225,7 @@ namespace skyline::kernel::svc {
                 .ipcRefCount = 0,
             };
 
-            fmt::format("Address: {}, Region Start: 0x{:X}, Size: 0x{:X}, Type: 0x{:X}, Attributes: 0x{:X}, Permissions: {}", fmt::ptr(address), memInfo.address, memInfo.size, memInfo.type, memInfo.attributes, chunk->second.permission);
+            LOGD("Address: {}, Region Start: 0x{:X}, Size: 0x{:X}, Type: 0x{:X}, Attributes: 0x{:X}, Permissions: {}", fmt::ptr(address), memInfo.address, memInfo.size, memInfo.type, memInfo.attributes, chunk->second.permission);
         } else {
             u64 addressSpaceEnd{reinterpret_cast<u64>(state.process->memory.addressSpace.end().base())};
 
@@ -1218,17 +1218,41 @@ namespace skyline::kernel::svc {
             auto &context{*reinterpret_cast<ThreadContext *>(ctx.x0)};
             context = {}; // Zero-initialize the contents of the context as not all fields are set
 
-            auto &targetContext{thread->ctx};
-            for (size_t i{}; i < targetContext.gpr.regs.size(); i++)
-                context.gpr[i] = targetContext.gpr.regs[i];
+            if (state.process->is64bit()) {
+                auto &targetContext{dynamic_cast<type::KNceThread *>(thread.get())->ctx};
+                for (size_t i{}; i < targetContext.gpr.regs.size(); i++)
+                    context.gpr[i] = targetContext.gpr.regs[i];
 
-            for (size_t i{}; i < targetContext.fpr.regs.size(); i++)
-                context.vreg[i] = targetContext.fpr.regs[i];
+                for (size_t i{}; i < targetContext.fpr.regs.size(); i++)
+                    context.vreg[i] = targetContext.fpr.regs[i];
 
-            context.fpcr = targetContext.fpr.fpcr;
-            context.fpsr = targetContext.fpr.fpsr;
+                context.fpcr = targetContext.fpr.fpcr;
+                context.fpsr = targetContext.fpr.fpsr;
 
-            context.tpidr = reinterpret_cast<u64>(targetContext.tpidrEl0);
+                context.tpidr = reinterpret_cast<u64>(targetContext.tpidrEl0);
+            } else { // 32 bit
+                constexpr u32 El0Aarch32PsrMask = 0xFE0FFE20;
+                // https://developer.arm.com/documentation/ddi0601/2023-12/AArch32-Registers/FPSCR--Floating-Point-Status-and-Control-Register
+                constexpr u32 FpsrMask = 0xF800009F; // [31:27], [7], [4:0]
+                constexpr u32 FpcrMask = 0x07FF9F00; // [26:15], [12:8]
+
+                auto &targetContext{dynamic_cast<type::KJit32Thread *>(thread.get())->ctx};
+
+                context.pc = targetContext.pc;
+                context.pstate = targetContext.cpsr & El0Aarch32PsrMask;
+
+                for (size_t i{}; i < targetContext.gpr.size() - 1; i++)
+                    context.gpr[i] = targetContext.gpr[i];
+
+                // TODO: Check if this is correct
+                for (size_t i{}; i < targetContext.fpr.size(); i++) {
+                    context.vreg[i] = targetContext.fpr_d[i];
+                }
+
+                context.fpsr = targetContext.fpscr & FpsrMask;
+                context.fpcr = targetContext.fpscr & FpcrMask;
+                context.tpidr = targetContext.tpidr;
+            }
 
             // Note: We don't write the whole context as we only store the parts required according to the ARMv8 ABI for syscall handling
             LOGD("Written partial context for thread #{}", thread->id);

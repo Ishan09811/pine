@@ -12,6 +12,8 @@ namespace skyline::kernel {
     /**
      * @brief The OS class manages the interaction between the various Skyline components
      */
+    extern bool isJitEnabled;
+
     class OS {
       public:
         std::string nativeLibraryPath; //!< The full path to the app's native library directory

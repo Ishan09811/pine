@@ -43,6 +43,9 @@ class EmulationSettings private constructor(context : Context, prefName : String
     var enableFoldableLayout by sharedPreferences(context, false, prefName = prefName)
     var showPauseButton by sharedPreferences(context, false, prefName = prefName)
 
+    // CPU
+    var cpuBackend by sharedPreferences(context, 0, prefName = prefName)
+
     // GPU
     var gpuDriver by sharedPreferences(context, SYSTEM_GPU_DRIVER, prefName = prefName)
     var forceTripleBuffering by sharedPreferences(context, true, prefName = prefName)
