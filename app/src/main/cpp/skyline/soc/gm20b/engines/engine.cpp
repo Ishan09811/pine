@@ -6,7 +6,9 @@
 
 namespace skyline::soc::gm20b::engine {
 
-    u64 GetGpuTimeTicks(const DeviceState &state) {
+    const DeviceState &state;
+    
+    u64 GetGpuTimeTicks() {
         constexpr i64 NsToTickNumerator{384};
         constexpr i64 NsToTickDenominator{625};
 
