@@ -6,16 +6,14 @@
 
 namespace skyline::soc::gm20b::engine {
 
-    extern Settings* settings;
-
-    u64 GetGpuTimeTicks() {
+    u64 GetGpuTimeTicks(const DeviceState &state) {
         constexpr i64 NsToTickNumerator{384};
         constexpr i64 NsToTickDenominator{625};
 
         i64 nsTime{util::GetTimeNs()};
         i64 timestamp{(nsTime / NsToTickDenominator) * NsToTickNumerator + ((nsTime % NsToTickDenominator) * NsToTickNumerator) / NsToTickDenominator};
 
-        if (settings->enableDynamicResolution) {
+        if (*state.settings->enableDynamicResolution) {
             // Default behavior
             return static_cast<u64>(timestamp);
         } else {
