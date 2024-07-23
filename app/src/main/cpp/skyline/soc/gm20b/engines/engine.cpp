@@ -3,10 +3,9 @@
 
 #include "engine.h"
 #include <common/settings.h>
+#include <gpu.h>
 
 namespace skyline::soc::gm20b::engine {
-
-    const DeviceState &state;
     
     u64 GetGpuTimeTicks() {
         constexpr i64 NsToTickNumerator{384};
@@ -14,6 +13,8 @@ namespace skyline::soc::gm20b::engine {
 
         i64 nsTime{util::GetTimeNs()};
         i64 timestamp{(nsTime / NsToTickDenominator) * NsToTickNumerator + ((nsTime % NsToTickDenominator) * NsToTickNumerator) / NsToTickDenominator};
+
+        const DeviceState &state = skyline::gpu::GetDeviceState();
 
         if (*state.settings->enableDynamicResolution) {
             // Default behavior
