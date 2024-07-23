@@ -99,6 +99,11 @@ namespace skyline {
 
         virtual ~Settings() = default;
 
+        static Settings& Instance() {
+            static Settings instance; // Static instance
+            return instance;
+        }
+
         /**
          * @brief Updates settings with the given values
          * @note This method is platform-specific and must be overridden

@@ -5,8 +5,6 @@
 #include <common/settings.h>
 
 namespace skyline::soc::gm20b::engine {
-
-    extern Settings* settings; 
     
     u64 GetGpuTimeTicks() {
         constexpr i64 NsToTickNumerator{384};
@@ -14,6 +12,8 @@ namespace skyline::soc::gm20b::engine {
 
         i64 nsTime{util::GetTimeNs()};
         i64 timestamp{(nsTime / NsToTickDenominator) * NsToTickNumerator + ((nsTime % NsToTickDenominator) * NsToTickNumerator) / NsToTickDenominator};
+
+        auto& settings = skyline::Settings::Instance();
 
         if (*settings->enableDynamicResolution) {
             // Default behavior
