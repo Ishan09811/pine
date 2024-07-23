@@ -42,5 +42,7 @@ namespace skyline::kernel {
          * @param romType The type of the ROM file
          */
         void Execute(int romFd, loader::RomFormat romType);
+
+        extern bool isJitEnabled;
     };
 }

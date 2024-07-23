@@ -248,3 +248,7 @@ extern "C" JNIEXPORT void JNICALL Java_emu_skyline_settings_NativeSettings_updat
 extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_enableDynamicResolution(JNIEnv *env, jobject obj, jboolean enable) {
     skyline::soc::gm20b::engine::enableDynamicResolution(enable);
 }
+
+extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_enableJit(JNIEnv *env, jobject obj, jboolean enable) {
+    skyline::kernel::isJitEnabled = enable;
+}

@@ -97,6 +97,16 @@
             app:title="@string/disable_audio_output" />
     </PreferenceCategory>
     <PreferenceCategory
+        android:key="category_cpu"
+        android:title="@string/cpu">
+        <emu.skyline.preference.IntegerListPreference
+            android:defaultValue="0"
+            android:entries="@array/cpu_backends"
+            app:key="cpu_backend"
+            app:title="@string/cpu_backend"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>        
+    <PreferenceCategory
         android:key="category_gpu"
         android:title="@string/gpu">
         <emu.skyline.preference.GpuDriverPreference

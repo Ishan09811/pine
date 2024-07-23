@@ -30,7 +30,9 @@ namespace skyline::kernel {
           assetFileSystem(std::move(assetFileSystem)),
           state(this, jvmManager, settings),
           serviceManager(state) {}
-
+    
+    bool isJitEnabled = false;
+    
     void OS::Execute(int romFd, loader::RomFormat romType) {
         auto romFile{std::make_shared<vfs::OsBacking>(romFd)};
         auto keyStore{std::make_shared<crypto::KeyStore>(privateAppFilesPath + "keys/")};
@@ -71,7 +73,7 @@ namespace skyline::kernel {
         // Scheduler retrieves information from the NPDM of the process so it needs to be initialized after the process is created
         state.scheduler = std::make_shared<kernel::Scheduler>(state);
 
-        if (process->is64bit()) {
+        if (!isJitEnabled) {
             state.nce = std::make_shared<nce::NCE>(state);
         } else { // 32-bit
             state.jit32 = std::make_shared<jit::Jit32>(state);

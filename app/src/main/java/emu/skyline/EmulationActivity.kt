@@ -196,6 +196,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
     private external fun enableDynamicResolution(enable: Boolean)
 
+    private external fun enableJit(enable: Boolean)
+
     /**
      * @see [InputHandler.initializeControllers]
      */
@@ -343,6 +345,13 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 2 -> Rational(21, 9)
                 3 -> Rational(16, 10)
                 else -> null
+            }
+        )
+
+        enableJit(
+            when (emulationSettings.cpuBackend) {
+                0 -> false
+                else -> true
             }
         )
 

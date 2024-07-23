@@ -122,6 +122,9 @@
     <string name="disable_audio_output">Disable Audio Output</string>
     <string name="disable_audio_output_enabled">Audio output is disabled</string>
     <string name="disable_audio_output_disabled">Audio output is enabled</string>
+    <!-- Settings - CPU -->
+    <string name="cpu">CPU</string>
+    <string name="cpu_backend">CPU backend</string>
     <!-- Settings - GPU -->
     <string name="gpu">GPU</string>
     <string name="gpu_driver_config">GPU Driver Configuration</string>

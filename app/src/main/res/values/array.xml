@@ -87,6 +87,11 @@
         <item>16:10</item>
         <item>Device Aspect Ratio (Stretch to fit)</item>
     </string-array>
+    <string-array name="cpu_backends">
+        <item>Native code execution (NCE)</item>
+        <item>Dynarmic</item>
+    </string-array>   
+
     <string-array name="orientation_entries">
         <item>Auto</item>
         <item>Landscape</item>
