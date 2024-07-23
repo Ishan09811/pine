@@ -6,6 +6,8 @@
 
 namespace skyline::soc::gm20b::engine {
 
+    extern Settings* settings;
+
     u64 GetGpuTimeTicks() {
         constexpr i64 NsToTickNumerator{384};
         constexpr i64 NsToTickDenominator{625};
