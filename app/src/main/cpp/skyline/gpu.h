@@ -29,7 +29,7 @@ namespace skyline::gpu {
      */
     class GPU {
       private:
-        const DeviceState &state; // We access the device state inside Texture (and Buffers) for setting up NCE memory tracking
+        static const DeviceState &state; // We access the device state inside Texture (and Buffers) for setting up NCE memory tracking
         friend Texture;
         friend Buffer;
         friend BufferManager;
@@ -71,7 +71,7 @@ namespace skyline::gpu {
         static constexpr size_t DebugTracingBufferSize{0x80000}; //!< 512KiB
         memory::Buffer debugTracingBuffer; //!< General use buffer for debug tracing, first 4 bytes are allocated for checkpoints
 
-        static const DeviceState& GetDeviceState() const {
+        static const DeviceState& GetDeviceState() {
             return state;
         }
 
