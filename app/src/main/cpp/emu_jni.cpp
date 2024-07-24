@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2020 Skyline Team and Contributors (https://github.com/skyline-emu/)
 
+#include <string>
 #include <csignal>
 #include <pthread.h>
 #include <android/asset_manager_jni.h>
@@ -254,6 +255,7 @@ extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_enableJit(J
     skyline::kernel::isJitEnabled = enable;
 }
 
-extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_setAudioSink(JNIEnv *env, jobject obj, jstring sink) {
+extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_setAudioSink(JNIEnv *env, jobject obj, jstring jSink) {
+    std::string sink = ConvertJStringToString(env, jSink);
     AudioCore::Sink::AudioSink = sink;
 }
