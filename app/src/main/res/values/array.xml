@@ -89,7 +89,7 @@
     </string-array>
     <string-array name="cpu_backends">
         <item>Native code execution (NCE)</item>
-        <item>Dynarmic</item>
+        <item>Dynarmic (32Bit)</item>
     </string-array>   
     <string-array name="audio_sinks">
          <item>Auto</item>

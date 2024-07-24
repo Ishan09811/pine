@@ -29,8 +29,8 @@ namespace skyline::jit {
         config.optimizations |= Dynarmic::OptimizationFlag::Unsafe_IgnoreGlobalMonitor;
         config.unsafe_optimizations = true;
 
-        config.fastmem_pointer = state.process->memory.base.data();
-        config.fastmem_exclusive_access = true;
+        config.fastmem_pointer = *state.settings->enableJitFastmem ? state.process->memory.base.data() : nullptr;
+        config.fastmem_exclusive_access = *state.settings->enableJitFastmem;
 
         config.define_unpredictable_behaviour = true;
 

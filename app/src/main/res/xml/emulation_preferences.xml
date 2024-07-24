@@ -105,13 +105,19 @@
             app:key="cpu_backend"
             app:title="@string/cpu_backend"
             app:useSimpleSummaryProvider="true" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:summaryOff="enable_jit_fastmem_disabled"
+            android:summaryOn="enable_jit_fastmem_enabled" 
+            app:key="enable_jit_fastmem" 
+            app:title="@string/enable_jit_fastmem" /> 
     </PreferenceCategory>        
     <PreferenceCategory
         android:key="category_gpu"
         android:title="@string/gpu">
         <emu.skyline.preference.GpuDriverPreference
             app:key="gpu_driver"
-            app:title="@string/gpu_driver_config" />
+            app:title="@sstring/gpu_driver_config" />
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:summaryOff="@string/triple_buffering_disabled"

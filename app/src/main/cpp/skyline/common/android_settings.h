@@ -50,7 +50,7 @@ namespace skyline {
             enableFastGpuReadbackHack = ktSettings.GetBool("enableFastGpuReadbackHack");
             enableFastReadbackWrites = ktSettings.GetBool("enableFastReadbackWrites");
             disableSubgroupShuffle = ktSettings.GetBool("disableSubgroupShuffle");
-            isAudioOutputDisabled = ktSettings.GetBool("isAudioOutputDisabled");
+            enableJitFastmem = ktSettings.GetBool("enableJitFastmem"); 
             logLevel = ktSettings.GetInt<skyline::AsyncLogger::LogLevel>("logLevel");
             validationLayer = ktSettings.GetBool("validationLayer");
         };

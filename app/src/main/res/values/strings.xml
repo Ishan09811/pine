@@ -131,6 +131,9 @@
     <!-- Settings - CPU -->
     <string name="cpu">CPU</string>
     <string name="cpu_backend">CPU backend</string>
+    <string name="enable_jit_fastmem">Enable JIT Fastmem</string>
+    <string name="enable_jit_fastmem_disabled">JIT fastmem is disabled</string>
+    <string name="enable_jit_fastmem_enabled"> JIT fastmem is enabled</string>
     <!-- Settings - GPU -->
     <string name="gpu">GPU</string>
     <string name="gpu_driver_config">GPU Driver Configuration</string>

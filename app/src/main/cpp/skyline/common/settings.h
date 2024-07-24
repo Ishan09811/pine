@@ -73,6 +73,9 @@ namespace skyline {
         Setting<bool> disableFrameThrottling; //!< Allow the guest to submit frames without any blocking calls
         Setting<bool> disableShaderCache;  //!< Prevents cached shaders from being loaded and disables caching of new shaders
 
+        // CPU
+        Setting<bool> enableJitFastmem;
+
         // GPU
         Setting<std::string> gpuDriver; //!< The label of the GPU driver to use
         Setting<std::string> gpuDriverLibraryName; //!< The name of the GPU driver library to use

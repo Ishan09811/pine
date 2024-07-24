@@ -24,6 +24,9 @@ data class NativeSettings(
     var systemRegion : Int,
     var isInternetEnabled : Boolean,
 
+    // CPU
+    var enableJitFastmem : Boolean,
+
     // GPU
     var gpuDriver : String,
     var gpuDriverLibraryName : String,
@@ -52,6 +55,7 @@ data class NativeSettings(
         pref.systemLanguage,
         pref.systemRegion,
         pref.isInternetEnabled,
+        pref.enableJitFastmem,
         if (pref.gpuDriver == EmulationSettings.SYSTEM_GPU_DRIVER) "" else pref.gpuDriver,
         if (pref.gpuDriver == EmulationSettings.SYSTEM_GPU_DRIVER) "" else GpuDriverHelper.getLibraryName(context, pref.gpuDriver),
         pref.forceTripleBuffering,

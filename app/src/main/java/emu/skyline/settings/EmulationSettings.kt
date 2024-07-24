@@ -45,6 +45,7 @@ class EmulationSettings private constructor(context : Context, prefName : String
 
     // CPU
     var cpuBackend by sharedPreferences(context, 0, prefName = prefName)
+    var enableJitFastmem by sharedPreferences(context, false, prefName = prefName)
 
     // GPU
     var gpuDriver by sharedPreferences(context, SYSTEM_GPU_DRIVER, prefName = prefName)
