@@ -2,6 +2,7 @@
 // Copyright © 2023 Strato Team and Contributors (https://github.com/strato-emu/)
 
 #include <common/trace.h>
+#include <common/settings.h>
 #include <kernel/types/KProcess.h>
 #include <kernel/svc.h>
 #include "jit_core_32.h"
