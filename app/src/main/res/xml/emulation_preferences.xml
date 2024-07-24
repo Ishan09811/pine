@@ -107,8 +107,8 @@
             app:useSimpleSummaryProvider="true" />
         <SwitchPreferenceCompat
             android:defaultValue="false"
-            android:summaryOff="enable_jit_fastmem_disabled"
-            android:summaryOn="enable_jit_fastmem_enabled" 
+            android:summaryOff="@string/enable_jit_fastmem_disabled"
+            android:summaryOn="@string/enable_jit_fastmem_enabled" 
             app:key="enable_jit_fastmem" 
             app:title="@string/enable_jit_fastmem" /> 
     </PreferenceCategory>        
