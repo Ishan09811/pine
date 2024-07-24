@@ -33,7 +33,6 @@ class EmulationSettings private constructor(context : Context, prefName : String
 
     // Audio
     var audioOutputEngine by sharedPreferences(context, 0, prefName = prefName)
-    var isAudioOutputDisabled by sharedPreferences(context, false, prefName = prefName)
 
     // Display
     var perfStats by sharedPreferences(context, false, prefName = prefName)

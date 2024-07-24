@@ -95,12 +95,6 @@
             app:key="audio_output_engine"
             app:title="@string/audio_output_engine"
             app:useSimpleSummaryProvider="true" />
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:summaryOff="@string/disable_audio_output_disabled"
-            android:summaryOn="@string/disable_audio_output_enabled"
-            app:key="is_audio_output_disabled"
-            app:title="@string/disable_audio_output" />
     </PreferenceCategory>
     <PreferenceCategory
         android:key="category_cpu"

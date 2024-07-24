@@ -40,7 +40,7 @@ namespace skyline::audio {
     Audio::Audio(const DeviceState &state)
         : audioOutManager{std::make_unique<AudioCore::AudioOut::Manager>(audioSystem)},
           audioRendererManager{std::make_unique<AudioCore::AudioRenderer::Manager>(audioSystem)} {
-        AudioCore::Settings::values.volume  = *state.settings->isAudioOutputDisabled ? 0 : 200;
+        AudioCore::Settings::values.volume  = 200;
     }
 
     Audio::~Audio() = default;

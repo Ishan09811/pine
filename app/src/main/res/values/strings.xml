@@ -127,9 +127,6 @@
     <string name="show_pause_button_enabled">The pause button will be displayed</string>
     <!-- Settings - Audio -->
     <string name="audio">Audio</string>
-    <string name="disable_audio_output">Disable Audio Output</string>
-    <string name="disable_audio_output_enabled">Audio output is disabled</string>
-    <string name="disable_audio_output_disabled">Audio output is enabled</string>
     <string name="audio_output_engine">Output engine</string>
     <!-- Settings - CPU -->
     <string name="cpu">CPU</string>
