@@ -20,6 +20,7 @@
 #include "skyline/kernel/types/KProcess.h"
 #include "skyline/logger/logger.h"
 #include "skyline/soc/gm20b/engines/engine.h"
+#include <audio_core/sink/sink_details.h>
 
 jint Fps; //!< An approximation of the amount of frames being submitted every second
 jfloat AverageFrametimeMs; //!< The average time it takes for a frame to be rendered and presented in milliseconds
