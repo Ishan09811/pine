@@ -360,8 +360,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
         setAudioSink(
             when (emulationSettings.audioOutputEngine) {
-                0 -> "cubeb"
-                else -> "sdl2"
+                0 -> "auto"
+                else -> "cubeb"
             }
         )
 
