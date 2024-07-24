@@ -89,6 +89,12 @@
     <PreferenceCategory
         android:key="category_audio"
         android:title="@string/audio">
+        <emu.skyline.preference.IntegerListPreference
+            android:defaultValue="0"
+            android:entries="@array/audio_sinks"
+            app:key="audio_output_engine"
+            app:title="@string/audio_output_engine"
+            app:useSimpleSummaryProvider="true" />
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:summaryOff="@string/disable_audio_output_disabled"

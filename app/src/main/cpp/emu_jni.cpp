@@ -252,3 +252,7 @@ extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_enableDynam
 extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_enableJit(JNIEnv *env, jobject obj, jboolean enable) {
     skyline::kernel::isJitEnabled = enable;
 }
+
+extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_setAudioSink(JNIEnv *env, jobject obj, jstring sink) {
+    AudioCore::Sink::AudioSink = sink;
+}

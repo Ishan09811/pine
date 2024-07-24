@@ -199,6 +199,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
     private external fun enableJit(enable: Boolean)
 
+    private external fun setAudioSink(sink: String)
+
     /**
      * @see [InputHandler.initializeControllers]
      */
@@ -353,6 +355,13 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             when (emulationSettings.cpuBackend) {
                 0 -> false
                 else -> true
+            }
+        )
+
+        setAudioSink(
+            when (emulationSettings.audioOutputEngine) {
+                0 -> "cubeb"
+                else -> "sdl2"
             }
         )
 
