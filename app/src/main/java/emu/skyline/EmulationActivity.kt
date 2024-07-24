@@ -505,7 +505,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     @SuppressWarnings("WeakerAccess")
     fun resumeEmulator() {
         gameSurface?.let { setSurface(it) }
-        changeAudioStatus(!emulationSettings.isAudioOutputDisabled)
+        changeAudioStatus(true)
         isEmulatorPaused = false
     }
 

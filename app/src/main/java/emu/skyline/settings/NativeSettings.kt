@@ -24,9 +24,6 @@ data class NativeSettings(
     var systemRegion : Int,
     var isInternetEnabled : Boolean,
 
-    // Audio
-    var isAudioOutputDisabled : Boolean,
-
     // GPU
     var gpuDriver : String,
     var gpuDriverLibraryName : String,
