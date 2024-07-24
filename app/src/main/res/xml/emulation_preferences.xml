@@ -117,7 +117,7 @@
         android:title="@string/gpu">
         <emu.skyline.preference.GpuDriverPreference
             app:key="gpu_driver"
-            app:title="@sstring/gpu_driver_config" />
+            app:title="@string/gpu_driver_config" />
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:summaryOff="@string/triple_buffering_disabled"
