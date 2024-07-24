@@ -52,7 +52,6 @@ data class NativeSettings(
         pref.systemLanguage,
         pref.systemRegion,
         pref.isInternetEnabled,
-        pref.isAudioOutputDisabled,
         if (pref.gpuDriver == EmulationSettings.SYSTEM_GPU_DRIVER) "" else pref.gpuDriver,
         if (pref.gpuDriver == EmulationSettings.SYSTEM_GPU_DRIVER) "" else GpuDriverHelper.getLibraryName(context, pref.gpuDriver),
         pref.forceTripleBuffering,
