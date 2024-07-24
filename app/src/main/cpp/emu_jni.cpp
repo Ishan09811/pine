@@ -58,6 +58,15 @@ static std::string GetTimeZoneName() {
     return "GMT";
 }
 
+std::string ConvertJStringToString(JNIEnv* env, jstring jStr) {
+    if (!jStr) return "";
+
+    const char* chars = env->GetStringUTFChars(jStr, nullptr);
+    std::string str(chars);
+    env->ReleaseStringUTFChars(jStr, chars);
+    return str;
+}
+
 extern "C" JNIEXPORT void Java_emu_skyline_EmulationActivity_executeApplication(
     JNIEnv *env,
     jobject instance,
