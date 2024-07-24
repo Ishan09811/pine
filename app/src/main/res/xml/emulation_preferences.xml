@@ -41,7 +41,7 @@
             android:defaultValue="false"
             android:summary="@string/enable_sustained_perf_desc"
             app:key="enable_sustained_perf"
-            app:title="enable_sustained_perf"/>
+            app:title="@string/enable_sustained_perf"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:key="category_presentation"
