@@ -94,6 +94,7 @@
     <string-array name="audio_sinks">
          <item>Auto</item>
          <item>Cubeb</item>
+         <item>Null</item>
     </string-array>     
     <string-array name="orientation_entries">
         <item>Auto</item>

@@ -361,7 +361,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         setAudioSink(
             when (emulationSettings.audioOutputEngine) {
                 0 -> "auto"
-                else -> "cubeb"
+                1 -> "cubeb"
+                else -> "null"
             }
         )
 
