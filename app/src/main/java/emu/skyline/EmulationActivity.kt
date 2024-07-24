@@ -385,6 +385,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
         enableDynamicResolution(emulationSettings.enableDynamicResolution)
 
+        window.setSustainedPerformanceMode(emulationSettings.enableSustainedPerf)
+
         force60HzRefreshRate(!emulationSettings.maxRefreshRate)
         getSystemService<DisplayManager>()?.registerDisplayListener(this, null)
 

@@ -34,7 +34,7 @@
     <!-- Settings - Content -->
     <string name="content">Content</string>
     <string name="open_data_directory">View Internal Directory</string>
-    <string name="open_data_directory_summary">Opens Skyline\'s internal directory in a file manager</string>
+    <string name="open_data_directory_summary">Opens Pine\'s internal directory in a file manager</string>
     <string name="open_data_directory_failed">Cannot find an external file manager to open Skyline\'s internal directory</string>
     <string name="search_location">Search Locations</string>
     <string name="delete_search_location">Delete this search location</string>
@@ -106,6 +106,8 @@
     <string name="system_language">System Language</string>
     <string name="system_region">System Region</string>
     <string name="internet">The system will be able to use internet</string>
+    <string name="enable_sustained_perf">Enable Sustained Performance</string>
+    <string name="enable_sustained_perf_desc">may reduce thermal throttling</string>
     <!-- Settings - Display -->
     <string name="display">Display</string>
     <string name="perf_stats">Show Performance Statistics</string>

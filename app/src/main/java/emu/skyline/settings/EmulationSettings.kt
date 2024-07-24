@@ -30,6 +30,7 @@ class EmulationSettings private constructor(context : Context, prefName : String
     var systemLanguage by sharedPreferences(context, 1, prefName = prefName)
     var systemRegion by sharedPreferences(context, -1, prefName = prefName)
     var isInternetEnabled by sharedPreferences(context, false, prefName = prefName)
+    var enableSustainedPerf by sharedPreferences(context, false, prefName = prefName)
 
     // Audio
     var audioOutputEngine by sharedPreferences(context, 0, prefName = prefName)
