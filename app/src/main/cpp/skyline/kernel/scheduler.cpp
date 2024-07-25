@@ -9,13 +9,14 @@
 #include "types/KThread.h"
 #include "types/KProcess.h"
 #include "scheduler.h"
+#include "os.h"
 
 namespace skyline::kernel {
     Scheduler::CoreContext::CoreContext(u8 id, i8 preemptionPriority) : id(id), preemptionPriority(preemptionPriority) {}
 
     Scheduler::Scheduler(const DeviceState &state) : state(state) {
         // Don't restart syscalls: we want futexes to fail and their predicates rechecked
-        if (state.process->is64bit()) {
+        if (!skyline::kernel::isJitEnabled) {
             signal::SetGuestSignalHandler({Scheduler::YieldSignal, Scheduler::PreemptionSignal}, Scheduler::GuestSignalHandler, false);
             signal::SetHostSignalHandler({Scheduler::YieldSignal, Scheduler::PreemptionSignal}, Scheduler::HostSignalHandler, false);
         } else {

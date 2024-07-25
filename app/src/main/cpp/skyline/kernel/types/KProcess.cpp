@@ -122,7 +122,7 @@ namespace skyline::kernel::type {
         size_t tid{threads.size() + 1}; //!< The first thread is HOS-1 rather than HOS-0, this is to match the HOS kernel's behaviour
 
         auto thread{[&]() -> std::shared_ptr<KThread> {
-            if (is64bit())
+            if (!skyline::kernel::isJitEnabled)
                 return NewHandle<KNceThread>(std::ref(*this), tid, entry, argument, stackTop, priority ? *priority : state.process->npdm.meta.mainThreadPriority, idealCore ? *idealCore : state.process->npdm.meta.idealCore).item;
             else
                 return NewHandle<KJit32Thread>(std::ref(*this), tid, entry, argument, stackTop, priority ? *priority : state.process->npdm.meta.mainThreadPriority, idealCore ? *idealCore : state.process->npdm.meta.idealCore).item;

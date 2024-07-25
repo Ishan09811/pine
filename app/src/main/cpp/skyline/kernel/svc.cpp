@@ -1218,7 +1218,7 @@ namespace skyline::kernel::svc {
             auto &context{*reinterpret_cast<ThreadContext *>(ctx.x0)};
             context = {}; // Zero-initialize the contents of the context as not all fields are set
 
-            if (state.process->is64bit()) {
+            if (!skyline::kernel::isJitEnabled) {
                 auto &targetContext{dynamic_cast<type::KNceThread *>(thread.get())->ctx};
                 for (size_t i{}; i < targetContext.gpr.regs.size(); i++)
                     context.gpr[i] = targetContext.gpr.regs[i];
