@@ -270,5 +270,5 @@ extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_setAudioSin
 }
 
 extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_setResolution(JNIEnv *env, jobject obj, jfloat resolution) {
-    skyline::gpu::resolution = resolution
+    skyline::gpu::resolution = resolution;
 }
