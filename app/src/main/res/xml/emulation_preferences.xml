@@ -136,6 +136,12 @@
             android:summaryOn="@string/disable_frame_throttling_enabled"
             app:key="disable_frame_throttling"
             app:title="@string/disable_frame_throttling" />
+        <emu.skyline.preference.IntegerListPreference
+            android:defaultValue="0"
+            android:entries="@array/resolutions"
+            app:key="resolution"
+            app:useSimpleSummaryProvider="true"
+            app:title="@string/resolution" />
         <SeekBarPreference
             android:defaultValue="4"
             android:max="6"

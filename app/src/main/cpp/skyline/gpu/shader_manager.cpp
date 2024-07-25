@@ -30,6 +30,9 @@ namespace Shader::Log {
 }
 
 namespace skyline::gpu {
+    
+    float resolution = 0.0f;
+
     void ShaderManager::LoadShaderReplacements(std::string_view replacementDir) {
         std::filesystem::path replacementDirPath{replacementDir};
         if (std::filesystem::exists(replacementDirPath)) {
@@ -140,7 +143,8 @@ namespace skyline::gpu {
             .disable_shader_loop_safety_checks = true,
             #endif
             .resolution_info = {
-                .active = false,
+                .active = true,
+                .up_factor = resolution,
             },
         };
     }

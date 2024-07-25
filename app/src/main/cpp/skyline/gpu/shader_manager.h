@@ -20,6 +20,9 @@ namespace skyline::gpu {
     /**
      * @brief The Shader Manager is responsible for caching and looking up shaders alongside handling compilation of shaders when not found in any cache
      */
+
+    extern float resolution;
+
     class ShaderManager {
       private:
         GPU &gpu;

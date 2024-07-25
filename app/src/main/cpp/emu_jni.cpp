@@ -268,3 +268,7 @@ extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_setAudioSin
     std::string sink = ConvertJStringToString(env, jSink);
     AudioCore::Sink::AudioSink = sink;
 }
+
+extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_setResolution(JNIEnv *env, jobject obj, jfloat resolution) {
+    skyline::gpu::resolution = resolution
+}

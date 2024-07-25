@@ -95,7 +95,14 @@
          <item>Auto</item>
          <item>Cubeb</item>
          <item>Null</item>
-    </string-array>     
+    </string-array>
+    <string-array name="resolutions">
+         <item>0.5X (360p/540p)</item>
+         <item>0.75X (540p/810p)</item>
+         <item>1X (720p/1080p)</item>
+         <item>2X (1440p/2160p)</item>
+         <item>3X (2160p/3240p)</item>
+    </string-array>
     <string-array name="orientation_entries">
         <item>Auto</item>
         <item>Landscape</item>

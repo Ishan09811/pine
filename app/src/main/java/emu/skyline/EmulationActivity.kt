@@ -201,6 +201,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
     private external fun setAudioSink(sink: String)
 
+    private external fun setResolution(resolution: Float)
+
     /**
      * @see [InputHandler.initializeControllers]
      */
@@ -363,6 +365,16 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 0 -> "auto"
                 1 -> "cubeb"
                 else -> "null"
+            }
+        )
+
+        setResolution(
+            when (emulationSettings.resolution) {
+                0 -> 0.5f
+                1 -> 0.75f
+                2 -> 1.0f
+                3 -> 2.0f
+                4 -> 3.0f
             }
         )
 

@@ -52,6 +52,7 @@ class EmulationSettings private constructor(context : Context, prefName : String
     var gpuDriver by sharedPreferences(context, SYSTEM_GPU_DRIVER, prefName = prefName)
     var forceTripleBuffering by sharedPreferences(context, true, prefName = prefName)
     var disableFrameThrottling by sharedPreferences(context, false, prefName = prefName)
+    var resolution by sharedPreferences(context, 0, prefName = prefName)
     var executorSlotCountScale by sharedPreferences(context, 6, prefName = prefName)
     var executorFlushThreshold by sharedPreferences(context, 256, prefName = prefName)
     var useDirectMemoryImport by sharedPreferences(context, false, prefName = prefName)
