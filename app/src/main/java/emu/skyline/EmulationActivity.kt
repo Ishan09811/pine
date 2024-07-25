@@ -374,7 +374,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 1 -> 0.75f
                 2 -> 1.0f
                 3 -> 2.0f
-                4 -> 3.0f
+                else -> 3.0f
             }
         )
 
