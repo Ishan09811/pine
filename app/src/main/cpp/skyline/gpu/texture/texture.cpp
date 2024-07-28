@@ -261,13 +261,34 @@ namespace skyline::gpu {
                 // We can optimize linear texture sync on a UMA by mapping the texture onto the CPU and copying directly into it rather than a staging buffer
                 if (layout == vk::ImageLayout::eUndefined)
                     TransitionLayout(vk::ImageLayout::eGeneral);
-                bufferData = std::get<memory::Image>(backing).data();
+                auto& image = std::get<memory::Image>(backing);
+                bufferData = image.data();
+
+                // Map the image memory to a CPU-accessible pointer
+                void* mappedMemory = image.MapMemory();
+                if (mappedMemory) {
+                    // Copy data directly into the mapped memory
+                    std::memcpy(mappedMemory, pointer, surfaceSize);
+                    image.UnmapMemory();
+                } else {
+                    throw exception("Failed to map image memory for direct copy");
+                }
+
                 WaitOnFence();
                 return nullptr;
             } else {
                 throw exception("Guest -> Host synchronization of images tiled as '{}' isn't implemented", vk::to_string(tiling));
             }
         }()};
+
+        // Copy data from the guest to the buffer
+        if (stagingBuffer) {
+            std::memcpy(bufferData, pointer, surfaceSize);
+        }
+
+        return stagingBuffer;
+    }
+
 
         std::vector<u8> deswizzleBuffer;
         u8 *deswizzleOutput;
