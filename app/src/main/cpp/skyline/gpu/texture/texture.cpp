@@ -265,11 +265,11 @@ namespace skyline::gpu {
                 bufferData = image.data();
 
                 // Map the image memory to a CPU-accessible pointer
-                void* mappedMemory = image.MapMemory();
+                void* mappedMemory = image.vkMapMemory();
                 if (mappedMemory) {
                     // Copy data directly into the mapped memory
                     std::memcpy(mappedMemory, pointer, surfaceSize);
-                    image.UnmapMemory();
+                    image.vkUnmapMemory();
                 } else {
                     throw exception("Failed to map image memory for direct copy");
                 }
