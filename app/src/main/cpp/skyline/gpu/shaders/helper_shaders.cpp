@@ -9,6 +9,9 @@
 #include "helper_shaders.h"
 
 namespace skyline::gpu {
+    
+    bool isSampleShadingEnabled= false
+
     static vk::raii::ShaderModule CreateShaderModule(GPU &gpu, vfs::Backing &shaderBacking) {
         std::vector<u32> shaderBuf(shaderBacking.size / 4);
 
@@ -70,7 +73,7 @@ namespace skyline::gpu {
 
         constexpr static vk::PipelineMultisampleStateCreateInfo multisampleState{
             .rasterizationSamples = vk::SampleCountFlagBits::e1,
-            .sampleShadingEnable = *state.settings->enableSampleShading,
+            .sampleShadingEnable = isSampleShadingEnabled,
             .minSampleShading = 1.0f,
             .alphaToCoverageEnable = false,
             .alphaToOneEnable = false

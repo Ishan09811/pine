@@ -15,6 +15,8 @@ namespace skyline::gpu {
     class TextureView;
     class GPU;
 
+    extern bool isSampleShadingEnabled;
+
     /**
      * @brief A base class that can be inherited by helper shaders that render to a single color/depth rendertarget to simplify pipeline creation
      */

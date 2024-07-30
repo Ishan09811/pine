@@ -72,7 +72,8 @@ namespace skyline::kernel {
 
         // Scheduler retrieves information from the NPDM of the process so it needs to be initialized after the process is created
         state.scheduler = std::make_shared<kernel::Scheduler>(state);
-
+        
+        skyline::gpu::isSampleShadingEnabled = *state.settings->enableSampleShading;
         if (!isJitEnabled) {
             state.nce = std::make_shared<nce::NCE>(state);
         } else { // 32-bit
