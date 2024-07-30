@@ -10,7 +10,7 @@
 
 namespace skyline::gpu {
     
-    bool isSampleShadingEnabled= false
+    bool isSampleShadingEnabled = false;
 
     static vk::raii::ShaderModule CreateShaderModule(GPU &gpu, vfs::Backing &shaderBacking) {
         std::vector<u32> shaderBuf(shaderBacking.size / 4);
