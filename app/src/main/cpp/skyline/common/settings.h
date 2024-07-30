@@ -84,6 +84,7 @@ namespace skyline {
         Setting<bool> useDirectMemoryImport; //!< If buffer emulation should be done by importing guest buffer mappings
         Setting<bool> forceMaxGpuClocks; //!< If the GPU should be forced to run at maximum clocks
         Setting<bool> freeGuestTextureMemory; //!< If guest textrue memory should be freed when the owning texture is GPU dirty
+        Setting<bool> enableSampleShading;
 
         // Hacks
         Setting<bool> enableFastGpuReadbackHack; //!< If the CPU texture readback skipping hack should be used

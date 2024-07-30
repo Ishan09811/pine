@@ -59,6 +59,7 @@ class EmulationSettings private constructor(context : Context, prefName : String
     var freeGuestTextureMemory by sharedPreferences(context, true, prefName = prefName)
     var disableShaderCache by sharedPreferences(context, false, prefName = prefName)
     var enableDynamicResolution by sharedPreferences(context, false, prefName = prefName)
+    var enableSampleShading by sharedPreferences(context, false, prefName = prefName)
 
     // Hacks
     var enableFastGpuReadbackHack by sharedPreferences(context, false, prefName = prefName)

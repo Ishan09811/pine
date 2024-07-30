@@ -38,6 +38,7 @@ data class NativeSettings(
     var forceMaxGpuClocks : Boolean,
     var freeGuestTextureMemory : Boolean,
     var disableShaderCache : Boolean,
+    var enableSampleShading : Boolean,
 
     // Hacks
     var enableFastGpuReadbackHack : Boolean,
@@ -66,6 +67,7 @@ data class NativeSettings(
         pref.forceMaxGpuClocks,
         pref.freeGuestTextureMemory,
         pref.disableShaderCache,
+        pref.enableSampleShading,
         pref.enableFastGpuReadbackHack,
         pref.enableFastReadbackWrites,
         pref.disableSubgroupShuffle,

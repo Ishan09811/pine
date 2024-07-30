@@ -70,7 +70,7 @@ namespace skyline::gpu {
 
         constexpr static vk::PipelineMultisampleStateCreateInfo multisampleState{
             .rasterizationSamples = vk::SampleCountFlagBits::e1,
-            .sampleShadingEnable = false,
+            .sampleShadingEnable = *state.settings->enableSampleShading,
             .minSampleShading = 1.0f,
             .alphaToCoverageEnable = false,
             .alphaToOneEnable = false
