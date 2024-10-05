@@ -343,8 +343,7 @@ namespace skyline::gpu {
 
     static PFN_vkGetInstanceProcAddr LoadVulkanDriver(const DeviceState &state, adrenotools_gpu_mapping *mapping) {
         void *libvulkanHandle{};
-        void *userMappingHandle = nullptr;
-        uint64_t gpuMemSize = 0;
+        void *userMappingHandle = nullptr; // New void* pointer for user mapping handle
 
         // If the user has selected a custom driver, try to load it
         if (!(*state.settings->gpuDriver).empty()) {
@@ -356,24 +355,15 @@ namespace skyline::gpu {
                 (state.os->privateAppFilesPath + "gpu_drivers/" + *state.settings->gpuDriver + "/").c_str(),
                 (*state.settings->gpuDriverLibraryName).c_str(),
                 (state.os->publicAppFilesPath + "gpu/vk_file_redirect/").c_str(),
-                reinterpret_cast<void**>(&userMappingHandle)
+                reinterpret_cast<void**>(&userMappingHandle) // Use reinterpret_cast to pass as void**
             );
 
+            // Cast the userMappingHandle back to adrenotools_gpu_mapping*
             if (libvulkanHandle) {
                 mapping = reinterpret_cast<adrenotools_gpu_mapping*>(userMappingHandle);
+            }
 
-                // GPU memory allocation
-                if (!adrenotools_mem_gpu_allocate(userMappingHandle, &gpuMemSize)) {
-                    LOGW("Failed to allocate GPU memory.");
-                    return nullptr;
-                }
-
-                // CPU-side memory mapping
-                if (!adrenotools_mem_cpu_map(userMappingHandle, mapping->host_ptr, gpuMemSize)) {
-                    LOGW("Failed to map GPU memory to CPU.");
-                    return nullptr;
-                }
-            } else {
+            if (!libvulkanHandle) {
                 char *error = dlerror();
                 LOGW("Failed to load custom Vulkan driver {}/{}: {}", *state.settings->gpuDriver, *state.settings->gpuDriverLibraryName, error ? error : "");
             }
@@ -388,24 +378,15 @@ namespace skyline::gpu {
                 nullptr,
                 nullptr,
                 (state.os->publicAppFilesPath + "gpu/vk_file_redirect/").c_str(),
-                reinterpret_cast<void**>(&userMappingHandle)
+                reinterpret_cast<void**>(&userMappingHandle) // Use reinterpret_cast for user mapping handle
             );
 
+            // Cast the userMappingHandle back to adrenotools_gpu_mapping*
             if (libvulkanHandle) {
                 mapping = reinterpret_cast<adrenotools_gpu_mapping*>(userMappingHandle);
+            }
 
-                // GPU memory allocation
-                if (!adrenotools_mem_gpu_allocate(userMappingHandle, &gpuMemSize)) {
-                    LOGW("Failed to allocate GPU memory.");
-                    return nullptr;
-                }
-
-                // CPU-side memory mapping
-                if (!adrenotools_mem_cpu_map(userMappingHandle, mapping->host_ptr, gpuMemSize)) {
-                    LOGW("Failed to map GPU memory to CPU.");
-                    return nullptr;
-                }
-            } else {
+            if (!libvulkanHandle) {
                 char *error = dlerror();
                 LOGW("Failed to load builtin Vulkan driver: {}", error ? error : "");
             }
@@ -415,7 +396,6 @@ namespace skyline::gpu {
         }
         return reinterpret_cast<PFN_vkGetInstanceProcAddr>(dlsym(libvulkanHandle, "vkGetInstanceProcAddr"));
     }
-
 
 
     GPU::GPU(const DeviceState &state)
