@@ -343,6 +343,7 @@ namespace skyline::gpu {
 
     static PFN_vkGetInstanceProcAddr LoadVulkanDriver(const DeviceState &state, adrenotools_gpu_mapping *mapping) {
         void *libvulkanHandle{};
+        void *userMappingHandle = nullptr; // New void* pointer for user mapping handle
 
         // If the user has selected a custom driver, try to load it
         if (!(*state.settings->gpuDriver).empty()) {
@@ -354,8 +355,13 @@ namespace skyline::gpu {
                 (state.os->privateAppFilesPath + "gpu_drivers/" + *state.settings->gpuDriver + "/").c_str(),
                 (*state.settings->gpuDriverLibraryName).c_str(),
                 (state.os->publicAppFilesPath + "gpu/vk_file_redirect/").c_str(),
-                mapping
+                reinterpret_cast<void**>(&userMappingHandle) // Use reinterpret_cast to pass as void**
             );
+
+            // Cast the userMappingHandle back to adrenotools_gpu_mapping*
+            if (libvulkanHandle) {
+                mapping = reinterpret_cast<adrenotools_gpu_mapping*>(userMappingHandle);
+            }
 
             if (!libvulkanHandle) {
                 char *error = dlerror();
@@ -372,8 +378,13 @@ namespace skyline::gpu {
                 nullptr,
                 nullptr,
                 (state.os->publicAppFilesPath + "gpu/vk_file_redirect/").c_str(),
-                mapping
+                reinterpret_cast<void**>(&userMappingHandle) // Use reinterpret_cast for user mapping handle
             );
+
+            // Cast the userMappingHandle back to adrenotools_gpu_mapping*
+            if (libvulkanHandle) {
+                mapping = reinterpret_cast<adrenotools_gpu_mapping*>(userMappingHandle);
+            }
 
             if (!libvulkanHandle) {
                 char *error = dlerror();
@@ -383,9 +394,9 @@ namespace skyline::gpu {
             if (!libvulkanHandle)
                 libvulkanHandle = dlopen("libvulkan.so", RTLD_NOW);
         }
-
         return reinterpret_cast<PFN_vkGetInstanceProcAddr>(dlsym(libvulkanHandle, "vkGetInstanceProcAddr"));
     }
+
 
     GPU::GPU(const DeviceState &state)
         : state(state),
