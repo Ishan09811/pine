@@ -78,6 +78,10 @@ set(BUILD_TOOLS OFF)
 add_subdirectory("libraries/cubeb")
 include_directories(SYSTEM "libraries/cubeb/include")
 
+# Oboe
+add_subdirectory("libraries/oboe")
+include_directories(SYSTEM "libraries/oboe/include")
+
 # Perfetto SDK
 include_directories(SYSTEM "libraries/perfetto/sdk")
 add_library(perfetto STATIC libraries/perfetto/sdk/perfetto.cc)
