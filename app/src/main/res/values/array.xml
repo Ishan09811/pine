@@ -93,6 +93,7 @@
     </string-array>   
     <string-array name="audio_sinks">
          <item>Auto</item>
+         <item>Oboe</item>
          <item>Cubeb</item>
          <item>Null</item>
     </string-array>     
