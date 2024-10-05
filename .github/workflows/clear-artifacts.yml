@@ -1,0 +1,39 @@
+name: Cleanup Artifacts
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Get all artifacts
+      id: get-artifacts
+      run: |
+        curl -H "Authorization: token ${{ secrets.ME_TOKEN }}" \
+             -H "Accept: application/vnd.github.v3+json" \
+             https://api.github.com/repos/${{ github.repository }}/actions/artifacts \
+             -o artifacts.json
+
+    - name: Process artifacts
+      id: process-artifacts
+      run: |
+        NEWEST_ARTIFACT_ID=$(jq '.artifacts[0].id' artifacts.json)
+        echo "Newest artifact ID: $NEWEST_ARTIFACT_ID"
+        jq -c '.artifacts[] | select(.id != '"$NEWEST_ARTIFACT_ID"')' artifacts.json > artifacts_to_delete.json
+        jq -r '.id' artifacts_to_delete.json > artifacts_ids.txt
+
+    - name: Delete old artifacts
+      run: |
+        while IFS= read -r artifact_id; do
+          echo "Deleting artifact $artifact_id"
+          curl -X DELETE -H "Authorization: token ${{ secrets.ME_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$artifact_id
+        done < artifacts_ids.txt
