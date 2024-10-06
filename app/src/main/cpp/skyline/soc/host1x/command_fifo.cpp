@@ -45,7 +45,8 @@ namespace skyline::soc::host1x {
     };
     static_assert(sizeof(ChannelCommandFifoMethodHeader) == sizeof(u32));
 
-    ChannelCommandFifo::ChannelCommandFifo(const DeviceState &state, SyncpointSet &syncpoints) : state(state), gatherQueue(GatherQueueSize), host1XClass(syncpoints), nvDecClass(syncpoints), vicClass(syncpoints) {}
+    ChannelCommandFifo::ChannelCommandFifo(const DeviceState &state, SyncpointSet &syncpoints) 
+        : state(state), gatherQueue(GatherQueueSize), host1XClass(syncpoints), nvDecClass(syncpoints), vicClass(syncpoints) {}
 
     void ChannelCommandFifo::Send(ClassId targetClass, u32 method, u32 argument) {
         LOGV("Calling method in class: 0x{:X}, method: 0x{:X}, argument: 0x{:X}", targetClass, method, argument);
@@ -72,35 +73,63 @@ namespace skyline::soc::host1x {
         for (auto entry{gather.begin()}; entry != gather.end(); entry++) {
             ChannelCommandFifoMethodHeader methodHeader{.raw = *entry};
 
+            // Log each method header information
+            LOGD("Processing opcode: 0x{:X}, class ID: 0x{:X}, method address: 0x{:X}, method count: 0x{:X}, immediate data: 0x{:X}",
+                 static_cast<u8>(methodHeader.opcode),
+                 methodHeader.classId,
+                 methodHeader.methodAddress,
+                 methodHeader.methodCount,
+                 methodHeader.immdData);
+
             switch (methodHeader.opcode) {
                 case Host1xOpcode::SetClass:
                     targetClass = methodHeader.classId;
+                    LOGD("Setting target class to 0x{:X}", targetClass);
 
-                    for (u32 i{}; i < std::numeric_limits<u8>::digits; i++)
-                        if (methodHeader.classMethodMask & (1 << i))
+                    for (u32 i{}; i < std::numeric_limits<u8>::digits; i++) {
+                        if (methodHeader.classMethodMask & (1 << i)) {
+                            LOGD("Sending method from SetClass to class 0x{:X}, method: 0x{:X}, argument: 0x{:X}",
+                                 targetClass, methodHeader.methodAddress + i, *std::next(entry));
                             Send(targetClass, methodHeader.methodAddress + i, *++entry);
+                        }
+                    }
 
                     break;
                 case Host1xOpcode::Incr:
-                    for (u32 i{}; i < methodHeader.methodCount; i++)
+                    LOGD("Processing Incr opcode, method count: 0x{:X}", methodHeader.methodCount);
+                    for (u32 i{}; i < methodHeader.methodCount; i++) {
+                        LOGD("Sending method from Incr to class 0x{:X}, method: 0x{:X}, argument: 0x{:X}",
+                             targetClass, methodHeader.methodAddress + i, *std::next(entry));
                         Send(targetClass, methodHeader.methodAddress + i, *++entry);
+                    }
 
                     break;
                 case Host1xOpcode::NonIncr:
-                    for (u32 i{}; i < methodHeader.methodCount; i++)
+                    LOGD("Processing NonIncr opcode, method count: 0x{:X}", methodHeader.methodCount);
+                    for (u32 i{}; i < methodHeader.methodCount; i++) {
+                        LOGD("Sending method from NonIncr to class 0x{:X}, method: 0x{:X}, argument: 0x{:X}",
+                             targetClass, methodHeader.methodAddress, *std::next(entry));
                         Send(targetClass, methodHeader.methodAddress, *++entry);
+                    }
 
                     break;
                 case Host1xOpcode::Mask:
-                    for (u32 i{}; i < std::numeric_limits<u16>::digits; i++)
-                        if (methodHeader.offsetMask & (1 << i))
+                    LOGD("Processing Mask opcode, offset mask: 0x{:X}", methodHeader.offsetMask);
+                    for (u32 i{}; i < std::numeric_limits<u16>::digits; i++) {
+                        if (methodHeader.offsetMask & (1 << i)) {
+                            LOGD("Sending method from Mask to class 0x{:X}, method: 0x{:X}, argument: 0x{:X}",
+                                 targetClass, methodHeader.methodAddress + i, *std::next(entry));
                             Send(targetClass, methodHeader.methodAddress + i, *++entry);
+                        }
+                    }
 
                     break;
                 case Host1xOpcode::Imm:
+                    LOGD("Processing Imm opcode, immediate data: 0x{:X}", methodHeader.immdData);
                     Send(targetClass, methodHeader.methodAddress, methodHeader.immdData);
                     break;
                 default:
+                    LOGE("Unimplemented Host1x command FIFO opcode: 0x{:X}", static_cast<u8>(methodHeader.opcode));
                     throw exception("Unimplemented Host1x command FIFO opcode: 0x{:X}", static_cast<u8>(methodHeader.opcode));
             }
         }
@@ -141,6 +170,7 @@ namespace skyline::soc::host1x {
     }
 
     void ChannelCommandFifo::Push(span<u32> gather) {
+        LOGD("Pushing new gather data, size: 0x{:X}", gather.size());
         gatherQueue.Push(gather);
     }
 
