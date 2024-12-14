@@ -29,6 +29,11 @@ class SkylineApplication : Application() {
             private set
 
         val context : Context get() = instance.applicationContext
+
+        fun setTheme(newValue: Boolean) {
+            val dynamicColorsOptions = DynamicColorsOptions.Builder().setPrecondition { _, _ -> newValue }.build()
+            DynamicColors.applyToActivitiesIfAvailable(instance, dynamicColorsOptions)
+        }
     }
 
     override fun onCreate() {
