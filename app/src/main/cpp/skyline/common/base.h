@@ -4,6 +4,7 @@
 #pragma once
 
 #include <cstdint>
+#include <unistd.h>
 #include <variant>
 
 namespace skyline {
@@ -31,7 +32,7 @@ namespace skyline {
         constexpr size_t PageSize{0x1000}; //!< The size of a host page
         constexpr size_t PageSizeBits{12}; //!< log2(PageSize)
 
-        static_assert(PageSize == PAGE_SIZE);
+        static_assert(PageSize == getpagesize());
     }
 
     /**

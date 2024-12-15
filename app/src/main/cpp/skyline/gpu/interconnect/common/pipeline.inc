@@ -5,6 +5,7 @@
 
 #include <gpu/interconnect/command_executor.h>
 #include "samplers.h"
+#include <unistd.h>
 #include "textures.h"
 
 namespace skyline::gpu::interconnect {
@@ -23,7 +24,7 @@ namespace skyline::gpu::interconnect {
                                                          vk::PipelineStageFlagBits dstStage,
                                                          vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
         if (!view) // Return a dummy buffer if the constant buffer isn't bound
-            return BufferBinding{ctx.gpu.megaBufferAllocator.Allocate(ctx.executor.cycle, PAGE_SIZE).buffer, 0, PAGE_SIZE};
+            return BufferBinding{ctx.gpu.megaBufferAllocator.Allocate(ctx.executor.cycle, getpagesize()).buffer, 0, getpagesize()};
 
         ctx.executor.AttachBuffer(view);
         view.GetBuffer()->PopulateReadBarrier(dstStage, srcStageMask, dstStageMask);
@@ -47,12 +48,12 @@ namespace skyline::gpu::interconnect {
         };
         auto ssbo{cbuf.Read<SsboDescriptor>(ctx.executor, desc.cbuf_offset)};
         if (ssbo.size == 0)
-            return BufferBinding{ctx.gpu.megaBufferAllocator.Allocate(ctx.executor.cycle, PAGE_SIZE).buffer, 0, PAGE_SIZE};
+            return BufferBinding{ctx.gpu.megaBufferAllocator.Allocate(ctx.executor.cycle, getpagesize()).buffer, 0, getpagesize()};
 
         size_t padding{ssbo.address & (ctx.gpu.traits.minimumStorageBufferAlignment - 1)};
         cachedView.Update(ctx, ssbo.address - padding, util::AlignUp(ssbo.size + padding, ctx.gpu.traits.minimumStorageBufferAlignment));
         if (!cachedView.view) // Return a dummy buffer if the SSBO isn't bound
-            return BufferBinding{ctx.gpu.megaBufferAllocator.Allocate(ctx.executor.cycle, PAGE_SIZE).buffer, 0, PAGE_SIZE};
+            return BufferBinding{ctx.gpu.megaBufferAllocator.Allocate(ctx.executor.cycle, getpagesize()).buffer, 0, getpagesize()};
 
         auto view{cachedView.view};
         ctx.executor.AttachBuffer(view);
