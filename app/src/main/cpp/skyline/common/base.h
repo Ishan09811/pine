@@ -38,6 +38,14 @@ namespace skyline {
             return pageSize;
         }
 
+        inline u8 getTlsSlots() {
+            size_t slots = PageSize / TlsSlotSize;
+            if (slots > 255) {
+                throw std::runtime_error("TlsSlots exceeds u8 capacity!");
+            }
+            return static_cast<u8>(slots);
+        }
+
         const size_t PageSize{getDynamicPageSize()}; //!< The size of a host page
         constexpr size_t PageSizeBits{12}; //!< log2(PageSize)
     }
