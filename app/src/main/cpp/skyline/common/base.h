@@ -29,10 +29,17 @@ namespace skyline {
         constexpr i64 NsInDay{86400000000000UL}; //!< The amount of nanoseconds in a day
 
         constexpr size_t AddressSpaceSize{1ULL << 39}; //!< The size of the host CPU AS in bytes
-        constexpr size_t PageSize{0x1000}; //!< The size of a host page
-        constexpr size_t PageSizeBits{12}; //!< log2(PageSize)
 
-        assert(PageSize == getpagesize());
+        inline size_t getDynamicPageSize() {
+            size_t pageSize = getpagesize();
+            if (pageSize == 0) {
+                throw std::runtime_error("Failed to retrieve page size");
+            }
+            return pageSize;
+        }
+
+        const size_t PageSize{getDynamicPageSize()}; //!< The size of a host page
+        constexpr size_t PageSizeBits{12}; //!< log2(PageSize)
     }
 
     /**
