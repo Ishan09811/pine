@@ -12,7 +12,6 @@
 
 namespace skyline {
     namespace constant {
-        constexpr u16 TlsSlotSize{0x200}; //!< The size of a single TLS slot
         const u8 TlsSlots{constant::getTlsSlots()}; //!< The amount of TLS slots in a single page
         constexpr KHandle BaseHandleIndex{0xD000}; //!< The index of the base handle
     }
