@@ -30,6 +30,8 @@ namespace skyline {
 
         constexpr size_t AddressSpaceSize{1ULL << 39}; //!< The size of the host CPU AS in bytes
 
+        constexpr u16 TlsSlotSize{0x200};
+
         inline size_t getDynamicPageSize() {
             size_t pageSize = getpagesize();
             if (pageSize == 0) {
@@ -39,7 +41,7 @@ namespace skyline {
         }
 
         inline u8 getTlsSlots() {
-            size_t slots = PageSize / TlsSlotSize;
+            size_t slots = getDynamicPageSize() / TlsSlotSize;
             if (slots > 255) {
                 throw std::runtime_error("TlsSlots exceeds u8 capacity!");
             }
