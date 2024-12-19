@@ -172,6 +172,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
      */
     private external fun stopEmulation(join : Boolean) : Boolean
 
+    private external fun pauseEmulation(pause: Boolean)
+
     /**
      * This sets the surface object in libskyline to the provided value, emulation is halted if set to null
      *
@@ -448,8 +450,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         binding.inGameMenu.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.menu_emulation_resume -> {
-                    if (!isEmulatorPaused) {
-                        pauseEmulator()
+                    if (isEmulatorPaused) {
+                        resumeEmulator()
                         it.title = resources.getString(R.string.pause_emulation)
                         it.icon = ResourcesCompat.getDrawable(
                             resources,
@@ -457,7 +459,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                             this.theme
                         )
                     } else {
-                        resumeEmulator()
+                        pauseEmulator()
                         it.title = resources.getString(R.string.resume_emulation)
                         it.icon = ResourcesCompat.getDrawable(
                             resources,
@@ -500,14 +502,14 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     @SuppressWarnings("WeakerAccess")
     fun pauseEmulator() {
         if (isEmulatorPaused) return
-        setSurface(null)
+        pauseEmulation(true)
         changeAudioStatus(false)
         isEmulatorPaused = true
     }
 
     @SuppressWarnings("WeakerAccess")
     fun resumeEmulator() {
-        gameSurface?.let { setSurface(it) }
+        pauseEmulation(false)
         changeAudioStatus(true)
         isEmulatorPaused = false
     }

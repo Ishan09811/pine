@@ -115,6 +115,9 @@ namespace skyline::gpu {
          */
         void UpdateSurface(jobject newSurface);
 
+        void Pause();
+        void Resume();
+
         /**
          * @brief Queue the supplied texture to be presented to the screen
          * @param timestamp The earliest timestamp (relative to skyline::util::GetTickNs) at which the frame must be presented, it should be 0 when it doesn't matter
