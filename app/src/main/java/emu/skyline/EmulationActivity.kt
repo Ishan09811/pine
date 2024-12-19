@@ -450,8 +450,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         binding.inGameMenu.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.menu_emulation_resume -> {
-                    if (!isEmulatorPaused) {
-                        pauseEmulator()
+                    if (isEmulatorPaused) {
+                        resumeEmulator()
                         it.title = resources.getString(R.string.pause_emulation)
                         it.icon = ResourcesCompat.getDrawable(
                             resources,
@@ -459,7 +459,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                             this.theme
                         )
                     } else {
-                        resumeEmulator()
+                        pauseEmulator()
                         it.title = resources.getString(R.string.resume_emulation)
                         it.icon = ResourcesCompat.getDrawable(
                             resources,
