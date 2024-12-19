@@ -172,6 +172,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
      */
     private external fun stopEmulation(join : Boolean) : Boolean
 
+    private external fun pauseEmulation(pause: Boolean)
+
     /**
      * This sets the surface object in libskyline to the provided value, emulation is halted if set to null
      *
@@ -500,14 +502,14 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     @SuppressWarnings("WeakerAccess")
     fun pauseEmulator() {
         if (isEmulatorPaused) return
-        setSurface(null)
+        pauseEmulation(true)
         changeAudioStatus(false)
         isEmulatorPaused = true
     }
 
     @SuppressWarnings("WeakerAccess")
     fun resumeEmulator() {
-        gameSurface?.let { setSurface(it) }
+        pauseEmulation(false)
         changeAudioStatus(true)
         isEmulatorPaused = false
     }
