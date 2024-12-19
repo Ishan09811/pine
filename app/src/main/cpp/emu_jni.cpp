@@ -165,6 +165,12 @@ extern "C" JNIEXPORT jboolean Java_emu_skyline_EmulationActivity_setSurface(JNIE
     return true;
 }
 
+extern "C" JNIEXPORT void Java_emu_skyline_EmulationActivity_pauseEmulation(JNIEnv *, jobject, jboolean pause) {
+    if (pause) {
+        gpu->presentation.Pause();
+    } else gpu->presentation.Resume();
+}
+
 extern "C" JNIEXPORT void Java_emu_skyline_EmulationActivity_changeAudioStatus(JNIEnv *, jobject, jboolean play) {
     auto audio{AudioWeak.lock()};
     if (audio)
