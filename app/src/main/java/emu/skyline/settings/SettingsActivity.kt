@@ -161,13 +161,13 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
         val searchView = menuItem.actionView as SearchView
         searchView.queryHint = getString(R.string.search)
 
-        searchView.setOnQueryTextFocusChangeListener { _, focus ->
+        /* searchView.setOnQueryTextFocusChangeListener { _, focus ->
             (binding.titlebar.toolbar.layoutParams as AppBarLayout.LayoutParams).scrollFlags =
                 if (focus)
                     AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
                 else
                     AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
-        }
+        }*/
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query : String) : Boolean {
