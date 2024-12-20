@@ -7,18 +7,22 @@ package emu.skyline
 
 import android.content.Intent
 import android.graphics.Color
+import androidx.annotation.ColorInt
 import android.net.Uri
 import android.os.Bundle
 import android.provider.DocumentsContract
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.view.ViewGroup.MarginLayoutParams
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.res.use
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.documentfile.provider.DocumentFile
@@ -27,6 +31,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.R as MaterialR
+import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
 import emu.skyline.adapter.*
 import emu.skyline.data.AppItem
@@ -147,6 +152,27 @@ class MainActivity : AppCompatActivity() {
         window.decorView.findViewById<View>(android.R.id.content).viewTreeObserver.addOnTouchModeChangeListener { isInTouchMode ->
             refreshIconVisible = !isInTouchMode
         }
+
+        binding.statusBarShade.setBackgroundColor(
+            applyAlphaToColor(
+                MaterialColors.getColor(
+                    binding.root,
+                    MaterialR.attr.colorSurface
+                ),
+                0.9f
+            )
+        )
+
+        binding.navigationBarShade.setBackgroundColor(
+            applyAlphaToColor(
+                MaterialColors.getColor(
+                    binding.root,
+                    MaterialR.attr.colorSurface
+                ),
+                0.9f
+            )
+        )
+        setInsets()
     }
 
     private fun setAppListDecoration() {
@@ -331,4 +357,38 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.checkRomHash(SearchLocationHelper.getSearchLocations(this), EmulationSettings.global.systemLanguage)
     }
+
+    /**
+     * Adjusts the opacity of a color by applying an alpha factor.
+     *
+     * @param color The original color (including alpha).
+     * @param alphaFactor A value between 0.0 (fully transparent) and 1.0 (no change in opacity).
+     * @return A new color with the adjusted opacity.
+    */
+    @ColorInt
+    fun applyAlphaToColor(@ColorInt color: Int, alphaFactor: Float): Int {
+        val newAlpha = (Color.alpha(color) * alphaFactor).coerceIn(0f, 255f).roundToInt()
+        return Color.argb(
+            newAlpha,
+            Color.red(color),
+            Color.green(color),
+            Color.blue(color)
+        )
+    }
+
+    private fun setInsets() =
+        ViewCompat.setOnApplyWindowInsetsListener(
+            binding.root
+        ) { _: View, windowInsets: WindowInsetsCompat ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val mlpStatusShade = binding.statusBarShade.layoutParams as MarginLayoutParams
+            mlpStatusShade.height = insets.top
+            binding.statusBarShade.layoutParams = mlpStatusShade
+
+            val mlpNavShade = binding.navigationBarShade.layoutParams as MarginLayoutParams
+            mlpNavShade.height = insets.bottom
+            binding.navigationBarShade.layoutParams = mlpNavShade
+
+            windowInsets
+        }
 }
