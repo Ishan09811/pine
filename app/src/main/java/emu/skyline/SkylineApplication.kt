@@ -33,6 +33,10 @@ class SkylineApplication : Application() {
 
         val context : Context get() = instance.applicationContext
 
+        const val NAV_TYPE_THREE_BUTTON = 0
+        const val NAV_TYPE_TWO_BUTTON = 1
+        const val NAV_TYPE_GESTURE = 2
+
         /**
          * Adjusts the opacity of a color by applying an alpha factor.
          *
@@ -49,6 +53,32 @@ class SkylineApplication : Application() {
                 Color.green(color),
                 Color.blue(color)
             )
+        }
+
+        /**
+         * Determines the system navigation type.
+         *
+         * @param context The context used to access resources.
+         * @return An integer representing the navigation type:
+         * - 0: Three-button navigation
+         * - 1: Two-button navigation
+         * - 2: Gesture navigation
+        */
+        fun detectNavigationType(context: Context): Int {
+            val navBarModeResource = context.resources.getIdentifier(
+                "config_navBarInteractionMode",
+                "integer",
+                "android"
+            )
+            return if (navBarModeResource != 0) {
+                try {
+                    context.resources.getInteger(navBarModeResource)
+                } catch (e: Exception) {
+                    NAV_TYPE_THREE_BUTTON // Fallback to default
+                }
+            } else {
+                NAV_TYPE_THREE_BUTTON // Fallback to default
+            }
         }
     }
 
