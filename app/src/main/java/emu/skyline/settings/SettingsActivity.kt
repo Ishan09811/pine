@@ -38,6 +38,7 @@ import emu.skyline.preference.dialog.EditTextPreferenceMaterialDialogFragmentCom
 import emu.skyline.preference.dialog.IntegerListPreferenceMaterialDialogFragmentCompat
 import emu.skyline.preference.dialog.ListPreferenceMaterialDialogFragmentCompat
 import emu.skyline.utils.WindowInsetsHelper
+import emu.skyline.SkylineApplication
 
 private const val PREFERENCE_DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG"
 
@@ -139,15 +140,17 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
             )
         )
 
-        binding.navigationBarShade.setBackgroundColor(
-            SkylineApplication.applyAlphaToColor(
-                MaterialColors.getColor(
-                    binding.root,
-                    MaterialR.attr.colorSurface
-                ),
-                0.9f
+        if (SkylineApplication.detectNavigationType != SkylineApplication.NAV_TYPE_GESTURE) {
+            binding.navigationBarShade.setBackgroundColor(
+                SkylineApplication.applyAlphaToColor(
+                    MaterialColors.getColor(
+                        binding.root,
+                        MaterialR.attr.colorSurface
+                    ),
+                    0.9f
+                )
             )
-        )
+        }
     }
 
     override fun onCreateOptionsMenu(menu : Menu?) : Boolean {
