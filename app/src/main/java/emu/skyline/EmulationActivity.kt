@@ -42,6 +42,9 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.updateMargins
 import androidx.core.view.updatePadding
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -497,8 +500,25 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 else -> true
             }
         }
-
+        setInsets()
         executeApplication(intent!!)
+    }
+
+    private fun setInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(
+            binding.inGameMenu
+        ) { v: View, windowInsets: WindowInsetsCompat ->
+            val cutInsets: Insets = windowInsets.getInsets(WindowInsetsCompat.Type.displayCutout())
+            var left = 0
+            var right = 0
+            if (ViewCompat.getLayoutDirection(v) == ViewCompat.LAYOUT_DIRECTION_LTR) {
+                left = cutInsets.left
+            } else {
+                right = cutInsets.right
+            }
+
+            v.setPadding(left, cutInsets.top, right, 0)
+        }
     }
 
     @SuppressWarnings("WeakerAccess")
