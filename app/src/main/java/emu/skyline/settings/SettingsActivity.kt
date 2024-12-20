@@ -11,11 +11,14 @@ import android.text.TextUtils
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.ViewTreeObserver
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.WindowCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -24,6 +27,8 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.forEach
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.internal.ToolbarUtils
+import com.google.android.material.R as MaterialR
+import com.google.android.material.color.MaterialColors
 import emu.skyline.BuildConfig
 import emu.skyline.R
 import emu.skyline.data.AppItemTag
@@ -123,6 +128,26 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
                 .replace(R.id.settings, preferenceFragment)
                 .commit()
         }
+
+        binding.statusBarShade.setBackgroundColor(
+            SkylineApplication.applyAlphaToColor(
+                MaterialColors.getColor(
+                    binding.root,
+                    MaterialR.attr.colorSurface
+                ),
+                0.9f
+            )
+        )
+
+        binding.navigationBarShade.setBackgroundColor(
+            SkylineApplication.applyAlphaToColor(
+                MaterialColors.getColor(
+                    binding.root,
+                    MaterialR.attr.colorSurface
+                ),
+                0.9f
+            )
+        )
     }
 
     override fun onCreateOptionsMenu(menu : Menu?) : Boolean {
@@ -233,4 +258,20 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
             else -> return false
         }
     }
+
+    private fun setInsets() =
+        ViewCompat.setOnApplyWindowInsetsListener(
+            binding.root
+        ) { _: View, windowInsets: WindowInsetsCompat ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val statusShade = binding.statusBarShade.layoutParams as MarginLayoutParams
+            statusShade.height = insets.top
+            binding.statusBarShade.layoutParams = statusShade
+
+            val navShade = binding.navigationBarShade.layoutParams as MarginLayoutParams
+            navShade.height = insets.bottom
+            binding.navigationBarShade.layoutParams = navShade
+
+            windowInsets
+        }
 }
