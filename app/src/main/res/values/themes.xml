@@ -33,6 +33,8 @@
     <style name="BaseAppTheme" parent="ColorAppTheme">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
         <item name="chipChoiceStyle">@style/ChipChoice</item>
 
         <!-- Workaround for AndroidX PreferenceScreen since it doesn't use MaterialAlertDialogs -->
