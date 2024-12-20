@@ -7,7 +7,6 @@ package emu.skyline
 
 import android.content.Intent
 import android.graphics.Color
-import androidx.annotation.ColorInt
 import android.net.Uri
 import android.os.Bundle
 import android.provider.DocumentsContract
@@ -46,9 +45,9 @@ import emu.skyline.settings.SettingsActivity
 import emu.skyline.utils.GpuDriverHelper
 import emu.skyline.utils.SearchLocationHelper
 import emu.skyline.utils.WindowInsetsHelper
+import emu.skyline.SkylineApplication
 import javax.inject.Inject
 import kotlin.math.ceil
-import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -155,7 +154,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.statusBarShade.setBackgroundColor(
-            applyAlphaToColor(
+            SkylineApplication.applyAlphaToColor(
                 MaterialColors.getColor(
                     binding.root,
                     MaterialR.attr.colorSurface
@@ -165,7 +164,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         binding.navigationBarShade.setBackgroundColor(
-            applyAlphaToColor(
+            SkylineApplication.applyAlphaToColor(
                 MaterialColors.getColor(
                     binding.root,
                     MaterialR.attr.colorSurface
@@ -357,24 +356,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         viewModel.checkRomHash(SearchLocationHelper.getSearchLocations(this), EmulationSettings.global.systemLanguage)
-    }
-
-    /**
-     * Adjusts the opacity of a color by applying an alpha factor.
-     *
-     * @param color The original color (including alpha).
-     * @param alphaFactor A value between 0.0 (fully transparent) and 1.0 (no change in opacity).
-     * @return A new color with the adjusted opacity.
-    */
-    @ColorInt
-    fun applyAlphaToColor(@ColorInt color: Int, alphaFactor: Float): Int {
-        val newAlpha = (Color.alpha(color) * alphaFactor).coerceIn(0f, 255f).roundToInt()
-        return Color.argb(
-            newAlpha,
-            Color.red(color),
-            Color.green(color),
-            Color.blue(color)
-        )
     }
 
     private fun setInsets() =
