@@ -518,6 +518,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             }
 
             v.setPadding(left, cutInsets.top, right, 0)
+            windowInsets
         }
     }
 
