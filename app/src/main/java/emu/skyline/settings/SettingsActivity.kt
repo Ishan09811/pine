@@ -140,7 +140,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
             )
         )
 
-        if (SkylineApplication.detectNavigationType != SkylineApplication.NAV_TYPE_GESTURE) {
+        if (SkylineApplication.detectNavigationType(this) != SkylineApplication.NAV_TYPE_GESTURE) {
             binding.navigationBarShade.setBackgroundColor(
                 SkylineApplication.applyAlphaToColor(
                     MaterialColors.getColor(
