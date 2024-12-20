@@ -94,6 +94,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:focusedByDefault="true"
+        app:headerLayout="@layout/game_menu_header"
         app:menu="@menu/menu_in_game"
         tools:visibility="gone" />
     
