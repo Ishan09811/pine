@@ -151,6 +151,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
                 )
             )
         }
+        setInsets()
     }
 
     override fun onCreateOptionsMenu(menu : Menu?) : Boolean {
