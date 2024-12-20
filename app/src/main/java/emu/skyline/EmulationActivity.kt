@@ -33,6 +33,7 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.Toast
 import android.widget.PopupMenu
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -447,6 +448,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                // No op
             }
         })
+        binding.inGameMenu.getHeaderView(0).findViewById<TextView>(R.id.game_title).text = item.title
         binding.inGameMenu.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.menu_emulation_resume -> {
