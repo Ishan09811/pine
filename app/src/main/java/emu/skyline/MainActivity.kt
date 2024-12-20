@@ -163,15 +163,17 @@ class MainActivity : AppCompatActivity() {
             )
         )
 
-        binding.navigationBarShade.setBackgroundColor(
-            SkylineApplication.applyAlphaToColor(
-                MaterialColors.getColor(
-                    binding.root,
-                    MaterialR.attr.colorSurface
-                ),
-                0.9f
+        if (SkylineApplication.detectNavigationType != SkylineApplication.NAV_TYPE_GESTURE) {
+            binding.navigationBarShade.setBackgroundColor(
+                SkylineApplication.applyAlphaToColor(
+                    MaterialColors.getColor(
+                        binding.root,
+                        MaterialR.attr.colorSurface
+                    ),
+                    0.9f
+                )
             )
-        )
+        }
         setInsets()
     }
 
