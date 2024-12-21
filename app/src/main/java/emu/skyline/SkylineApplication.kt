@@ -33,6 +33,7 @@ class SkylineApplication : Application() {
 
         val context : Context get() = instance.applicationContext
 
+
         const val NAV_TYPE_THREE_BUTTON = 0
         const val NAV_TYPE_TWO_BUTTON = 1
         const val NAV_TYPE_GESTURE = 2
@@ -79,6 +80,12 @@ class SkylineApplication : Application() {
             } else {
                 NAV_TYPE_THREE_BUTTON // Fallback to default
             }
+        }
+
+        fun setTheme(newValue: Boolean) {
+            val dynamicColorsOptions = DynamicColorsOptions.Builder().setPrecondition { _, _ -> newValue }.build()
+            DynamicColors.applyToActivitiesIfAvailable(instance, dynamicColorsOptions)
+            if (newValue == false) { instance.setTheme(R.style.AppTheme) }
         }
     }
 

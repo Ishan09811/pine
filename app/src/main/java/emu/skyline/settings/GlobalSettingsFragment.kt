@@ -20,6 +20,7 @@ import emu.skyline.MainActivity
 import emu.skyline.R
 import emu.skyline.utils.GpuDriverHelper
 import emu.skyline.utils.WindowInsetsHelper
+import emu.skyline.SkylineApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,9 +46,10 @@ class GlobalSettingsFragment : PreferenceFragmentCompat() {
         addPreferencesFromResource(R.xml.credits_preferences)
 
         // Re-launch the app if Material You is toggled
-        findPreference<Preference>("use_material_you")?.setOnPreferenceChangeListener { _, _ ->
-            requireActivity().finishAffinity()
-            startActivity(Intent(requireContext(), MainActivity::class.java))
+        findPreference<Preference>("use_material_you")?.setOnPreferenceChangeListener { _, newValue ->
+            val isMaterialYouEnabled = newValue as Boolean
+            SkylineApplication.setTheme(isMaterialYouEnabled)
+            requireActivity().recreate()
             true
         }
 
