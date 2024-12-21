@@ -24,7 +24,7 @@ namespace skyline::gpu::memory {
 
         Buffer(const Buffer &) = delete;
 
-        constexpr Buffer(Buffer &&other)
+         Buffer(Buffer &&other)
             : vmaAllocator(std::exchange(other.vmaAllocator, nullptr)),
               vmaAllocation(std::exchange(other.vmaAllocation, nullptr)),
               vkBuffer(std::exchange(other.vkBuffer, {})),
@@ -94,7 +94,7 @@ namespace skyline::gpu::memory {
 
         Image(const Image &) = delete;
 
-        constexpr Image(Image &&other)
+         Image(Image &&other)
             : pointer(std::exchange(other.pointer, nullptr)),
               vmaAllocator(std::exchange(other.vmaAllocator, nullptr)),
               vmaAllocation(std::exchange(other.vmaAllocation, nullptr)),
