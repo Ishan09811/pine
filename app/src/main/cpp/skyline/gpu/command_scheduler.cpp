@@ -74,7 +74,7 @@ namespace skyline::gpu {
 
         auto result{(*gpu.vkDevice).allocateCommandBuffers(&commandBufferAllocateInfo, &commandBuffer, *gpu.vkDevice.getDispatcher())};
         if (result != vk::Result::eSuccess)
-            vk::throwResultException(result, __builtin_FUNCTION());
+            vk::detail::throwResultException(result, __builtin_FUNCTION());
         return {pool->buffers.emplace_back(gpu.vkDevice, commandBuffer, pool->vkCommandPool)};
     }
 
