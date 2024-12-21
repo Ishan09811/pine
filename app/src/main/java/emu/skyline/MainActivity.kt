@@ -12,13 +12,16 @@ import android.os.Bundle
 import android.provider.DocumentsContract
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.view.ViewGroup.MarginLayoutParams
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.res.use
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.documentfile.provider.DocumentFile
@@ -27,6 +30,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.R as MaterialR
+import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
 import emu.skyline.adapter.*
 import emu.skyline.data.AppItem
@@ -41,6 +45,7 @@ import emu.skyline.settings.SettingsActivity
 import emu.skyline.utils.GpuDriverHelper
 import emu.skyline.utils.SearchLocationHelper
 import emu.skyline.utils.WindowInsetsHelper
+import emu.skyline.SkylineApplication
 import javax.inject.Inject
 import kotlin.math.ceil
 
@@ -147,6 +152,29 @@ class MainActivity : AppCompatActivity() {
         window.decorView.findViewById<View>(android.R.id.content).viewTreeObserver.addOnTouchModeChangeListener { isInTouchMode ->
             refreshIconVisible = !isInTouchMode
         }
+
+        binding.statusBarShade.setBackgroundColor(
+            SkylineApplication.applyAlphaToColor(
+                MaterialColors.getColor(
+                    binding.root,
+                    MaterialR.attr.colorSurface
+                ),
+                0.9f
+            )
+        )
+
+        if (SkylineApplication.detectNavigationType(this) != SkylineApplication.NAV_TYPE_GESTURE) {
+            binding.navigationBarShade.setBackgroundColor(
+                SkylineApplication.applyAlphaToColor(
+                    MaterialColors.getColor(
+                        binding.root,
+                        MaterialR.attr.colorSurface
+                    ),
+                    0.9f
+                )
+            )
+        }
+        setInsets()
     }
 
     private fun setAppListDecoration() {
@@ -331,4 +359,20 @@ class MainActivity : AppCompatActivity() {
 
         viewModel.checkRomHash(SearchLocationHelper.getSearchLocations(this), EmulationSettings.global.systemLanguage)
     }
+
+    private fun setInsets() =
+        ViewCompat.setOnApplyWindowInsetsListener(
+            binding.root
+        ) { _: View, windowInsets: WindowInsetsCompat ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val mlpStatusShade = binding.statusBarShade.layoutParams as MarginLayoutParams
+            mlpStatusShade.height = insets.top
+            binding.statusBarShade.layoutParams = mlpStatusShade
+
+            val mlpNavShade = binding.navigationBarShade.layoutParams as MarginLayoutParams
+            mlpNavShade.height = insets.bottom
+            binding.navigationBarShade.layoutParams = mlpNavShade
+
+            windowInsets
+        }
 }

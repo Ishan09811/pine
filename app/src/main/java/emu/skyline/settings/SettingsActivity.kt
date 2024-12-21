@@ -8,14 +8,18 @@ package emu.skyline.settings
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.View
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.ViewTreeObserver
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.WindowCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -24,6 +28,8 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.forEach
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.internal.ToolbarUtils
+import com.google.android.material.R as MaterialR
+import com.google.android.material.color.MaterialColors
 import emu.skyline.BuildConfig
 import emu.skyline.R
 import emu.skyline.data.AppItemTag
@@ -33,6 +39,7 @@ import emu.skyline.preference.dialog.EditTextPreferenceMaterialDialogFragmentCom
 import emu.skyline.preference.dialog.IntegerListPreferenceMaterialDialogFragmentCompat
 import emu.skyline.preference.dialog.ListPreferenceMaterialDialogFragmentCompat
 import emu.skyline.utils.WindowInsetsHelper
+import emu.skyline.SkylineApplication
 
 private const val PREFERENCE_DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG"
 
@@ -123,6 +130,29 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
                 .replace(R.id.settings, preferenceFragment)
                 .commit()
         }
+
+        binding.statusBarShade.setBackgroundColor(
+            SkylineApplication.applyAlphaToColor(
+                MaterialColors.getColor(
+                    binding.root,
+                    MaterialR.attr.colorSurface
+                ),
+                0.9f
+            )
+        )
+
+        if (SkylineApplication.detectNavigationType(this) != SkylineApplication.NAV_TYPE_GESTURE) {
+            binding.navigationBarShade.setBackgroundColor(
+                SkylineApplication.applyAlphaToColor(
+                    MaterialColors.getColor(
+                        binding.root,
+                        MaterialR.attr.colorSurface
+                    ),
+                    0.9f
+                )
+            )
+        }
+        setInsets()
     }
 
     override fun onCreateOptionsMenu(menu : Menu?) : Boolean {
@@ -131,13 +161,13 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
         val searchView = menuItem.actionView as SearchView
         searchView.queryHint = getString(R.string.search)
 
-        searchView.setOnQueryTextFocusChangeListener { _, focus ->
+        /* searchView.setOnQueryTextFocusChangeListener { _, focus ->
             (binding.titlebar.toolbar.layoutParams as AppBarLayout.LayoutParams).scrollFlags =
                 if (focus)
                     AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
                 else
                     AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
-        }
+        }*/
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query : String) : Boolean {
@@ -233,4 +263,20 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
             else -> return false
         }
     }
+
+    private fun setInsets() =
+        ViewCompat.setOnApplyWindowInsetsListener(
+            binding.root
+        ) { _: View, windowInsets: WindowInsetsCompat ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val statusShade = binding.statusBarShade.layoutParams as MarginLayoutParams
+            statusShade.height = insets.top
+            binding.statusBarShade.layoutParams = statusShade
+
+            val navShade = binding.navigationBarShade.layoutParams as MarginLayoutParams
+            navShade.height = insets.bottom
+            binding.navigationBarShade.layoutParams = navShade
+
+            windowInsets
+        }
 }
