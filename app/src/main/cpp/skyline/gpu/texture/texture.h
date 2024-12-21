@@ -10,6 +10,7 @@
 #include "common/trap_manager.h"
 #include <gpu/tag_allocator.h>
 #include <gpu/memory_manager.h>
+#include <vulkan/vulkan_format_traits.hpp>
 #include <gpu/usage_tracker.h>
 
 namespace skyline::gpu {
