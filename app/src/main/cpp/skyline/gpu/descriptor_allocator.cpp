@@ -71,9 +71,9 @@ namespace skyline::gpu {
             pool->freeSetCount--;
 
         if (result == vk::Result::eSuccess) {
-            return vk::ResultValue<vk::DescriptorSet>(descriptorSet);
+            return vk::ResultValue<vk::DescriptorSet>(vk::Result::eSuccess, descriptorSet);
         } else {
-            return vk::ResultValue<vk::DescriptorSet>(result);
+            return vk::ResultValue<vk::DescriptorSet>(result, vk::DescriptorSet{});
         }
     }
 
