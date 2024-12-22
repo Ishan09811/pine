@@ -70,11 +70,7 @@ namespace skyline::gpu {
         if (pool->freeSetCount > 0)
             pool->freeSetCount--;
 
-        return vk::createResultValueType(result, descriptorSet, __builtin_FUNCTION(), {
-            vk::Result::eSuccess,
-            vk::Result::eErrorOutOfPoolMemory,
-            vk::Result::eErrorFragmentedPool
-        });
+        return vk::detail::createResultValueType(result)
     }
 
     DescriptorAllocator::ActiveDescriptorSet::ActiveDescriptorSet(std::shared_ptr<DescriptorPool> pPool, DescriptorSetSlot *slot) : pool{std::move(pPool)}, slot{slot} {}
