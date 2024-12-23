@@ -209,7 +209,7 @@ namespace skyline::gpu {
     static vk::raii::DebugReportCallbackEXT CreateDebugReportCallback(GPU *gpu, const vk::raii::Instance &instance) {
         return vk::raii::DebugReportCallbackEXT(instance, vk::DebugReportCallbackCreateInfoEXT{
             .flags = vk::DebugReportFlagBitsEXT::eError | vk::DebugReportFlagBitsEXT::eWarning | vk::DebugReportFlagBitsEXT::ePerformanceWarning | vk::DebugReportFlagBitsEXT::eInformation | vk::DebugReportFlagBitsEXT::eDebug,
-            .pfnCallback = reinterpret_cast<PFN_vkDebugReportCallbackEXT>(&DebugCallback),
+            .pfnCallback = reinterpret_cast<vk::PFN_DebugReportCallbackEXT>(&DebugCallback),
             .pUserData = gpu,
         });
     }

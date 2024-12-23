@@ -5,6 +5,7 @@
 
 #include <vulkan/vulkan_raii.hpp>
 #include <common/spin_lock.h>
+#include "vk_descriptor_set_layout_hash.hpp"
 #include <common.h>
 
 namespace skyline::gpu {
