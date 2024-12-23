@@ -121,7 +121,7 @@ namespace skyline {
             std::scoped_lock lock(trapMutex);
 
             // Retrieve any callbacks for the page that was faulted
-            auto [entries, intervals]{trapMap.GetAlignedRecursiveRange<constant::PageSize>(address)};
+            auto [entries, intervals]{trapMap.GetAlignedRecursiveRange(constant::PageSize, address)};
             if (entries.empty())
                 return false; // There's no callbacks associated with this page
 
