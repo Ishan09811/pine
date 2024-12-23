@@ -241,9 +241,8 @@ namespace skyline {
             return std::pair{queryEntries, intervals};
         }
 
-        template<size_t Alignment>
-        std::pair<std::vector<std::reference_wrapper<EntryType>>, std::vector<Interval>> GetAlignedRecursiveRange(AddressType address) {
-            return GetAlignedRecursiveRange<Alignment>(Interval{address, address + 1});
+        std::pair<std::vector<std::reference_wrapper<EntryType>>, std::vector<Interval>> GetAlignedRecursiveRange(std::size_t Alignment, AddressType address) {
+            return GetAlignedRecursiveRange(Alignment, Interval{address, address + 1});
         }
     };
 }
