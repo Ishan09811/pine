@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <unistd.h>
+#include <stdexcept>
 #include <variant>
 
 namespace skyline {
