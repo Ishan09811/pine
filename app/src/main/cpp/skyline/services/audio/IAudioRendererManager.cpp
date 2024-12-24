@@ -27,12 +27,18 @@ namespace skyline::service::audio {
             return Result{Service::Audio::ResultOutOfSessions};
         }
 
-        manager.RegisterService(std::make_shared<IAudioRenderer>(state, manager,
-                                                                 *state.audio->audioRendererManager,
-                                                                 params,
-                                                                 transferMemorySize, processHandle, appletResourceUserId, sessionId),
-                                session, response);
+        try {
+            auto renderer = std::make_shared<IAudioRenderer>(
+                state, manager,
+                *state.audio->audioRendererManager,
+                params, transferMemorySize, processHandle, appletResourceUserId,
+                state.audio->audioRendererManager->GetSessionId());
 
+            manager.RegisterService(renderer, session, response);
+        } catch (const std::bad_alloc &e) {
+            LOGE("Memory allocation failed: %s", e.what());
+            return Result{Service::Audio::ResultOperationFailed};
+        }
         return {};
     }
 
