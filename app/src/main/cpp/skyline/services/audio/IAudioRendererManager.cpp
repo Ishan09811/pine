@@ -21,6 +21,9 @@ namespace skyline::service::audio {
         auto transferMemoryHandle{request.copyHandles.at(0)};
         auto processHandle{request.copyHandles.at(1)};
 
+        // Log the transferMemorySize
+        LOGI("TransferMemorySize: %llu", transferMemorySize);
+
         i32 sessionId{state.audio->audioRendererManager->GetSessionId()};
         if (sessionId == -1) {
             LOGW("Out of audio renderer sessions!");
