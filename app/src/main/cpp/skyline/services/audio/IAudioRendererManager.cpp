@@ -39,7 +39,7 @@ namespace skyline::service::audio {
 
             manager.RegisterService(renderer, session, response);
         } catch (const std::bad_alloc &e) {
-            LOGE("Memory allocation failed: %s", e.what());
+            LOGE("Memory allocation failed: {}", e.what());
             return Result{Service::Audio::ResultOperationFailed};
         }
         return {};
