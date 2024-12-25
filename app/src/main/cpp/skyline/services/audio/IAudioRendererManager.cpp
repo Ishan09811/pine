@@ -22,7 +22,7 @@ namespace skyline::service::audio {
         auto processHandle{request.copyHandles.at(1)};
 
         // Log the transferMemorySize
-        LOGI("TransferMemorySize: %llu", transferMemorySize);
+        LOGI("TransferMemorySize: {}", transferMemorySize);
 
         i32 sessionId{state.audio->audioRendererManager->GetSessionId()};
         if (sessionId == -1) {
