@@ -2,14 +2,15 @@
 // Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
 
 #include <gpu.h>
+#include <unistd.h>
 #include "megabuffer.h"
 
 namespace skyline::gpu {
-    MegaBufferChunk::MegaBufferChunk(GPU &gpu) : backing{gpu.memory.AllocateBuffer(MegaBufferChunkSize)}, freeRegion{backing.subspan(PAGE_SIZE)} {}
+    MegaBufferChunk::MegaBufferChunk(GPU &gpu) : backing{gpu.memory.AllocateBuffer(MegaBufferChunkSize)}, freeRegion{backing.subspan(getpagesize())} {}
 
     bool MegaBufferChunk::TryReset() {
         if (cycle && cycle->Poll(true)) {
-            freeRegion = backing.subspan(PAGE_SIZE);
+            freeRegion = backing.subspan(getpagesize());
             cycle = nullptr;
             return true;
         }
@@ -24,7 +25,7 @@ namespace skyline::gpu {
     std::pair<vk::DeviceSize, span<u8>> MegaBufferChunk::Allocate(const std::shared_ptr<FenceCycle> &newCycle, vk::DeviceSize size, bool pageAlign) {
         if (pageAlign) {
             // If page aligned data was requested then align the free
-            auto alignedFreeBase{util::AlignUp(static_cast<size_t>(freeRegion.data() - backing.data()), PAGE_SIZE)};
+            auto alignedFreeBase{util::AlignUp(static_cast<size_t>(freeRegion.data() - backing.data()), getpagesize())};
             freeRegion = backing.subspan(alignedFreeBase);
         }
 

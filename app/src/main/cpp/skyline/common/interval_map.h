@@ -158,8 +158,7 @@ namespace skyline {
          * @return All entries overlapping with the given interval and a list of intervals they recursively cover with alignment for page-based lookup semantics
          * @note This function is specifically designed for memory faulting lookups and has design-decisions that correspond to that which might not work for other uses
          */
-        template<size_t Alignment>
-        std::pair<std::vector<std::reference_wrapper<EntryType>>, std::vector<Interval>> GetAlignedRecursiveRange(Interval interval) {
+        std::pair<std::vector<std::reference_wrapper<EntryType>>, std::vector<Interval>> GetAlignedRecursiveRange(std::size_t Alignment, Interval interval) {
             std::vector<std::reference_wrapper<EntryType>> queryEntries;
             std::vector<Interval> intervals;
 
@@ -242,9 +241,8 @@ namespace skyline {
             return std::pair{queryEntries, intervals};
         }
 
-        template<size_t Alignment>
-        std::pair<std::vector<std::reference_wrapper<EntryType>>, std::vector<Interval>> GetAlignedRecursiveRange(AddressType address) {
-            return GetAlignedRecursiveRange<Alignment>(Interval{address, address + 1});
+        std::pair<std::vector<std::reference_wrapper<EntryType>>, std::vector<Interval>> GetAlignedRecursiveRange(std::size_t Alignment, AddressType address) {
+            return GetAlignedRecursiveRange(Alignment, Interval{address, address + 1});
         }
     };
 }

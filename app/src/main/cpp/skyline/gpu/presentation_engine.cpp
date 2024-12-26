@@ -78,11 +78,14 @@ namespace skyline::gpu {
         try {
             choreographerLooper = ALooper_prepare(0);
             AChoreographer_postFrameCallback64(AChoreographer_getInstance(), reinterpret_cast<AChoreographer_frameCallback64>(&ChoreographerCallback), this);
-            while (ALooper_pollAll(-1, nullptr, nullptr, nullptr) == ALOOPER_POLL_WAKE && !choreographerStop) {
+
+
+            while (ALooper_pollOnce(-1, nullptr, nullptr, nullptr) == ALOOPER_POLL_WAKE && !choreographerStop) {
                 while (paused.load(std::memory_order_acquire)) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 }
             }
+
         } catch (const signal::SignalException &e) {
             LOGE("{}\nStack Trace:{}", e.what(), state.loader->GetStackTrace(e.frames));
             if (state.process)

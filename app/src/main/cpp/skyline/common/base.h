@@ -4,6 +4,8 @@
 #pragma once
 
 #include <cstdint>
+#include <unistd.h>
+#include <stdexcept>
 #include <variant>
 
 namespace skyline {
@@ -28,10 +30,27 @@ namespace skyline {
         constexpr i64 NsInDay{86400000000000UL}; //!< The amount of nanoseconds in a day
 
         constexpr size_t AddressSpaceSize{1ULL << 39}; //!< The size of the host CPU AS in bytes
-        constexpr size_t PageSize{0x1000}; //!< The size of a host page
-        constexpr size_t PageSizeBits{12}; //!< log2(PageSize)
 
-        static_assert(PageSize == PAGE_SIZE);
+        constexpr u16 TlsSlotSize{0x200};
+
+        inline size_t getDynamicPageSize() {
+            size_t pageSize = getpagesize();
+            if (pageSize == 0) {
+                throw std::runtime_error("Failed to retrieve page size");
+            }
+            return pageSize;
+        }
+
+        inline u8 getTlsSlots() {
+            size_t slots = getDynamicPageSize() / TlsSlotSize;
+            if (slots > 255) {
+                throw std::runtime_error("TlsSlots exceeds u8 capacity!");
+            }
+            return static_cast<u8>(slots);
+        }
+
+        const size_t PageSize{getDynamicPageSize()}; //!< The size of a host page
+        constexpr size_t PageSizeBits{12}; //!< log2(PageSize)
     }
 
     /**
