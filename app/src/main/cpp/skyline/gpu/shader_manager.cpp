@@ -33,20 +33,27 @@ namespace skyline::gpu {
     void ShaderManager::LoadShaderReplacements(std::string_view replacementDir) {
         std::filesystem::path replacementDirPath{replacementDir};
         if (std::filesystem::exists(replacementDirPath)) {
+            std::vector<std::future<void>> tasks;
             for (const auto &entry : std::filesystem::directory_iterator{replacementDirPath}) {
                 if (entry.is_regular_file()) {
-                    // Parse hash from filename
-                    auto path{entry.path()};
-                    auto &replacementMap{path.extension().string() == ".spv" ? hostShaderReplacements : guestShaderReplacements};
-                    u64 hash{std::stoull(path.stem().string(), nullptr, 16)};
-                    auto it{replacementMap.insert({hash, {}})};
+                    tasks.emplace_back(std::async(std::launch::async, [this, path = entry.path()]() {
+                        // Parse hash from filename
+                        auto &replacementMap{path.extension().string() == ".spv" ? hostShaderReplacements : guestShaderReplacements};
+                        u64 hash{std::stoull(path.stem().string(), nullptr, 16)};
 
-                    // Read file into map entry
-                    std::ifstream file{entry.path(), std::ios::binary | std::ios::ate};
-                    it.first->second.resize(static_cast<size_t>(file.tellg()));
-                    file.seekg(0, std::ios::beg);
-                    file.read(reinterpret_cast<char *>(it.first->second.data()), static_cast<std::streamsize>(it.first->second.size()));
+                        std::ifstream file{path, std::ios::binary | std::ios::ate};
+                        std::vector<u8> data(static_cast<size_t>(file.tellg()));
+                        file.seekg(0, std::ios::beg);
+                        file.read(reinterpret_cast<char *>(data.data()), static_cast<std::streamsize>(data.size()));
+                    
+                        std::scoped_lock lock{replacementMapMutex};
+                        replacementMap[hash] = std::move(data);
+                    }));
                 }
+            }
+            
+            for (auto &task : tasks) {
+                task.get(); // Wait for all tasks to complete
             }
         }
     }
