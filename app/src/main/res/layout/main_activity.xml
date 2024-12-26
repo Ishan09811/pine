@@ -6,6 +6,15 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
+    
+    <View
+        android:id="@+id/status_bar_shade"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/transparent"
+        android:clickable="false"
+        android:focusable="false"
+        android:layout_gravity="top" />
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
@@ -142,4 +151,12 @@
             android:overScrollMode="ifContentScrolls"
             android:paddingBottom="20dp" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    <View
+        android:id="@+id/navigation_bar_shade"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/transparent"
+        android:clickable="false"
+        android:focusable="false"
+        android:layout_gravity="bottom" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

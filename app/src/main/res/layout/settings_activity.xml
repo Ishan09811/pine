@@ -6,6 +6,15 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <View
+        android:id="@+id/status_bar_shade"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/transparent"
+        android:clickable="false"
+        android:focusable="false"
+        android:layout_gravity="top" />
+
     <include
         android:id="@+id/titlebar"
         layout="@layout/titlebar" />
@@ -15,4 +24,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <View
+        android:id="@+id/navigation_bar_shade"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/transparent"
+        android:clickable="false"
+        android:focusable="false"
+        android:layout_gravity="bottom" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

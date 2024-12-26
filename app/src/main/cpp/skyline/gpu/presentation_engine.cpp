@@ -21,6 +21,8 @@ extern jfloat AverageFrametimeDeviationMs;
 namespace skyline::gpu {
     using namespace service::hosbinder;
 
+    std::atomic<bool> paused{false};
+
     PresentationEngine::PresentationEngine(const DeviceState &state, GPU &gpu)
         : state{state},
           gpu{gpu},
@@ -76,7 +78,14 @@ namespace skyline::gpu {
         try {
             choreographerLooper = ALooper_prepare(0);
             AChoreographer_postFrameCallback64(AChoreographer_getInstance(), reinterpret_cast<AChoreographer_frameCallback64>(&ChoreographerCallback), this);
-            while (ALooper_pollOnce(-1, nullptr, nullptr, nullptr) == ALOOPER_POLL_WAKE && !choreographerStop); // Will block and process callbacks till ALooper_wake() is called with choreographerStop set
+
+
+            while (ALooper_pollOnce(-1, nullptr, nullptr, nullptr) == ALOOPER_POLL_WAKE && !choreographerStop) {
+                while (paused.load(std::memory_order_acquire)) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                }
+            }
+
         } catch (const signal::SignalException &e) {
             LOGE("{}\nStack Trace:{}", e.what(), state.loader->GetStackTrace(e.frames));
             if (state.process)
@@ -235,6 +244,9 @@ namespace skyline::gpu {
 
         try {
             presentQueue.Process([this](const PresentableFrame &frame) {
+                while (paused.load(std::memory_order_acquire)) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                }
                 PresentFrame(frame);
                 frame.presentCallback(); // We're calling the callback here as it's outside of all the locks in PresentFrame
                 skipSignal = true;
@@ -410,6 +422,16 @@ namespace skyline::gpu {
         });
 
         return nextFrameId++;
+    }
+
+    void PresentationEngine::Pause() {
+        paused.store(true, std::memory_order_release);
+        LOGI("PresentationEngine paused.");
+    }
+
+    void PresentationEngine::Resume() {
+        paused.store(false, std::memory_order_release);
+        LOGI("PresentationEngine resumed.");
     }
 
     NativeWindowTransform PresentationEngine::GetTransformHint() {

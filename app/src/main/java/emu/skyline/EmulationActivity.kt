@@ -33,6 +33,7 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.Toast
 import android.widget.PopupMenu
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -41,6 +42,9 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.updateMargins
 import androidx.core.view.updatePadding
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -171,6 +175,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
      * @return If it successfully caused [emulationThread] to gracefully stop or do so asynchronously when not joined
      */
     private external fun stopEmulation(join : Boolean) : Boolean
+
+    private external fun pauseEmulation(pause: Boolean)
 
     /**
      * This sets the surface object in libskyline to the provided value, emulation is halted if set to null
@@ -308,7 +314,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
 
         requestedOrientation = emulationSettings.orientation
-        window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+        window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         inputHandler = InputHandler(inputManager, emulationSettings)
         setContentView(binding.root)
 
@@ -445,11 +451,12 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                // No op
             }
         })
+        binding.inGameMenu.getHeaderView(0).findViewById<TextView>(R.id.game_title).text = item.title
         binding.inGameMenu.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.menu_emulation_resume -> {
                     if (isEmulatorPaused) {
-                        pauseEmulator()
+                        resumeEmulator()
                         it.title = resources.getString(R.string.pause_emulation)
                         it.icon = ResourcesCompat.getDrawable(
                             resources,
@@ -457,7 +464,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                             this.theme
                         )
                     } else {
-                        resumeEmulator()
+                        pauseEmulator()
                         it.title = resources.getString(R.string.resume_emulation)
                         it.icon = ResourcesCompat.getDrawable(
                             resources,
@@ -493,21 +500,39 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 else -> true
             }
         }
-
+        setInsets()
         executeApplication(intent!!)
+    }
+
+    private fun setInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(
+            binding.inGameMenu
+        ) { v: View, windowInsets: WindowInsetsCompat ->
+            val cutInsets: Insets = windowInsets.getInsets(WindowInsetsCompat.Type.displayCutout())
+            var left = 0
+            var right = 0
+            if (ViewCompat.getLayoutDirection(v) == ViewCompat.LAYOUT_DIRECTION_LTR) {
+                left = cutInsets.left
+            } else {
+                right = cutInsets.right
+            }
+
+            v.setPadding(left, cutInsets.top, right, 0)
+            windowInsets
+        }
     }
 
     @SuppressWarnings("WeakerAccess")
     fun pauseEmulator() {
         if (isEmulatorPaused) return
-        setSurface(null)
+        pauseEmulation(true)
         changeAudioStatus(false)
         isEmulatorPaused = true
     }
 
     @SuppressWarnings("WeakerAccess")
     fun resumeEmulator() {
-        gameSurface?.let { setSurface(it) }
+        pauseEmulation(false)
         changeAudioStatus(true)
         isEmulatorPaused = false
     }
