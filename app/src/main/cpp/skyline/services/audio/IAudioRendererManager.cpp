@@ -6,6 +6,9 @@
 #include <audio_core/audio_render_manager.h>
 #include <common/utils.h>
 #include <audio.h>
+#include <fstream>
+#include <string>
+#include <sstream>
 #include "IAudioRenderer.h"
 #include "IAudioDevice.h"
 #include "IAudioRendererManager.h"
@@ -23,6 +26,15 @@ namespace skyline::service::audio {
 
         // Log the transferMemorySize
         LOGI("TransferMemorySize: {}", transferMemorySize);
+
+        constexpr u64 fallbackMaxAllowedMemorySize = 64 * 1024 * 1024; // 64 MB fallback
+        u64 maxAllowedMemorySize = (GetTotalRAM() > 0) ? GetTotalRAM() / 2 : fallbackMaxAllowedMemorySize;
+
+        if (transferMemorySize > maxAllowedMemorySize || transferMemorySize == 0) {
+            LOGW("Invalid TransferMemorySize: {}. Using fallback size: {} bytes.", 
+                 transferMemorySize, fallbackMaxAllowedMemorySize);
+            transferMemorySize = fallbackMaxAllowedMemorySize; // Use fallback size
+        }
 
         i32 sessionId{state.audio->audioRendererManager->GetSessionId()};
         if (sessionId == -1) {
@@ -71,4 +83,26 @@ namespace skyline::service::audio {
         return {};
     }
 
+    u64 GetTotalRAM() {
+        u64 totalRam = 0;
+        std::ifstream meminfo("/proc/meminfo");
+        std::string line;
+
+        if (meminfo.is_open()) {
+            while (std::getline(meminfo, line)) {
+                if (line.find("MemTotal:") == 0) {
+                    std::istringstream iss(line);
+                    std::string label;
+                    u64 value;
+                    std::string unit;
+                    iss >> label >> value >> unit;
+                    // Convert kB to bytes
+                    totalRam = value * 1024;
+                    break;
+                }
+            }
+        }
+
+        return totalRam;
+    }
 }
