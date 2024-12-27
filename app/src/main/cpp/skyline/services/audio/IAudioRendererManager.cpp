@@ -17,6 +17,8 @@ namespace skyline::service::audio {
     IAudioRendererManager::IAudioRendererManager(const DeviceState &state, ServiceManager &manager)
         : BaseService(state, manager) {}
 
+    u64 GetTotalRAM();
+
     Result IAudioRendererManager::OpenAudioRenderer(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
         const auto &params{request.Pop<AudioCore::AudioRendererParameterInternal>()};
         u64 transferMemorySize{request.Pop<u64>()};
