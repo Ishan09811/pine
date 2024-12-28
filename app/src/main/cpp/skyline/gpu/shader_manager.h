@@ -34,6 +34,7 @@ namespace skyline::gpu {
         std::mutex poolMutex;
         std::filesystem::path dumpPath;
         std::mutex dumpMutex;
+        std::mutex replacementMapMutex;
 
         /**
          * @brief Called at init time to populate the shader replacements map from the input directory
