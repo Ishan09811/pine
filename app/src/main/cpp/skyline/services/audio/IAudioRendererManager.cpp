@@ -17,8 +17,6 @@ namespace skyline::service::audio {
     IAudioRendererManager::IAudioRendererManager(const DeviceState &state, ServiceManager &manager)
         : BaseService(state, manager) {}
 
-    u64 GetTotalRAM();
-
     Result IAudioRendererManager::OpenAudioRenderer(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
         const auto &params{request.Pop<AudioCore::AudioRendererParameterInternal>()};
         u64 transferMemorySize{request.Pop<u64>()};
@@ -29,10 +27,9 @@ namespace skyline::service::audio {
         // Log the transferMemorySize
         LOGI("TransferMemorySize: {}", transferMemorySize);
 
-        constexpr u64 fallbackMaxAllowedMemorySize = 64 * 1024 * 1024; // 64 MB fallback
-        u64 maxAllowedMemorySize = (GetTotalRAM() > 0) ? GetTotalRAM() / 2 : fallbackMaxAllowedMemorySize;
+        constexpr u64 fallbackMaxAllowedMemorySize = 128 * 1024 * 1024; // 128 MB fallback
 
-        if (transferMemorySize > maxAllowedMemorySize || transferMemorySize == 0) {
+        if (transferMemorySize > fallbackMaxAllowedMemorySize || transferMemorySize == 0) {
             LOGW("Invalid TransferMemorySize: {}. Using fallback size: {} bytes.", 
                  transferMemorySize, fallbackMaxAllowedMemorySize);
             transferMemorySize = fallbackMaxAllowedMemorySize; // Use fallback size
@@ -83,28 +80,5 @@ namespace skyline::service::audio {
         u64 appletResourceUserId{request.Pop<u64>()};
         manager.RegisterService(std::make_shared<IAudioDevice>(state, manager, appletResourceUserId, revision), session, response);
         return {};
-    }
-
-    u64 GetTotalRAM() {
-        u64 totalRam = 0;
-        std::ifstream meminfo("/proc/meminfo");
-        std::string line;
-
-        if (meminfo.is_open()) {
-            while (std::getline(meminfo, line)) {
-                if (line.find("MemTotal:") == 0) {
-                    std::istringstream iss(line);
-                    std::string label;
-                    u64 value;
-                    std::string unit;
-                    iss >> label >> value >> unit;
-                    // Convert kB to bytes
-                    totalRam = value * 1024;
-                    break;
-                }
-            }
-        }
-
-        return totalRam;
     }
 }
