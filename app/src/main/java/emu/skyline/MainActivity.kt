@@ -29,6 +29,7 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.R as MaterialR
 import com.google.android.material.color.MaterialColors
@@ -176,8 +177,10 @@ class MainActivity : AppCompatActivity() {
             )
         }
         
-        SkylineApplication.themeChangeFlow.collect {
-            recreate()
+        lifecycleScope.launch.repeatOnLifecycle(Lifecycle.State.CREATED) {
+            SkylineApplication.themeChangeFlow.collect {
+                recreate()
+            }
         }
         setInsets()
     }
