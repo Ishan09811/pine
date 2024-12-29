@@ -33,6 +33,8 @@ class SkylineApplication : Application() {
 
         val context : Context get() = instance.applicationContext
 
+        private val _themeChangeFlow = MutableSharedFlow<Unit>()
+        val themeChangeFlow = _themeChangeFlow.asSharedFlow()
 
         const val NAV_TYPE_THREE_BUTTON = 0
         const val NAV_TYPE_TWO_BUTTON = 1
@@ -85,8 +87,8 @@ class SkylineApplication : Application() {
         fun setTheme(newValue: Boolean) {
             val dynamicColorsOptions = DynamicColorsOptions.Builder().setPrecondition { _, _ -> newValue }.build()
             DynamicColors.applyToActivitiesIfAvailable(instance, dynamicColorsOptions)
-            if (newValue == false) { instance.setTheme(R.style.AppTheme) }
-            instance.recreate()
+            if (!newValue) { instance.setTheme(R.style.AppTheme) }
+            _themeChangeFlow.tryEmit(Unit)
         }
     }
 
