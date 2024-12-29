@@ -91,7 +91,7 @@ class SkylineApplication : Application() {
                 val dynamicColorsOptions = DynamicColorsOptions.Builder().build()
                 DynamicColors.applyToActivitiesIfAvailable(instance, dynamicColorsOptions)
             } else {
-                instance.setTheme(R.style.AppTheme)
+                instance.applyStyle(R.style.AppTheme, /*force*/ true)
             }
             _themeChangeFlow.tryEmit(Unit)
         }
