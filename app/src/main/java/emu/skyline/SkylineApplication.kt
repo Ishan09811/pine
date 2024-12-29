@@ -89,7 +89,7 @@ class SkylineApplication : Application() {
 
         fun setTheme(newValue: Boolean) {
             if (newValue) {
-                instance.setTheme(R.style.AppTheme.MaterialYou)
+                instance.setTheme(R.style.AppTheme_MaterialYou)
             } else {
                 instance.setTheme(R.style.AppTheme)
             }
