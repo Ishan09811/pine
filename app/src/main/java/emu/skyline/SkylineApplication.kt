@@ -8,6 +8,7 @@ package emu.skyline
 import android.app.Application
 import android.content.Context
 import android.graphics.Color
+import android.content.res.Resources.Theme
 import androidx.annotation.ColorInt
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
