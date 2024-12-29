@@ -15,6 +15,7 @@ import dagger.hilt.android.HiltAndroidApp
 import emu.skyline.di.getSettings
 import java.io.File
 import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 /**
  * @return The optimal directory for putting public files inside, this may return a private directory if a public directory cannot be retrieved
