@@ -49,7 +49,6 @@ class GlobalSettingsFragment : PreferenceFragmentCompat() {
         findPreference<Preference>("use_material_you")?.setOnPreferenceChangeListener { _, newValue ->
             val isMaterialYouEnabled = newValue as Boolean
             SkylineApplication.setTheme(isMaterialYouEnabled)
-            requireActivity().recreate()
             true
         }
 
