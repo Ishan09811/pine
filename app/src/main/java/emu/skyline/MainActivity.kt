@@ -51,6 +51,7 @@ import emu.skyline.utils.WindowInsetsHelper
 import emu.skyline.SkylineApplication
 import javax.inject.Inject
 import kotlin.math.ceil
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
