@@ -89,10 +89,9 @@ class SkylineApplication : Application() {
 
         fun setTheme(newValue: Boolean) {
             if (newValue) {
-                val dynamicColorsOptions = DynamicColorsOptions.Builder().build()
-                DynamicColors.applyToActivitiesIfAvailable(instance, dynamicColorsOptions)
+                instance.setTheme(R.style.AppTheme.MaterialYou)
             } else {
-                instance.applyStyle(R.style.AppTheme, /*force*/ true)
+                instance.setTheme(R.style.AppTheme)
             }
             _themeChangeFlow.tryEmit(Unit)
         }
@@ -102,8 +101,6 @@ class SkylineApplication : Application() {
         super.onCreate()
         instance = this
         System.loadLibrary("skyline")
-
-        val dynamicColorsOptions = DynamicColorsOptions.Builder().setPrecondition { _, _ -> getSettings().useMaterialYou }.build()
-        DynamicColors.applyToActivitiesIfAvailable(this, dynamicColorsOptions)
+        setTheme(getSettings().useMaterialYou)
     }
 }
