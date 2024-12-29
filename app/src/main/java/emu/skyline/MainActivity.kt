@@ -177,9 +177,11 @@ class MainActivity : AppCompatActivity() {
             )
         }
         
-        lifecycleScope.launch.repeatOnLifecycle(Lifecycle.State.CREATED) {
-            SkylineApplication.themeChangeFlow.collect {
-                recreate()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                SkylineApplication.themeChangeFlow.collect {
+                    recreate()
+                }
             }
         }
         setInsets()
