@@ -7,6 +7,7 @@ package emu.skyline.settings
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Build
 import android.view.View
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
@@ -49,7 +50,6 @@ class GlobalSettingsFragment : PreferenceFragmentCompat() {
         findPreference<Preference>("use_material_you")?.setOnPreferenceChangeListener { _, newValue ->
             val isMaterialYouEnabled = newValue as Boolean
             SkylineApplication.setTheme(isMaterialYouEnabled)
-            requireActivity().recreate()
             true
         }
 
@@ -74,17 +74,28 @@ class GlobalSettingsFragment : PreferenceFragmentCompat() {
         if (BuildConfig.BUILD_TYPE != "release")
             findPreference<Preference>("validation_layer")?.isVisible = true
 
-        if (!GpuDriverHelper.supportsForceMaxGpuClocks()) {
-            val forceMaxGpuClocksPref = findPreference<TwoStatePreference>("force_max_gpu_clocks")!!
-            forceMaxGpuClocksPref.isSelectable = false
-            forceMaxGpuClocksPref.isChecked = false
-            forceMaxGpuClocksPref.summary = context!!.getString(R.string.force_max_gpu_clocks_desc_unsupported)
-        }
-
+        disablePreference("use_material_you", Build.VERSION.SDK_INT < Build.VERSION_CODES.S, null)
+        disablePreference("force_max_gpu_clocks", !GpuDriverHelper.supportsForceMaxGpuClocks(), context!!.getString(R.string.force_max_gpu_clocks_desc_unsupported))
         resources.getStringArray(R.array.credits_entries).asIterable().shuffled().forEach {
             findPreference<PreferenceCategory>("category_credits")?.addPreference(Preference(context!!).apply {
                 title = it
             })
+        }
+    }
+
+    fun disablePreference(
+        preferenceId: String, 
+        isDisabled: Boolean, 
+        disabledSummary: String? = null
+    ) {
+        val preference = findPreference<Preference>(preferenceId)!!
+        preference.isSelectable = !isDisabled
+        preference.isEnabled = !isDisabled
+        if (preference is TwoStatePreference && isDisabled) {
+            preference.isChecked = false
+        }
+        if (isDisabled && disabledSummary != null) {
+            preference.summary = disabledSummary
         }
     }
 }

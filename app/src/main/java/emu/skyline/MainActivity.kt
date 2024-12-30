@@ -28,6 +28,9 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.R as MaterialR
 import com.google.android.material.color.MaterialColors
@@ -48,6 +51,7 @@ import emu.skyline.utils.WindowInsetsHelper
 import emu.skyline.SkylineApplication
 import javax.inject.Inject
 import kotlin.math.ceil
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -173,6 +177,16 @@ class MainActivity : AppCompatActivity() {
                     0.9f
                 )
             )
+        }
+        
+        // we collect the themeChanges and apply
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                SkylineApplication.themeChangeFlow.collect { themeId ->
+                    setTheme(themeId)
+                    recreate()
+                }
+            }
         }
         setInsets()
     }

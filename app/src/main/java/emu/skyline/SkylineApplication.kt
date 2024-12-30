@@ -8,6 +8,7 @@ package emu.skyline
 import android.app.Application
 import android.content.Context
 import android.graphics.Color
+import android.content.res.Resources.Theme
 import androidx.annotation.ColorInt
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.color.DynamicColorsOptions
@@ -15,6 +16,8 @@ import dagger.hilt.android.HiltAndroidApp
 import emu.skyline.di.getSettings
 import java.io.File
 import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 /**
  * @return The optimal directory for putting public files inside, this may return a private directory if a public directory cannot be retrieved
@@ -33,6 +36,8 @@ class SkylineApplication : Application() {
 
         val context : Context get() = instance.applicationContext
 
+        private val _themeChangeFlow = MutableSharedFlow<Int>(replay = 1)
+        val themeChangeFlow = _themeChangeFlow.asSharedFlow()
 
         const val NAV_TYPE_THREE_BUTTON = 0
         const val NAV_TYPE_TWO_BUTTON = 1
@@ -83,9 +88,11 @@ class SkylineApplication : Application() {
         }
 
         fun setTheme(newValue: Boolean) {
-            val dynamicColorsOptions = DynamicColorsOptions.Builder().setPrecondition { _, _ -> newValue }.build()
-            DynamicColors.applyToActivitiesIfAvailable(instance, dynamicColorsOptions)
-            if (newValue == false) { instance.setTheme(R.style.AppTheme) }
+            if (newValue) {
+                _themeChangeFlow.tryEmit(R.style.AppTheme_MaterialYou)
+            } else {
+                _themeChangeFlow.tryEmit(R.style.AppTheme)
+            }
         }
     }
 
@@ -93,8 +100,6 @@ class SkylineApplication : Application() {
         super.onCreate()
         instance = this
         System.loadLibrary("skyline")
-
-        val dynamicColorsOptions = DynamicColorsOptions.Builder().setPrecondition { _, _ -> getSettings().useMaterialYou }.build()
-        DynamicColors.applyToActivitiesIfAvailable(this, dynamicColorsOptions)
+        setTheme(getSettings().useMaterialYou)
     }
 }
