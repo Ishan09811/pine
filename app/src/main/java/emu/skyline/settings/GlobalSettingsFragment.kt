@@ -85,18 +85,16 @@ class GlobalSettingsFragment : PreferenceFragmentCompat() {
 
     fun disablePreference(
         preferenceId: String, 
-        isEnabled: Boolean, 
+        isDisabled: Boolean, 
         disabledSummary: String? = null
     ) {
         val preference = findPreference<Preference>(preferenceId)!!
-        preference.isSelectable = !isEnabled
-        preference.isEnabled = !isEnabled
-        if (preference is TwoStatePreference) {
-            if (!isEnabled) {
-                preference.isChecked = false
-            }
+        preference.isSelectable = !isDisabled
+        preference.isEnabled = !isDisabled
+        if (preference is TwoStatePreference && isDisabled) {
+            preference.isChecked = false
         }
-        if (!isEnabled && disabledSummary != null) {
+        if (isDisabled && disabledSummary != null) {
             preference.summary = disabledSummary
         }
     }
