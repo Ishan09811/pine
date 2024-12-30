@@ -10,6 +10,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
+import android.content.DialogInterface
 import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.provider.DocumentsContract
@@ -27,6 +28,8 @@ import kotlinx.coroutines.launch
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.color.DynamicColors
+import com.google.android.material.color.DynamicColorsOptions
 import emu.skyline.data.AppItem
 import emu.skyline.data.AppItemTag
 import emu.skyline.databinding.AppDialogBinding
@@ -35,6 +38,8 @@ import emu.skyline.settings.SettingsActivity
 import emu.skyline.utils.CacheManagementUtils
 import emu.skyline.utils.SaveManagementUtils
 import emu.skyline.utils.serializable
+import emu.skyline.di.getSettings
+import emu.skyline.SkylineApplication
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -205,5 +210,14 @@ class AppDialog : BottomSheetDialogFragment() {
                 false
             }
         }
+
+        val contentBasedTheme = DynamicColorsOptions.Builder().setContentBasedSource(item.bitmapIcon).build()
+        DynamicColors.applyToActivityIfAvailable(requireActivity(), contentBasedTheme)
+        requireActivity().recreate()
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        SkylineApplication.setTheme(requireContext().getSettings().useMaterialYou)
     }
 }
