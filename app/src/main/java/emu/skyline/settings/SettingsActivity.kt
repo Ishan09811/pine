@@ -26,6 +26,9 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.forEach
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.internal.ToolbarUtils
 import com.google.android.material.R as MaterialR
@@ -40,6 +43,7 @@ import emu.skyline.preference.dialog.IntegerListPreferenceMaterialDialogFragment
 import emu.skyline.preference.dialog.ListPreferenceMaterialDialogFragmentCompat
 import emu.skyline.utils.WindowInsetsHelper
 import emu.skyline.SkylineApplication
+import kotlinx.coroutines.launch
 
 private const val PREFERENCE_DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG"
 
@@ -151,6 +155,16 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
                     0.9f
                 )
             )
+        }
+        
+        // we collect the themeChanges and apply
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                SkylineApplication.themeChangeFlow.collect { themeId ->
+                    setTheme(themeId)
+                    recreate()
+                }
+            }
         }
         setInsets()
     }
