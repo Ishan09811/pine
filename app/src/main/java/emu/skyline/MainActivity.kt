@@ -179,9 +179,11 @@ class MainActivity : AppCompatActivity() {
             )
         }
         
+        // we collect the themeChanges and apply
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                SkylineApplication.themeChangeFlow.collect {
+                SkylineApplication.themeChangeFlow.collect { themeId ->
+                    setTheme(themeId)
                     recreate()
                 }
             }
