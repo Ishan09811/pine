@@ -73,7 +73,7 @@ class GlobalSettingsFragment : PreferenceFragmentCompat() {
         if (BuildConfig.BUILD_TYPE != "release")
             findPreference<Preference>("validation_layer")?.isVisible = true
 
-        disablePreference("use_material_you", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S, null))
+        disablePreference("use_material_you", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S, null)
         disablePreference("force_max_gpu_clocks", !GpuDriverHelper.supportsForceMaxGpuClocks(), context!!.getString(R.string.force_max_gpu_clocks_desc_unsupported))
         resources.getStringArray(R.array.credits_entries).asIterable().shuffled().forEach {
             findPreference<PreferenceCategory>("category_credits")?.addPreference(Preference(context!!).apply {
