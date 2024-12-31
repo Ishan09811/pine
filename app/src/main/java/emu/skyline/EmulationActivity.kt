@@ -22,8 +22,6 @@ import androidx.core.content.res.ResourcesCompat
 import android.graphics.Color
 import android.graphics.PointF
 import android.graphics.drawable.Icon
-import android.graphics.RenderEffect
-import android.graphics.Shader
 import android.hardware.display.DisplayManager
 import android.net.DhcpInfo
 import android.net.wifi.WifiManager
@@ -541,20 +539,26 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
     private fun startAmbientEffectUpdates() {
         ambientJob = CoroutineScope(Dispatchers.Main).launch {
+            var previousColor = Color.BLACK
             while (isActive) {
                 ambientHelper.captureAmbientEffect(object : AmbientHelper.AmbientCallback {
                     override fun onColorsExtracted(vibrantColor: Int, mutedColor: Int, dominantColor: Int) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            binding.gameViewContainer.setBackgroundColor(dominantColor)
-                            binding.gameViewContainer.setRenderEffect(RenderEffect.createBlurEffect(75f, 75f, Shader.TileMode.MIRROR))
-                        }
+                        val animator = ObjectAnimator.ofArgb(
+                            binding.gameViewContainer,
+                            "backgroundColor",
+                            previousColor,
+                            dominantColor
+                        )
+                        animator.duration = 300 // Smooth transition duration
+                        animator.start()
+                        previousColor = dominantColor
                     }
 
                     override fun onError(error: String) {
                         Log.e("AmbientHelper", error)
                     }
                 })
-                delay(100)
+                delay(50)
             }
         }
     }
