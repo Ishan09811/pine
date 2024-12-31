@@ -508,16 +508,18 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         }
         setInsets()
         executeApplication(intent!!)
-        binding.gameView.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
-            override fun onPreDraw(): Boolean {
-                if (binding.gameView.width > 0 && binding.gameView.height > 0) {
-                    ambientHelper = AmbientHelper(binding.gameView)
-                    startAmbientEffectUpdates()
-                    binding.gameView.viewTreeObserver.removeOnPreDrawListener(this)
+        if (emulationSettings.enableAmbientMode) {
+            binding.gameView.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+                override fun onPreDraw(): Boolean {
+                    if (binding.gameView.width > 0 && binding.gameView.height > 0) {
+                        ambientHelper = AmbientHelper(binding.gameView)
+                        startAmbientEffectUpdates()
+                        binding.gameView.viewTreeObserver.removeOnPreDrawListener(this)
+                    }
+                    return true
                 }
-                return true
-            }
-        })
+            })
+        }    
     }
 
     private fun setInsets() {
