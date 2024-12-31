@@ -81,7 +81,7 @@ import java.nio.ByteOrder
 import java.util.concurrent.FutureTask
 import javax.inject.Inject
 import kotlin.math.abs
-
+import kotlinx.coroutines.*
 
 private const val ActionPause = "${BuildConfig.APPLICATION_ID}.ACTION_EMULATOR_PAUSE"
 private const val ActionMute = "${BuildConfig.APPLICATION_ID}.ACTION_EMULATOR_MUTE"
@@ -209,6 +209,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     private external fun setAudioSink(sink: String)
 
     private var ambientJob: Job? = null
+    private lateinit var ambientHelper: AmbientHelper
 
     /**
      * @see [InputHandler.initializeControllers]
