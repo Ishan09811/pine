@@ -31,9 +31,11 @@ import android.util.Log
 import android.util.Rational
 import android.util.TypedValue
 import android.view.*
+import android.view.ViewTreeObserver
 import android.widget.Toast
 import android.widget.PopupMenu
 import android.widget.TextView
+import android.animation.ObjectAnimator
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -71,6 +73,7 @@ import emu.skyline.settings.SettingsActivity
 import emu.skyline.utils.ByteBufferSerializable
 import emu.skyline.utils.GpuDriverHelper
 import emu.skyline.utils.serializable
+import emu.skyline.utils.AmbientHelper
 import emu.skyline.input.onscreen.OnScreenEditActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -80,7 +83,7 @@ import java.nio.ByteOrder
 import java.util.concurrent.FutureTask
 import javax.inject.Inject
 import kotlin.math.abs
-
+import kotlinx.coroutines.*
 
 private const val ActionPause = "${BuildConfig.APPLICATION_ID}.ACTION_EMULATOR_PAUSE"
 private const val ActionMute = "${BuildConfig.APPLICATION_ID}.ACTION_EMULATOR_MUTE"
@@ -206,6 +209,9 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     private external fun enableJit(enable: Boolean)
 
     private external fun setAudioSink(sink: String)
+
+    private var ambientJob: Job? = null
+    private lateinit var ambientHelper: AmbientHelper
 
     /**
      * @see [InputHandler.initializeControllers]
@@ -502,6 +508,18 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         }
         setInsets()
         executeApplication(intent!!)
+        if (emulationSettings.enableAmbientMode) {
+            binding.gameView.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+                override fun onPreDraw(): Boolean {
+                    if (binding.gameView.width > 0 && binding.gameView.height > 0) {
+                        ambientHelper = AmbientHelper(binding.gameView)
+                        startAmbientEffectUpdates()
+                        binding.gameView.viewTreeObserver.removeOnPreDrawListener(this)
+                    }
+                    return true
+                }
+            })
+        }    
     }
 
     private fun setInsets() {
@@ -520,6 +538,36 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             v.setPadding(left, cutInsets.top, right, 0)
             windowInsets
         }
+    }
+
+    private fun startAmbientEffectUpdates() {
+        ambientJob = CoroutineScope(Dispatchers.Main).launch {
+            var previousColor = Color.BLACK
+            while (isActive) {
+                ambientHelper.captureAmbientEffect(object : AmbientHelper.AmbientCallback {
+                    override fun onColorsExtracted(vibrantColor: Int, mutedColor: Int, dominantColor: Int) {
+                        val animator = ObjectAnimator.ofArgb(
+                            binding.gameViewContainer,
+                            "backgroundColor",
+                            previousColor,
+                            dominantColor
+                        )
+                        animator.duration = 300 // Smooth transition duration
+                        animator.start()
+                        previousColor = dominantColor
+                    }
+
+                    override fun onError(error: String) {
+                        Log.e("AmbientHelper", error)
+                    }
+                })
+                delay(50)
+            }
+        }
+    }
+
+    private fun stopAmbientEffectUpdates() {
+        ambientJob?.cancel()
     }
 
     @SuppressWarnings("WeakerAccess")
