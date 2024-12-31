@@ -224,7 +224,7 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
 
         return when (val guestEvent = inputManager.eventMap[KeyHostEvent(event.device.descriptor, event.keyCode)]) {
             is ButtonGuestEvent -> {
-                buttonEventListener?.onControllerButtonPressed(guestEvent.button)
+                OnButtonEventListener.onControllerButtonPressed(guestEvent.button, action.state)
                 if (guestEvent.button != ButtonId.Menu)
                     setButtonState(guestEvent.id, guestEvent.button.value, action.state)
                 true
@@ -391,6 +391,6 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
     }
 
     interface OnButtonEventListener {
-       fun onControllerButtonPressed(buttonId: ButtonId)
+       fun onControllerButtonPressed(buttonId: ButtonId, PRESSED: Boolean)
     }
 }
