@@ -509,10 +509,10 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         executeApplication(intent!!)
         binding.gameView.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
             override fun onPreDraw(): Boolean {
-                if (gameView.width > 0 && gameView.height > 0) {
+                if (binding.gameView.width > 0 && binding.gameView.height > 0) {
                     ambientHelper = AmbientHelper(binding.gameView)
                     startAmbientEffectUpdates()
-                    gameView.viewTreeObserver.removeOnPreDrawListener(this)
+                    binding.gameView.viewTreeObserver.removeOnPreDrawListener(this)
                 }
                 return true
             }
