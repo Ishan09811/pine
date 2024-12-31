@@ -131,6 +131,10 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
         updateControllers()
     }
 
+    fun setControllerButtonEventListener(listener: OnButtonEventListener?) {
+        buttonEventListener = listener
+    }
+
     fun initialiseMotionSensors(context : Context) {
         val sensorManager = context.getSystemService<SensorManager>() ?: return
         val sensorList = sensorManager.getSensorList(Sensor.TYPE_ALL)
@@ -220,6 +224,7 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
 
         return when (val guestEvent = inputManager.eventMap[KeyHostEvent(event.device.descriptor, event.keyCode)]) {
             is ButtonGuestEvent -> {
+                buttonEventListener?.onControllerButtonPressed(guestEvent.button)
                 if (guestEvent.button != ButtonId.Menu)
                     setButtonState(guestEvent.id, guestEvent.button.value, action.state)
                 true
@@ -383,5 +388,9 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
 
     fun getFirstControllerType() : ControllerType {
         return inputManager.controllers[0]?.type ?: ControllerType.None
+    }
+
+    interface OnButtonEventListener {
+       fun onControllerButtonPressed(buttonId: ButtonId)
     }
 }
