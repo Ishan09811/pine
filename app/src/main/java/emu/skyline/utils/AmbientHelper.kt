@@ -7,6 +7,7 @@ import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
 import android.view.SurfaceView
+import android.view.PixelCopy
 import androidx.palette.graphics.Palette
 
 class AmbientHelper(private val surfaceView: SurfaceView) {
