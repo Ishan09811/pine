@@ -521,7 +521,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             })
         }
 
-        inputHandler.setButtonEventListener(this)
+        inputHandler.setControllerButtonEventListener(this)
     }
 
     private fun setInsets() {
