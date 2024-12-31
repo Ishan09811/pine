@@ -35,6 +35,7 @@ import android.view.ViewTreeObserver
 import android.widget.Toast
 import android.widget.PopupMenu
 import android.widget.TextView
+import android.animation.ObjectAnimator
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
