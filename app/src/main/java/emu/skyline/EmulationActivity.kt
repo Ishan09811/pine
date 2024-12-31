@@ -31,6 +31,7 @@ import android.util.Log
 import android.util.Rational
 import android.util.TypedValue
 import android.view.*
+import android.view.ViewTreeObserver
 import android.widget.Toast
 import android.widget.PopupMenu
 import android.widget.TextView
@@ -506,8 +507,16 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         }
         setInsets()
         executeApplication(intent!!)
-        ambientHelper = AmbientHelper(binding.gameView)
-        startAmbientEffectUpdates()
+        binding.gameView.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                if (gameView.width > 0 && gameView.height > 0) {
+                    ambientHelper = AmbientHelper(binding.gameView)
+                    startAmbientEffectUpdates()
+                    gameView.viewTreeObserver.removeOnPreDrawListener(this)
+                }
+                return true
+            }
+        })
     }
 
     private fun setInsets() {
