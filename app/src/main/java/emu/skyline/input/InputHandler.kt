@@ -132,7 +132,7 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
     }
 
     fun setControllerButtonEventListener(listener: OnButtonEventListener?) {
-        buttonEventListener = listener
+        OnButtonEventListener = listener
     }
 
     fun initialiseMotionSensors(context : Context) {
