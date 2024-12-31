@@ -180,6 +180,7 @@ dependencies {
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
+    implementation 'androidx.palette:palette-ktx:1.0.0'
 
     /* Kotlin */
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
