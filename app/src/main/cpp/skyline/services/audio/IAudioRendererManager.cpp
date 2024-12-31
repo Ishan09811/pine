@@ -6,6 +6,9 @@
 #include <audio_core/audio_render_manager.h>
 #include <common/utils.h>
 #include <audio.h>
+#include <fstream>
+#include <string>
+#include <sstream>
 #include "IAudioRenderer.h"
 #include "IAudioDevice.h"
 #include "IAudioRendererManager.h"
@@ -21,18 +24,35 @@ namespace skyline::service::audio {
         auto transferMemoryHandle{request.copyHandles.at(0)};
         auto processHandle{request.copyHandles.at(1)};
 
+        // Log the transferMemorySize
+        LOGI("TransferMemorySize: {}", transferMemorySize);
+
+        constexpr u64 fallbackMaxAllowedMemorySize = 128 * 1024 * 1024; // 128 MB fallback
+
+        if (transferMemorySize > fallbackMaxAllowedMemorySize || transferMemorySize == 0) {
+            LOGW("Invalid TransferMemorySize: {}. Using fallback size: {} bytes.", 
+                 transferMemorySize, fallbackMaxAllowedMemorySize);
+            transferMemorySize = fallbackMaxAllowedMemorySize; // Use fallback size
+        }
+
         i32 sessionId{state.audio->audioRendererManager->GetSessionId()};
         if (sessionId == -1) {
             LOGW("Out of audio renderer sessions!");
             return Result{Service::Audio::ResultOutOfSessions};
         }
 
-        manager.RegisterService(std::make_shared<IAudioRenderer>(state, manager,
-                                                                 *state.audio->audioRendererManager,
-                                                                 params,
-                                                                 transferMemorySize, processHandle, appletResourceUserId, sessionId),
-                                session, response);
+        try {
+            auto renderer = std::make_shared<IAudioRenderer>(
+                state, manager,
+                *state.audio->audioRendererManager,
+                params, transferMemorySize, processHandle, appletResourceUserId,
+                state.audio->audioRendererManager->GetSessionId());
 
+            manager.RegisterService(renderer, session, response);
+        } catch (const std::bad_alloc &e) {
+            LOGE("Memory allocation failed: {}", e.what());
+            return Result{Service::Audio::ResultOperationFailed};
+        }
         return {};
     }
 
@@ -61,5 +81,4 @@ namespace skyline::service::audio {
         manager.RegisterService(std::make_shared<IAudioDevice>(state, manager, appletResourceUserId, revision), session, response);
         return {};
     }
-
 }
