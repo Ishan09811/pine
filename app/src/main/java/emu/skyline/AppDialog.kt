@@ -211,9 +211,11 @@ class AppDialog : BottomSheetDialogFragment() {
             }
         }
 
-        val contentBasedTheme = DynamicColorsOptions.Builder().setContentBasedSource(item.bitmapIcon).build()
-        DynamicColors.applyToActivityIfAvailable(requireActivity(), contentBasedTheme)
-        requireActivity().recreate()
+        if (savedInstanceState == null) {
+            val contentBasedTheme = DynamicColorsOptions.Builder().setContentBasedSource(item.bitmapIcon).build()
+            DynamicColors.applyToActivityIfAvailable(requireActivity(), contentBasedTheme)
+            requireActivity().recreate()
+        }
     }
 
     override fun onDismiss(dialog: DialogInterface) {
