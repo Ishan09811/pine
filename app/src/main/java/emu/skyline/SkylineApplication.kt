@@ -87,11 +87,13 @@ class SkylineApplication : Application() {
             }
         }
 
+        private var currentTheme: Int? = null
+
         fun setTheme(newValue: Boolean) {
-            if (newValue) {
-                _themeChangeFlow.tryEmit(R.style.AppTheme_MaterialYou)
-            } else {
-                _themeChangeFlow.tryEmit(R.style.AppTheme)
+            val newTheme = if (newValue) R.style.AppTheme_MaterialYou else R.style.AppTheme
+            if (currentTheme != newTheme) {
+                _themeChangeFlow.tryEmit(newTheme)
+                currentTheme = newTheme
             }
         }
     }
