@@ -71,6 +71,7 @@ import emu.skyline.settings.SettingsActivity
 import emu.skyline.utils.ByteBufferSerializable
 import emu.skyline.utils.GpuDriverHelper
 import emu.skyline.utils.serializable
+import emu.skyline.utils.AmbientHelper
 import emu.skyline.input.onscreen.OnScreenEditActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -206,6 +207,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     private external fun enableJit(enable: Boolean)
 
     private external fun setAudioSink(sink: String)
+
+    private var ambientJob: Job? = null
 
     /**
      * @see [InputHandler.initializeControllers]
@@ -502,6 +505,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         }
         setInsets()
         executeApplication(intent!!)
+        ambientHelper = AmbientHelper(binding.gameView)
+        startAmbientEffectUpdates()
     }
 
     private fun setInsets() {
@@ -520,6 +525,27 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             v.setPadding(left, cutInsets.top, right, 0)
             windowInsets
         }
+    }
+
+    private fun startAmbientEffectUpdates() {
+        ambientJob = CoroutineScope(Dispatchers.Main).launch {
+            while (isActive) {
+                ambientHelper.captureAmbientEffect(object : AmbientHelper.AmbientCallback {
+                    override fun onColorsExtracted(vibrantColor: Int, mutedColor: Int, dominantColor: Int) {
+                        binding.gameViewContainer.setBackgroundColor(dominantColor)
+                    }
+
+                    override fun onError(error: String) {
+                        Log.e("AmbientHelper", error)
+                    }
+                })
+                delay(100)
+            }
+        }
+    }
+
+    private fun stopAmbientEffectUpdates() {
+        ambientJob?.cancel()
     }
 
     @SuppressWarnings("WeakerAccess")
