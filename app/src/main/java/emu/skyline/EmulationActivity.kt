@@ -519,7 +519,9 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                     return true
                 }
             })
-        }    
+        }
+
+        inputHandler.setButtonEventListener(this)
     }
 
     private fun setInsets() {
@@ -594,16 +596,26 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         pauseEmulator()
     }
 
+    override fun onControllerButtonPressed(buttonId: ButtonId, PRESSED: Boolean) {
+        if (buttonId == ButtonId.Menu && PRESSED) {
+            if (binding.drawerLayout.isOpen) {
+                binding.drawerLayout.close()
+            } else {
+                binding.drawerLayout.open()
+            }
+        }
+    }
+
     override fun onStart() {
         super.onStart()
 
         onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (binding.drawerLayout.isOpen) {
-                        binding.drawerLayout.close()
-                    } else {
-                        binding.drawerLayout.open()
-                    }
+                    binding.drawerLayout.close()
+                } else {
+                    binding.drawerLayout.open()
+                }
             }
         })
     }
