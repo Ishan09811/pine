@@ -212,9 +212,11 @@ class AppDialog : BottomSheetDialogFragment() {
         }
 
         if (savedInstanceState == null) {
+            val onAppliedCallback = DynamicColors.OnAppliedCallback { activity ->
+                activity.recreate()
+            }
             val contentBasedTheme = DynamicColorsOptions.Builder().setContentBasedSource(item.bitmapIcon).build()
             DynamicColors.applyToActivityIfAvailable(requireActivity(), contentBasedTheme)
-            requireActivity().recreate()
         }
     }
 
