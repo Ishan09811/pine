@@ -111,6 +111,7 @@
          <item>Immediate (Off)</item>
          <item>Mailbox</item>
          <item>FIFO (On)</item>
+         <item>FIFO (Relaxed)</item>
     </string-array>  
     <string-array name="credits_entries">
         <item>j0hnnybrav0</item>
