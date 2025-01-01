@@ -582,6 +582,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
     @SuppressWarnings("WeakerAccess")
     fun resumeEmulator() {
+        if (!isEmulatorPaused) return
         pauseEmulation(false)
         changeAudioStatus(true)
         isEmulatorPaused = false
@@ -603,6 +604,9 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             } else {
                 binding.drawerLayout.open()
             }
+        } else if (buttonId == ButtonId.Pause && PRESSED) {
+            pauseEmulator()
+            resumeEmulator()
         }
     }
 
