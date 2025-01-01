@@ -105,6 +105,7 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
     private val motionAcelOrientation : FloatArray = FloatArray(3)
     private var motionAxisOrientationX = SensorManager.AXIS_Y
     private var motionAxisOrientationY = SensorManager.AXIS_X
+    private var buttonEventListener: OnButtonEventListener? = null
 
     /**
      * Initializes all of the controllers from [InputManager] on the guest
@@ -132,7 +133,7 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
     }
 
     fun setControllerButtonEventListener(listener: OnButtonEventListener?) {
-        OnButtonEventListener = listener
+        buttonEventListener = listener
     }
 
     fun initialiseMotionSensors(context : Context) {
@@ -224,7 +225,7 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
 
         return when (val guestEvent = inputManager.eventMap[KeyHostEvent(event.device.descriptor, event.keyCode)]) {
             is ButtonGuestEvent -> {
-                OnButtonEventListener.onControllerButtonPressed(guestEvent.button, action.state)
+                buttonEventListener?.onControllerButtonPressed(guestEvent.button, action.state)
                 if (guestEvent.button != ButtonId.Menu)
                     setButtonState(guestEvent.id, guestEvent.button.value, action.state)
                 true
