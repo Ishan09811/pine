@@ -107,6 +107,11 @@
         <item>0</item>
         <item>8</item>
     </integer-array>
+    <string-array name="vsync_modes">
+         <item>Immediate (Off)</item>
+         <item>Mailbox</item>
+         <item>FIFO (On)</item>
+    </string-array>  
     <string-array name="credits_entries">
         <item>j0hnnybrav0</item>
         <item>Ell Jensen</item>
