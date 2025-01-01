@@ -74,6 +74,13 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
          * @param points An array of skyline::input::TouchScreenPoint in C++ represented as integers
          */
         external fun setTouchState(points : IntArray)
+
+        fun isKotlinHandle(button: ButtonId): Boolean {
+            return when (button) {
+                ButtonId.Menu, ButtonId.Pause -> true // these needs to be handle kotlin side
+                else -> false
+            }
+        }
     }
 
     @Suppress("ArrayInDataClass")
@@ -394,12 +401,5 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
 
     interface OnButtonEventListener {
        fun onControllerButtonPressed(buttonId: ButtonId, PRESSED: Boolean)
-    }
-
-    fun isKotlinHandle(button: ButtonId): Boolean {
-        return when (button) {
-            ButtonId.Menu, ButtonId.Pause -> true // these needs to be handle kotlin side
-            else -> false
-        }
     }
 }
