@@ -280,7 +280,7 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
                     when (guestEvent) {
                         is ButtonGuestEvent -> {
                             val action = if (abs(value) >= guestEvent.threshold) ButtonState.Pressed.state else ButtonState.Released.state
-                            if (guestEvent.button != ButtonId.Menu)
+                            if (!isKotlinHandle(guestEvent.button))
                                 setButtonState(guestEvent.id, guestEvent.button.value, action)
                         }
 
