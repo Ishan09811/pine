@@ -38,7 +38,7 @@ namespace skyline {
             systemRegion = ktSettings.GetInt<skyline::region::RegionCode>("systemRegion");
             isInternetEnabled = ktSettings.GetBool("isInternetEnabled");
             forceTripleBuffering = ktSettings.GetBool("forceTripleBuffering");
-            disableFrameThrottling = ktSettings.GetBool("disableFrameThrottling");
+            vsyncMode = ktSettings.GetInt("vsyncMode");
             gpuDriver = ktSettings.GetString("gpuDriver");
             gpuDriverLibraryName = ktSettings.GetString("gpuDriverLibraryName");
             executorSlotCountScale = ktSettings.GetInt<u32>("executorSlotCountScale");
