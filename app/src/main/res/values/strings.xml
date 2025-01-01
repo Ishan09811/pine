@@ -269,6 +269,7 @@
     <string name="plus_button">Plus</string>
     <string name="minus_button">Minus</string>
     <string name="emu_menu_button">Emulator Menu</string>
+    <string name="emu_pause_button">Pause</string>
     <string name="stick_preview">Stick Preview</string>
     <string name="done">Done</string>
     <string name="use_non_stick">Use any unmapped button to finish</string>
