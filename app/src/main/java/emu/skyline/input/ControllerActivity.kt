@@ -158,7 +158,11 @@ class ControllerActivity : AppCompatActivity() {
             }
 
             items.add(ControllerHeaderItem(getString(R.string.misc_buttons))) // The menu button will always exist
-            for (button in controller.type.buttons.filterNot { item -> buttonArrays.any { item in it.second } }.plus(ButtonId.Menu)) {
+            for (button in controller.type.buttons
+                .filterNot { item -> buttonArrays.any { item in it.second } }
+                .plus(ButtonId.Menu)
+                .plus(ButtonId.Pause)) {
+    
                 val buttonItem = ControllerButtonViewItem(id, button, onControllerButtonClick)
 
                 items.add(buttonItem)
