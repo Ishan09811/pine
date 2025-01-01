@@ -134,13 +134,12 @@
             android:summaryOn="@string/triple_buffering_enabled"
             app:key="force_triple_buffering"
             app:title="@string/force_triple_buffering" />
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:dependency="force_triple_buffering"
-            android:summaryOff="@string/disable_frame_throttling_disabled"
-            android:summaryOn="@string/disable_frame_throttling_enabled"
-            app:key="disable_frame_throttling"
-            app:title="@string/disable_frame_throttling" />
+        <emu.skyline.preference.IntegerListPreference
+            android:defaultValue="1"
+            android:entries="@array/vsync_modes"
+            app:key="vsync_mode"
+            app:title="@string/vsync_mode"
+            app:useSimpleSummaryProvider="true"/>
         <SeekBarPreference
             android:defaultValue="4"
             android:max="6"
