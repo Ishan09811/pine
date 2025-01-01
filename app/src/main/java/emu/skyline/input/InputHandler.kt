@@ -225,8 +225,9 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
 
         return when (val guestEvent = inputManager.eventMap[KeyHostEvent(event.device.descriptor, event.keyCode)]) {
             is ButtonGuestEvent -> {
-                buttonEventListener?.onControllerButtonPressed(guestEvent.button, action.state)
-                if (guestEvent.button != ButtonId.Menu)
+                if (isKotlinHandle(guestEvent.button)) 
+                    buttonEventListener?.onControllerButtonPressed(guestEvent.button, action.state)
+                if (!isKotlinHandle(guestEvent.button))
                     setButtonState(guestEvent.id, guestEvent.button.value, action.state)
                 true
             }
@@ -393,5 +394,12 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
 
     interface OnButtonEventListener {
        fun onControllerButtonPressed(buttonId: ButtonId, PRESSED: Boolean)
+    }
+
+    fun isKotlinHandle(button: ButtonId): Boolean {
+        return when (button) {
+            ButtonId.Menu, ButtonId.Pause -> true // these needs to be handle kotlin side
+            else -> false
+        }
     }
 }
