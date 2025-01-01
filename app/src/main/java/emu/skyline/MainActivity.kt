@@ -184,7 +184,8 @@ class MainActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 SkylineApplication.themeChangeFlow.collect { themeId ->
                     setTheme(themeId)
-                    //recreate()
+                    Toast.makeText(this@MainActivity, "recreated", Toast.LENGTH_SHORT).show()
+                    recreate()
                 }
             }
         }
