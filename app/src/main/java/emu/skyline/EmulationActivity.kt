@@ -605,8 +605,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 binding.drawerLayout.open()
             }
         } else if (buttonId == ButtonId.Pause && PRESSED) {
-            pauseEmulator()
-            resumeEmulator()
+            if (!isEmulatorPaused) pauseEmulator() else resumeEmulator()
         }
     }
 
