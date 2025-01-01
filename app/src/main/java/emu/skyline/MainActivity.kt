@@ -184,7 +184,7 @@ class MainActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 SkylineApplication.themeChangeFlow.collect { themeId ->
                     setTheme(themeId)
-                    recreate()
+                    //recreate()
                 }
             }
         }
