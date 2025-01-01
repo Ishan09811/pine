@@ -9,6 +9,7 @@ import android.content.Context
 import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import emu.skyline.R
+import emu.skyline.input.InputHandler
 import java.io.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -79,7 +80,7 @@ class InputManager @Inject constructor(@ApplicationContext context : Context) {
     fun syncFile() {
         for (controller in controllers.values) {
             for (button in ButtonId.values()) {
-                if (button != ButtonId.Menu && !(controller.type.buttons.contains(button) || controller.type.sticks.any { it.button == button })) {
+                if (!InputHandler.isKotlinHandle(button) && !(controller.type.buttons.contains(button) || controller.type.sticks.any { it.button == button })) {
                     val guestEvent = ButtonGuestEvent(controller.id, button)
 
                     eventMap.filterValues { it is ButtonGuestEvent && it == guestEvent }.keys.forEach { eventMap.remove(it) }
