@@ -211,7 +211,7 @@ namespace skyline::gpu {
             }); // We don't care about suboptimal images as they are caused by not respecting the transform hint, we handle transformations externally
         }
 
-        timestamp = (timestamp && !*state.settings->disableFrameThrottling) ? timestamp : getMonotonicNsNow(); // We tie FPS to the submission time rather than presentation timestamp, if we don't have the presentation timestamp available or if frame throttling is disabled as we want the maximum measured FPS to not be restricted to the refresh rate
+        timestamp = (timestamp && *state.settings->vsyncMode != 0 || *state.settings->vsyncMode != 1) ? timestamp : getMonotonicNsNow(); // We tie FPS to the submission time rather than presentation timestamp, if we don't have the presentation timestamp available or if frame throttling is disabled as we want the maximum measured FPS to not be restricted to the refresh rate
         if (frameTimestamp) {
             i64 sampleWeight{Fps ? Fps : 1}; //!< The weight of each sample in calculating the average, we want to roughly average the past second
 
@@ -315,7 +315,28 @@ namespace skyline::gpu {
         if ((capabilities.supportedUsageFlags & presentUsage) != presentUsage)
             throw exception("Swapchain doesn't support image usage '{}': {}", vk::to_string(presentUsage), vk::to_string(capabilities.supportedUsageFlags));
 
-        auto requestedMode{*state.settings->disableFrameThrottling ? vk::PresentModeKHR::eMailbox : vk::PresentModeKHR::eFifo};
+        auto requestedMode{vk::PresentModeKHR::eFifo};
+        switch (*state.settings->vsyncMode) {
+            case 0: // Immediate
+                requestedMode = vk::PresentModeKHR::eImmediate;
+                break;
+
+            case 1: // Mailbox
+                requestedMode = vk::PresentModeKHR::eMailbox;
+                break;
+
+            case 2: // FIFO
+                requestedMode = vk::PresentModeKHR::eFifo;
+                break;
+
+            case 3: // Relaxed FIFO
+                requestedMode = vk::PresentModeKHR::eFifoRelaxed;
+                break;
+            
+            default: // Default FIFO
+                requestedMode = vk::PresentModeKHR::eFifo;
+                break;
+        }
         auto modes{gpu.vkPhysicalDevice.getSurfacePresentModesKHR(**vkSurface)};
         if (std::find(modes.begin(), modes.end(), requestedMode) == modes.end())
             throw exception("Swapchain doesn't support present mode: {}", vk::to_string(requestedMode));
