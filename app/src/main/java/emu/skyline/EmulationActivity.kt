@@ -387,19 +387,11 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             }
         }
 
-        if (emulationSettings.perfStats) {
-            if (emulationSettings.disableFrameThrottling)
-                binding.perfStats.setTextColor(getColor(R.color.colorPerfStatsSecondary))
-
-            enablePerfStats(true)
-        }
-
+        if (emulationSettings.perfStats) enablePerfStats(true)
         enableThermalIndicator(emulationSettings.perfStats)
-
         enableDynamicResolution(emulationSettings.enableDynamicResolution)
-
+        
         window.setSustainedPerformanceMode(emulationSettings.enableSustainedPerf)
-
         force60HzRefreshRate(!emulationSettings.maxRefreshRate)
         getSystemService<DisplayManager>()?.registerDisplayListener(this, null)
 
