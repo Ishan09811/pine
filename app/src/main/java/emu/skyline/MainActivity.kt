@@ -112,6 +112,7 @@ class MainActivity : AppCompatActivity() {
                 else -> AppCompatDelegate.MODE_NIGHT_UNSPECIFIED
             }
         )
+        setTheme(if (getSettings().useMaterialYou) R.style.AppTheme_MaterialYou else R.style.AppTheme)
         super.onCreate(savedInstanceState)
 
         setContentView(binding.root)
@@ -185,7 +186,6 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
-                    setTheme(themeId)
                     Toast.makeText(this@MainActivity, "recreated", Toast.LENGTH_SHORT).show()
                     recreate()
                 }
