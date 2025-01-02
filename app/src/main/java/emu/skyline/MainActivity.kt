@@ -37,6 +37,7 @@ import com.google.android.material.R as MaterialR
 import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
 import emu.skyline.adapter.*
+import emu.skyline.di.getSettings
 import emu.skyline.data.AppItem
 import emu.skyline.data.AppItemTag
 import emu.skyline.databinding.MainActivityBinding
