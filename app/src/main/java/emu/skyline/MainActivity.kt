@@ -183,7 +183,7 @@ class MainActivity : AppCompatActivity() {
         // we collect the themeChanges and apply
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                SkylineApplication.themeChangeFlow.collect { themeId ->
+                SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
                     setTheme(themeId)
                     Toast.makeText(this@MainActivity, "recreated", Toast.LENGTH_SHORT).show()
                     recreate()
