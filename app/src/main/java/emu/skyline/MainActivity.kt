@@ -53,6 +53,7 @@ import emu.skyline.SkylineApplication
 import javax.inject.Inject
 import kotlin.math.ceil
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
