@@ -92,7 +92,7 @@ class SkylineApplication : Application() {
         fun setTheme(newValue: Boolean) {
             val newTheme = if (newValue) R.style.AppTheme_MaterialYou else R.style.AppTheme
             if (currentTheme != newTheme) {
-                _themeChangeFlow.tryEmit(newTheme)
+                _themeChangeFlow.emit(newTheme)
                 currentTheme = newTheme
             }
         }
