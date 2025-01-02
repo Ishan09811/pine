@@ -146,9 +146,7 @@
     <string name="force_triple_buffering">Force Triple Buffering</string>
     <string name="triple_buffering_enabled">Utilize at least three swapchain buffers (Higher FPS but more input lag)</string>
     <string name="triple_buffering_disabled">Utilize at least two swapchain buffers (Lower FPS but less input lag)</string>
-    <string name="disable_frame_throttling">Disable Frame Throttling</string>
-    <string name="disable_frame_throttling_enabled">Game is allowed to submit frames as fast as possible (Only for benchmarking)\n\n<b>Note:</b> An alternative method is utilized to measure the FPS with this enabled, the figures must not be compared to throttled FPS figures</string>
-    <string name="disable_frame_throttling_disabled">Only allow the game to submit frames at the display refresh rate</string>
+    <string name="vsync_mode">VSync Mode</string>
     <string name="executor_slot_count_scale">Executor Slot Count Scale</string>
     <string name="executor_slot_count_scale_desc">Scale controlling the maximum number of simultaneous GPU executions (Higher may sometimes perform better but will use more RAM)</string>
     <string name="executor_flush_threshold">Executor Flush Threshold</string>
