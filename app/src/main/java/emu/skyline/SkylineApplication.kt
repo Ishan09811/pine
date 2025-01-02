@@ -36,7 +36,7 @@ class SkylineApplication : Application() {
 
         val context : Context get() = instance.applicationContext
 
-        private val _themeChangeFlow = MutableSharedFlow<Int>(replay = 1)
+        private val _themeChangeFlow = MutableSharedFlow<Int>()
         val themeChangeFlow = _themeChangeFlow.asSharedFlow()
 
         const val NAV_TYPE_THREE_BUTTON = 0
