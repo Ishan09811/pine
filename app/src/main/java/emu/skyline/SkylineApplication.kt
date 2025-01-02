@@ -105,7 +105,6 @@ class SkylineApplication : Application() {
         super.onCreate()
         instance = this
         System.loadLibrary("skyline")
-        val initialTheme = if (getSettings().useMaterialYou) R.style.AppTheme_MaterialYou else R.style.AppTheme
-        setTheme(initialTheme)
+        setTheme(getSettings().useMaterialYou)
     }
 }
