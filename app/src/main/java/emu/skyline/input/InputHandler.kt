@@ -74,6 +74,13 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
          * @param points An array of skyline::input::TouchScreenPoint in C++ represented as integers
          */
         external fun setTouchState(points : IntArray)
+
+        fun isKotlinHandle(button: ButtonId): Boolean {
+            return when (button) {
+                ButtonId.Menu, ButtonId.Pause -> true // these needs to be handle kotlin side
+                else -> false
+            }
+        }
     }
 
     @Suppress("ArrayInDataClass")
@@ -105,6 +112,7 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
     private val motionAcelOrientation : FloatArray = FloatArray(3)
     private var motionAxisOrientationX = SensorManager.AXIS_Y
     private var motionAxisOrientationY = SensorManager.AXIS_X
+    private var buttonEventListener: OnButtonEventListener? = null
 
     /**
      * Initializes all of the controllers from [InputManager] on the guest
@@ -129,6 +137,10 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
         }
 
         updateControllers()
+    }
+
+    fun setControllerButtonEventListener(listener: OnButtonEventListener?) {
+        buttonEventListener = listener
     }
 
     fun initialiseMotionSensors(context : Context) {
@@ -220,7 +232,9 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
 
         return when (val guestEvent = inputManager.eventMap[KeyHostEvent(event.device.descriptor, event.keyCode)]) {
             is ButtonGuestEvent -> {
-                if (guestEvent.button != ButtonId.Menu)
+                if (isKotlinHandle(guestEvent.button)) 
+                    buttonEventListener?.onControllerButtonPressed(guestEvent.button, action.state)
+                if (!isKotlinHandle(guestEvent.button))
                     setButtonState(guestEvent.id, guestEvent.button.value, action.state)
                 true
             }
@@ -273,7 +287,7 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
                     when (guestEvent) {
                         is ButtonGuestEvent -> {
                             val action = if (abs(value) >= guestEvent.threshold) ButtonState.Pressed.state else ButtonState.Released.state
-                            if (guestEvent.button != ButtonId.Menu)
+                            if (!isKotlinHandle(guestEvent.button))
                                 setButtonState(guestEvent.id, guestEvent.button.value, action)
                         }
 
@@ -383,5 +397,9 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
 
     fun getFirstControllerType() : ControllerType {
         return inputManager.controllers[0]?.type ?: ControllerType.None
+    }
+
+    interface OnButtonEventListener {
+       fun onControllerButtonPressed(buttonId: ButtonId, PRESSED: Boolean)
     }
 }

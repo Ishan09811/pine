@@ -45,6 +45,7 @@ enum class ButtonId(val value : Long, val short : String? = null, val long : Int
     RightSL(1 shl 26, "SL", string.left_shoulder),
     RightSR(1 shl 27, "SR", string.right_shoulder),
     Menu(1 shl 28, "⌂︎", string.emu_menu_button),
+    Pause(1 shl 29, "𓊕", string.emu_pause_button),
     All(0x1FFFFFFF, "All");
 }
 

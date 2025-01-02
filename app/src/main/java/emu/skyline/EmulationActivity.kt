@@ -91,7 +91,7 @@ private const val ActionMute = "${BuildConfig.APPLICATION_ID}.ACTION_EMULATOR_MU
 private val Number.toPx get() = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), Resources.getSystem().displayMetrics).toInt()
 
 @AndroidEntryPoint
-class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTouchListener, DisplayManager.DisplayListener {
+class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTouchListener, DisplayManager.DisplayListener, InputHandler.OnButtonEventListener {
     companion object {
         private val Tag = EmulationActivity::class.java.simpleName
         const val ReturnToMainTag = "returnToMain"
@@ -519,7 +519,9 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                     return true
                 }
             })
-        }    
+        }
+
+        inputHandler.setControllerButtonEventListener(this)
     }
 
     private fun setInsets() {
@@ -580,6 +582,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
     @SuppressWarnings("WeakerAccess")
     fun resumeEmulator() {
+        if (!isEmulatorPaused) return
         pauseEmulation(false)
         changeAudioStatus(true)
         isEmulatorPaused = false
@@ -594,16 +597,28 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         pauseEmulator()
     }
 
+    override fun onControllerButtonPressed(buttonId: ButtonId, PRESSED: Boolean) {
+        if (buttonId == ButtonId.Menu && PRESSED) {
+            if (binding.drawerLayout.isOpen) {
+                binding.drawerLayout.close()
+            } else {
+                binding.drawerLayout.open()
+            }
+        } else if (buttonId == ButtonId.Pause && PRESSED) {
+            if (!isEmulatorPaused) pauseEmulator() else resumeEmulator()
+        }
+    }
+
     override fun onStart() {
         super.onStart()
 
         onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (binding.drawerLayout.isOpen) {
-                        binding.drawerLayout.close()
-                    } else {
-                        binding.drawerLayout.open()
-                    }
+                    binding.drawerLayout.close()
+                } else {
+                    binding.drawerLayout.open()
+                }
             }
         })
     }
