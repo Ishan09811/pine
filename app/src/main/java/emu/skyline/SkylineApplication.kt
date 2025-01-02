@@ -18,6 +18,9 @@ import java.io.File
 import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * @return The optimal directory for putting public files inside, this may return a private directory if a public directory cannot be retrieved
@@ -92,7 +95,7 @@ class SkylineApplication : Application() {
         fun setTheme(newValue: Boolean) {
             val newTheme = if (newValue) R.style.AppTheme_MaterialYou else R.style.AppTheme
             if (currentTheme != newTheme) {
-                _themeChangeFlow.emit(newTheme)
+                CoroutineScope(Dispatchers.Default).launch { _themeChangeFlow.emit(newTheme) }
                 currentTheme = newTheme
             }
         }
