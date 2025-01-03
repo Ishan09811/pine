@@ -8,7 +8,6 @@ package emu.skyline.preference
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.util.TypedValue
 import android.view.ViewTreeObserver
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -155,17 +154,10 @@ class SearchLocationActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
-                    if (getCurrentTheme() != themeId)
-                        recreate()
+                    recreate()
                 }
             }
         }
-    }
-
-    private fun getCurrentTheme(): Int {
-        val typedValue = TypedValue()
-        this@SearchLocationActivity.theme.resolveAttribute(R.attr.theme, typedValue, true)
-        return typedValue.resourceId
     }
 
     private fun resolveActionResultString(result : SearchLocationResult) = when (result) {
