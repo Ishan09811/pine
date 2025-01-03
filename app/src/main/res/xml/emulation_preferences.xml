@@ -95,6 +95,12 @@
             android:summary="@string/enable_ambient_mode_desc"
             android:key="enable_ambient_mode"
             android:title="@string/enable_ambient_mode" />
+        <emu.skyline.preference.IntegerListPreference
+            android:defaultValue="1"
+            android:entries="@array/anisotropic_filters"
+            app:key="anisotropic_filter"
+            app:title="@string/anisotropic_filter"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
     <PreferenceCategory
         android:key="category_audio"
