@@ -129,6 +129,7 @@
     <string name="show_pause_button_enabled">The pause button will be displayed</string>
     <string name="enable_ambient_mode">Enable Ambient Mode</string>
     <string name="enable_ambient_mode_desc">Ambient effect will be applied</string>
+    <string name="anisotropic_filter">Anisotropic Filter</string>
     <!-- Settings - Audio -->
     <string name="audio">Audio</string>
     <string name="audio_output_engine">Output engine</string>
