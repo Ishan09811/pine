@@ -164,7 +164,7 @@ class SearchLocationActivity : AppCompatActivity() {
 
     private fun getCurrentTheme(): Int {
         val typedValue = TypedValue()
-        theme.resolveAttribute(R.attr.theme, typedValue, true)
+        this@SearchLocationActivity.theme.resolveAttribute(R.attr.theme, typedValue, true)
         return typedValue.resourceId
     }
 
