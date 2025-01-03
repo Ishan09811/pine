@@ -30,9 +30,11 @@ import emu.skyline.utils.GpuDriverHelper
 import emu.skyline.utils.GpuDriverInstallResult
 import emu.skyline.utils.WindowInsetsHelper
 import emu.skyline.utils.serializable
+import emu.skyline.SkylineApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
  * This activity is used to manage the installed gpu drivers and select one to use.
@@ -125,6 +127,7 @@ class GpuDriverActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState : Bundle?) {
+        setTheme(if (getSettings().useMaterialYou) R.style.AppTheme_MaterialYou else R.style.AppTheme)
         super.onCreate(savedInstanceState)
 
         setContentView(binding.root)
@@ -190,6 +193,21 @@ class GpuDriverActivity : AppCompatActivity() {
         }
 
         populateAdapter()
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
+                    if (getCurrentTheme() != themeId)
+                        recreate()
+                }
+            }
+        }
+    }
+
+    private fun getCurrentTheme(): Int {
+        val typedValue = TypedValue()
+        theme.resolveAttribute(R.attr.theme, typedValue, true)
+        return typedValue.resourceId
     }
 
     private fun resolveInstallResultString(result : GpuDriverInstallResult) = when (result) {
