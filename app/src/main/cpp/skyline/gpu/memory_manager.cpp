@@ -120,7 +120,7 @@ namespace skyline::gpu::memory {
 
     Image MemoryManager::AllocateImage(const vk::ImageCreateInfo &createInfo) {
         VmaAllocationCreateInfo allocationCreateInfo{
-            .usage = VMA_MEMORY_USAGE_GPU_ONLY,
+            .requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         };
 
         VkImage image;
