@@ -211,7 +211,7 @@ class GpuDriverActivity : AppCompatActivity() {
 
     private fun getCurrentTheme(): Int {
         val typedValue = TypedValue()
-        theme.resolveAttribute(R.attr.theme, typedValue, true)
+        this@GpuDriverActivity.theme.resolveAttribute(R.attr.theme, typedValue, true)
         return typedValue.resourceId
     }
 
