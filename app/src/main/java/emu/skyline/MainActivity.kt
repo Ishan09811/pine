@@ -6,6 +6,8 @@
 package emu.skyline
 
 import android.content.Intent
+import android.util.TypedValue
+import android.content.res.Resources.Theme
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -187,12 +189,18 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
-                    Toast.makeText(this@MainActivity, "recreated", Toast.LENGTH_SHORT).show()
-                    recreate()
+                    if (getCurrentTheme() != themeId)
+                        recreate()
                 }
             }
         }
         setInsets()
+    }
+
+    private fun getCurrentTheme(): Int {
+        val typedValue = TypedValue()
+        theme.resolveAttribute(R.attr.theme, typedValue, true)
+        return typedValue.resourceId
     }
 
     private fun setAppListDecoration() {
