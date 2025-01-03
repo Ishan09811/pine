@@ -84,7 +84,8 @@ namespace skyline::gpu::memory {
         };
         VmaAllocationCreateInfo allocationCreateInfo{
             .flags = VMA_ALLOCATION_CREATE_MAPPED_BIT,
-            .usage = VMA_MEMORY_USAGE_CPU_ONLY,
+            .requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            .preferredFlags = VK_MEMORY_PROPERTY_HOST_CACHED_BIT, // may increase performance
         };
 
         VkBuffer buffer;
