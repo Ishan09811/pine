@@ -7,7 +7,6 @@ package emu.skyline
 
 import android.content.Intent
 import android.util.TypedValue
-import android.content.res.Resources.Theme
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -199,7 +198,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getCurrentTheme(): Int {
         val typedValue = TypedValue()
-        theme.resolveAttribute(R.attr.theme, typedValue, true)
+        this@MainActivity.theme.resolveAttribute(R.attr.theme, typedValue, true)
         return typedValue.resourceId
     }
 
