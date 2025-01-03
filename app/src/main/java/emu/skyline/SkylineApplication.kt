@@ -18,6 +18,9 @@ import java.io.File
 import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * @return The optimal directory for putting public files inside, this may return a private directory if a public directory cannot be retrieved
@@ -36,7 +39,7 @@ class SkylineApplication : Application() {
 
         val context : Context get() = instance.applicationContext
 
-        private val _themeChangeFlow = MutableSharedFlow<Int>(replay = 1)
+        private val _themeChangeFlow = MutableSharedFlow<Int>()
         val themeChangeFlow = _themeChangeFlow.asSharedFlow()
 
         const val NAV_TYPE_THREE_BUTTON = 0
@@ -87,11 +90,13 @@ class SkylineApplication : Application() {
             }
         }
 
+        private var currentTheme: Int? = null
+
         fun setTheme(newValue: Boolean) {
-            if (newValue) {
-                _themeChangeFlow.tryEmit(R.style.AppTheme_MaterialYou)
-            } else {
-                _themeChangeFlow.tryEmit(R.style.AppTheme)
+            val newTheme = if (newValue) R.style.AppTheme_MaterialYou else R.style.AppTheme
+            if (currentTheme != newTheme) {
+                CoroutineScope(Dispatchers.Main).launch { _themeChangeFlow.emit(newTheme) }
+                currentTheme = newTheme
             }
         }
     }
@@ -100,6 +105,5 @@ class SkylineApplication : Application() {
         super.onCreate()
         instance = this
         System.loadLibrary("skyline")
-        setTheme(getSettings().useMaterialYou)
     }
 }

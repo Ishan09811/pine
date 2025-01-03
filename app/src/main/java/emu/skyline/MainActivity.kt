@@ -6,6 +6,7 @@
 package emu.skyline
 
 import android.content.Intent
+import android.util.TypedValue
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -13,6 +14,7 @@ import android.provider.DocumentsContract
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.view.ViewGroup.MarginLayoutParams
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -36,6 +38,7 @@ import com.google.android.material.R as MaterialR
 import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
 import emu.skyline.adapter.*
+import emu.skyline.di.getSettings
 import emu.skyline.data.AppItem
 import emu.skyline.data.AppItemTag
 import emu.skyline.databinding.MainActivityBinding
@@ -52,6 +55,7 @@ import emu.skyline.SkylineApplication
 import javax.inject.Inject
 import kotlin.math.ceil
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -110,6 +114,7 @@ class MainActivity : AppCompatActivity() {
                 else -> AppCompatDelegate.MODE_NIGHT_UNSPECIFIED
             }
         )
+        setTheme(if (getSettings().useMaterialYou) R.style.AppTheme_MaterialYou else R.style.AppTheme)
         super.onCreate(savedInstanceState)
 
         setContentView(binding.root)
@@ -182,8 +187,7 @@ class MainActivity : AppCompatActivity() {
         // we collect the themeChanges and apply
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                SkylineApplication.themeChangeFlow.collect { themeId ->
-                    setTheme(themeId)
+                SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
                     recreate()
                 }
             }

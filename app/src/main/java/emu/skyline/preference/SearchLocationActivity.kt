@@ -15,6 +15,9 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import emu.skyline.R
@@ -30,6 +33,10 @@ import emu.skyline.utils.SearchLocationHelper
 import emu.skyline.utils.SearchLocationResult
 import emu.skyline.utils.WindowInsetsHelper
 import emu.skyline.utils.serializable
+import emu.skyline.di.getSettings
+import emu.skyline.SkylineApplication
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
  * This activity is used to manage the selected search locations to use.
@@ -88,6 +95,7 @@ class SearchLocationActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState : Bundle?) {
+        setTheme(if (getSettings().useMaterialYou) R.style.AppTheme_MaterialYou else R.style.AppTheme)
         super.onCreate(savedInstanceState)
 
         setContentView(binding.root)
@@ -142,6 +150,14 @@ class SearchLocationActivity : AppCompatActivity() {
         }
 
         populateAdapter()
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
+                    recreate()
+                }
+            }
+        }
     }
 
     private fun resolveActionResultString(result : SearchLocationResult) = when (result) {

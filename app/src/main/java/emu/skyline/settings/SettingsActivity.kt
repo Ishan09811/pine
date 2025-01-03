@@ -42,8 +42,10 @@ import emu.skyline.preference.dialog.EditTextPreferenceMaterialDialogFragmentCom
 import emu.skyline.preference.dialog.IntegerListPreferenceMaterialDialogFragmentCompat
 import emu.skyline.preference.dialog.ListPreferenceMaterialDialogFragmentCompat
 import emu.skyline.utils.WindowInsetsHelper
+import emu.skyline.di.getSettings
 import emu.skyline.SkylineApplication
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 private const val PREFERENCE_DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG"
 
@@ -70,6 +72,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
      * This initializes all of the elements in the activity and displays the settings fragment
      */
     override fun onCreate(savedInstanceState : Bundle?) {
+        setTheme(if (getSettings().useMaterialYou) R.style.AppTheme_MaterialYou else R.style.AppTheme)
         super.onCreate(savedInstanceState)
 
         setContentView(binding.root)
@@ -160,8 +163,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
         // we collect the themeChanges and apply
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                SkylineApplication.themeChangeFlow.collect { themeId ->
-                    setTheme(themeId)
+                SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
                     recreate()
                 }
             }
