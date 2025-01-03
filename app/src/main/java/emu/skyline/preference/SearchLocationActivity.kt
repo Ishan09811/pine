@@ -34,6 +34,7 @@ import emu.skyline.utils.SearchLocationHelper
 import emu.skyline.utils.SearchLocationResult
 import emu.skyline.utils.WindowInsetsHelper
 import emu.skyline.utils.serializable
+import emu.skyline.di.getSettings
 import emu.skyline.SkylineApplication
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.distinctUntilChanged
