@@ -188,18 +188,11 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
-                    if (getCurrentTheme() != themeId)
-                        recreate()
+                    recreate()
                 }
             }
         }
         setInsets()
-    }
-
-    private fun getCurrentTheme(): Int {
-        val typedValue = TypedValue()
-        this@MainActivity.theme.resolveAttribute(R.attr.theme, typedValue, true)
-        return typedValue.resourceId
     }
 
     private fun setAppListDecoration() {
