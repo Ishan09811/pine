@@ -30,6 +30,9 @@ import emu.skyline.utils.SearchLocationHelper
 import emu.skyline.utils.SearchLocationResult
 import emu.skyline.utils.WindowInsetsHelper
 import emu.skyline.utils.serializable
+import emu.skyline.SkylineApplication
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
  * This activity is used to manage the selected search locations to use.
@@ -88,6 +91,7 @@ class SearchLocationActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState : Bundle?) {
+        setTheme(if (getSettings().useMaterialYou) R.style.AppTheme_MaterialYou else R.style.AppTheme)
         super.onCreate(savedInstanceState)
 
         setContentView(binding.root)
@@ -142,6 +146,21 @@ class SearchLocationActivity : AppCompatActivity() {
         }
 
         populateAdapter()
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
+                    if (getCurrentTheme() != themeId)
+                        recreate()
+                }
+            }
+        }
+    }
+
+    private fun getCurrentTheme(): Int {
+        val typedValue = TypedValue()
+        theme.resolveAttribute(R.attr.theme, typedValue, true)
+        return typedValue.resourceId
     }
 
     private fun resolveActionResultString(result : SearchLocationResult) = when (result) {
