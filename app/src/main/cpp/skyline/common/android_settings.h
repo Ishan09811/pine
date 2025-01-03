@@ -39,7 +39,7 @@ namespace skyline {
             isInternetEnabled = ktSettings.GetBool("isInternetEnabled");
             forceTripleBuffering = ktSettings.GetBool("forceTripleBuffering");
             vsyncMode = ktSettings.GetInt<int>("vsyncMode");
-            anisotropicFilter = ktSettings.GetInt<int>("anisotropic_filter");
+            anisotropicFilter = ktSettings.GetInt<float>("anisotropic_filter");
             gpuDriver = ktSettings.GetString("gpuDriver");
             gpuDriverLibraryName = ktSettings.GetString("gpuDriverLibraryName");
             executorSlotCountScale = ktSettings.GetInt<u32>("executorSlotCountScale");
