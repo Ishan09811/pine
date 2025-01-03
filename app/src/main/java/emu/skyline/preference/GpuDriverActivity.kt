@@ -9,7 +9,6 @@ import android.content.Intent
 import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
 import android.os.Bundle
 import android.view.ViewTreeObserver
-import android.util.TypedValue
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -202,17 +201,10 @@ class GpuDriverActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
-                    if (getCurrentTheme() != themeId)
-                        recreate()
+                    recreate()
                 }
             }
         }
-    }
-
-    private fun getCurrentTheme(): Int {
-        val typedValue = TypedValue()
-        this@GpuDriverActivity.theme.resolveAttribute(R.attr.theme, typedValue, true)
-        return typedValue.resourceId
     }
 
     private fun resolveInstallResultString(result : GpuDriverInstallResult) = when (result) {
