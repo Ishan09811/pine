@@ -14,6 +14,8 @@ import android.view.Menu
 import android.view.ViewTreeObserver
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.TextView
+import android.util.TypedValue
+import android.content.res.Resources.Theme
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -71,6 +73,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
      * This initializes all of the elements in the activity and displays the settings fragment
      */
     override fun onCreate(savedInstanceState : Bundle?) {
+        setTheme()
         super.onCreate(savedInstanceState)
 
         setContentView(binding.root)
@@ -162,12 +165,18 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
-                    setTheme(themeId)
-                    recreate()
+                    if (getCurrentTheme() != themeId)
+                        recreate()
                 }
             }
         }
         setInsets()
+    }
+
+    private fun getCurrentTheme(): Int {
+        val typedValue = TypedValue()
+        theme.resolveAttribute(R.attr.theme, typedValue, true)
+        return typedValue.resourceId
     }
 
     override fun onCreateOptionsMenu(menu : Menu?) : Boolean {
