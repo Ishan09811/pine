@@ -15,7 +15,6 @@ import android.view.ViewTreeObserver
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.TextView
 import android.util.TypedValue
-import android.content.res.Resources.Theme
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -176,7 +175,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
 
     private fun getCurrentTheme(): Int {
         val typedValue = TypedValue()
-        theme.resolveAttribute(R.attr.theme, typedValue, true)
+        this@SettingsActivity.theme.resolveAttribute(R.attr.theme, typedValue, true)
         return typedValue.resourceId
     }
 
