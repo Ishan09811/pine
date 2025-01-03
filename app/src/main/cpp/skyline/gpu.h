@@ -20,7 +20,6 @@
 #include "gpu/cache/framebuffer_cache.h"
 #include "gpu/interconnect/maxwell_3d/pipeline_manager.h"
 #include "gpu/interconnect/kepler_compute/pipeline_manager.h"
-#include "gpu/interconnect/common/samplers.h"
 
 namespace skyline::gpu {
     static constexpr u32 VkApiVersion{VK_API_VERSION_1_1}; //!< The version of core Vulkan that we require
@@ -34,7 +33,6 @@ namespace skyline::gpu {
         friend Texture;
         friend Buffer;
         friend BufferManager;
-        friend Samplers;
 
       public:
         adrenotools_gpu_mapping adrenotoolsImportMapping{}; //!< Persistent struct to store active adrenotools mapping import info
