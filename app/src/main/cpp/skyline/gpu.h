@@ -77,5 +77,9 @@ namespace skyline::gpu {
          * @brief Should be called after loader population to initialize the per-title caches
          */
         void Initialise();
+
+        const DeviceState& getState() const {
+            return state;
+        }
     };
 }
