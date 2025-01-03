@@ -3,6 +3,7 @@
 
 #include <soc/gm20b/channel.h>
 #include <soc/gm20b/gmmu.h>
+#include <common/settings.h>
 #include "samplers.h"
 
 namespace skyline::gpu::interconnect {
