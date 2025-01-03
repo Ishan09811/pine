@@ -27,6 +27,9 @@ data class NativeSettings(
     // CPU
     var enableJitFastmem : Boolean,
 
+    // Display
+    var anisotropicFilter : Int,
+
     // GPU
     var gpuDriver : String,
     var gpuDriverLibraryName : String,
@@ -57,6 +60,7 @@ data class NativeSettings(
         pref.systemRegion,
         pref.isInternetEnabled,
         pref.enableJitFastmem,
+        pref.anisotropicFilter,
         if (pref.gpuDriver == EmulationSettings.SYSTEM_GPU_DRIVER) "" else pref.gpuDriver,
         if (pref.gpuDriver == EmulationSettings.SYSTEM_GPU_DRIVER) "" else GpuDriverHelper.getLibraryName(context, pref.gpuDriver),
         pref.forceTripleBuffering,

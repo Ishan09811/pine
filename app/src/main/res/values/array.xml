@@ -108,11 +108,27 @@
         <item>8</item>
     </integer-array>
     <string-array name="vsync_modes">
-         <item>Immediate (Off)</item>
-         <item>Mailbox</item>
-         <item>FIFO (On)</item>
-         <item>FIFO (Relaxed)</item>
-    </string-array>  
+        <item>Immediate (Off)</item>
+        <item>Mailbox</item>
+        <item>FIFO (On)</item>
+        <item>FIFO (Relaxed)</item>
+    </string-array>
+    <string-array name="anisotropic_filters">
+        <item>Off</item>
+        <item>Auto</item>
+        <item>2x</item>
+        <item>4x</item>
+        <item>8x</item>
+        <item>16x</item> 
+    </string-array>
+    <integer-array name="anisotropic_filters_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>4</item>
+        <item>8</item>
+        <item>16</item> 
+    </integer-array>    
     <string-array name="credits_entries">
         <item>j0hnnybrav0</item>
         <item>Ell Jensen</item>

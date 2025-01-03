@@ -98,6 +98,7 @@
         <emu.skyline.preference.IntegerListPreference
             android:defaultValue="1"
             android:entries="@array/anisotropic_filters"
+            android:entryValues="@array/anisotropic_filters_values"
             app:key="anisotropic_filter"
             app:title="@string/anisotropic_filter"
             app:useSimpleSummaryProvider="true" />
