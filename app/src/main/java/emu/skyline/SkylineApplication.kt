@@ -105,6 +105,5 @@ class SkylineApplication : Application() {
         super.onCreate()
         instance = this
         System.loadLibrary("skyline")
-        setTheme(getSettings().useMaterialYou)
     }
 }
