@@ -14,7 +14,6 @@ import android.view.Menu
 import android.view.ViewTreeObserver
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.TextView
-import android.util.TypedValue
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -165,18 +164,11 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
-                    if (getCurrentTheme() != themeId)
-                        recreate()
+                    recreate()
                 }
             }
         }
         setInsets()
-    }
-
-    private fun getCurrentTheme(): Int {
-        val typedValue = TypedValue()
-        this@SettingsActivity.theme.resolveAttribute(R.attr.theme, typedValue, true)
-        return typedValue.resourceId
     }
 
     override fun onCreateOptionsMenu(menu : Menu?) : Boolean {
