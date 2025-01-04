@@ -29,13 +29,9 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
                 recycle()
             }
         }
-
-        // Set up the click listener
-        setOnPreferenceClickListener {
-            showMaterialDialog()
-            true
-        }
     }
+
+    override fun onClick() { showMaterialDialog() }
 
     private fun showMaterialDialog() {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.preference_dialog_seekbar, null)
