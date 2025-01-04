@@ -15,8 +15,8 @@ import com.google.android.material.textview.MaterialTextView
 class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreference(context, attrs) {
 
     private var currentValue: Number = 0 // Use Number to hold either Int or Float
-    private var minValue: Float = 0f
-    private var maxValue: Float = 100f
+    private var minValue: Number = 0
+    private var maxValue: Number = 100
     private var step: Float = 1f
     private var isPercentage: Boolean = false
 
@@ -25,6 +25,8 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
         context.theme.obtainStyledAttributes(attrs, R.styleable.MaterialSeekBarPreference, 0, 0).apply {
             try {
                 isPercentage = getBoolean(R.styleable.MaterialSeekBarPreference_isPercentage, false)
+                minValue = getString(R.styleable.MaterialSeekBarPreference_minValue, "0").toNumber()
+                maxValue = getString(R.styleable.MaterialSeekBarPreference_maxValue, "100").toNumber()
             } finally {
                 recycle()
             }
@@ -39,8 +41,8 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
         val valueText = dialogView.findViewById<MaterialTextView>(R.id.value)
 
         // Configure slider
-        slider.valueFrom = minValue
-        slider.valueTo = maxValue
+        slider.valueFrom = if (isPercentage) minValue.toFloat() else minValue.toInt().toFloat()
+        slider.valueTo = if (isPercentage) maxValue.toFloat() else maxValue.toInt().toFloat()
         slider.stepSize = step
         slider.value = if (isPercentage) currentValue.toFloat() else currentValue.toInt().toFloat()
 
@@ -87,7 +89,7 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
 
     override fun onSetInitialValue(defaultValue: Any?) {
         currentValue = if (isPercentage) {
-            getPersistedFloat((defaultValue as? Float) ?: minValue).toFloat()
+            getPersistedFloat((defaultValue as? Float) ?: minValue.toFloat()).toFloat()
         } else {
             getPersistedInt((defaultValue as? Int) ?: minValue.toInt())
         }
