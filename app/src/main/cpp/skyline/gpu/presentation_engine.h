@@ -105,6 +105,8 @@ namespace skyline::gpu {
          */
         void UpdateSwapchain(texture::Format format, texture::Dimensions extent);
 
+        void LimitSpeed(i64 targetFrameTimeNs);
+
       public:
         PresentationEngine(const DeviceState &state, GPU &gpu);
 
