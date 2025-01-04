@@ -73,7 +73,7 @@ class GlobalSettingsFragment : PreferenceFragmentCompat() {
 
         disablePreference("use_material_you", Build.VERSION.SDK_INT < Build.VERSION_CODES.S, null)
         disablePreference("force_max_gpu_clocks", !GpuDriverHelper.supportsForceMaxGpuClocks(), context!!.getString(R.string.force_max_gpu_clocks_desc_unsupported))
-        disablePreference("speed_limit", !findPreference<SwitchPreferenceCompat>("enable_speed_limit")?.isChecked, null)
+        disablePreference("speed_limit", !findPreference<SwitchPreferenceCompat>("enable_speed_limit")?.isChecked?, null)
         resources.getStringArray(R.array.credits_entries).asIterable().shuffled().forEach {
             findPreference<PreferenceCategory>("category_credits")?.addPreference(Preference(context!!).apply {
                 title = it
