@@ -70,7 +70,7 @@ namespace skyline {
         }
 
         float GetFloat(const std::string_view &key) {
-            return {env, static_cast<float>(env->GetObjectField(settingsInstance, env->GetFieldID(settingsClass, key.data(), "F")))};
+            return static_cast<float>(env->GetFloatField(settingsInstance, env->GetFieldID(settingsClass, key.data(), "F")));
         }
     };
 
