@@ -278,5 +278,5 @@ extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_setAudioSin
 }
 
 extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_setAnisotropicFilter(JNIEnv *env, jobject obj, jFloat jAnisotropy) {
-    skyline::gpu::interconnect::preferredAnisotropy = static_cast<float>(jAnisotropy)
+    skyline::gpu::interconnect::preferredAnisotropy = static_cast<float>(jAnisotropy);
 }
