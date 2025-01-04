@@ -12,8 +12,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
 import com.google.android.material.textview.MaterialTextView
 
-class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreference(context, attrs),
-    Preference.OnPreferenceClickListener {
+class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreference(context, attrs) {
 
     private var currentValue: Float = 0f
     private var minValue: Float = 0f
@@ -30,13 +29,11 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
                 recycle()
             }
         }
-
-        onPreferenceClickListener = this
-    }
-
-    override fun onPreferenceClick(preference: Preference?): Boolean {
-        showMaterialDialog()
-        return true
+        
+        setOnPreferenceClickListener {
+            showMaterialDialog()
+            true
+        }
     }
 
     private fun showMaterialDialog() {
