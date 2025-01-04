@@ -31,6 +31,8 @@ namespace skyline {
         }
 
         void Update() override {
+            enableSpeedLimit = ktSettings.GetBool("enableSpeedLimit");
+            speedLimit = ktSettings.GetFloat("speedLimit");
             isDocked = ktSettings.GetBool("isDocked");
             usernameValue = std::move(ktSettings.GetString("usernameValue"));
             profilePictureValue = ktSettings.GetString("profilePictureValue");
