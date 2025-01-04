@@ -172,7 +172,7 @@ namespace skyline::gpu::interconnect {
                 return vkMode;
             }};
 
-            auto maxAnisotropy{*ctx.gpu.getState().settings->anisotropicFilter};
+            auto maxAnisotropy{preferredAnisotropy};
             if (maxAnisotropy == 1.0f) maxAnisotropy = texSampler.MaxAnisotropy();
             vk::StructureChain<vk::SamplerCreateInfo, vk::SamplerReductionModeCreateInfoEXT, vk::SamplerCustomBorderColorCreateInfoEXT> samplerInfo{
                 vk::SamplerCreateInfo{
