@@ -24,6 +24,8 @@ class EmulationSettings private constructor(context : Context, prefName : String
     var useCustomSettings by sharedPreferences(context, false, prefName = prefName)
 
     // System
+    var enableSpeedLimit by sharedPreferences(context, false, prefName = prefName)
+    var speedLimit by sharedPreferences(context, 100f, prefName = prefName)
     var isDocked by sharedPreferences(context, true, prefName = prefName)
     var usernameValue by sharedPreferences(context, context.getString(R.string.username_default), prefName = prefName)
     var profilePictureValue by sharedPreferences(context, "", prefName = prefName)
