@@ -8,6 +8,7 @@
 #include "tsc.h"
 
 namespace skyline::gpu::interconnect {
+    inline float preferredAnisotropy = 0.0f;
     class SamplerPoolState : dirty::CachedManualDirty, dirty::RefreshableManualDirty {
       public:
         struct EngineRegisters {
