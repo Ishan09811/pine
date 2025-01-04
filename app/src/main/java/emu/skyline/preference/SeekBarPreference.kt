@@ -19,9 +19,9 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
         dialogLayoutResource = R.layout.preference_dialog_seekbar
 
         // Read the custom attribute
-        context.theme.obtainStyledAttributes(attrs, R.styleable.CustomSeekBarPreference, 0, 0).apply {
+        context.theme.obtainStyledAttributes(attrs, R.styleable.MaterialSeekBarPreference, 0, 0).apply {
             try {
-                isPercentage = getBoolean(R.styleable.CustomSeekBarPreference_isPercentage, false)
+                isPercentage = getBoolean(R.styleable.MaterialSeekBarPreference_isPercentage, false)
             } finally {
                 recycle()
             }
