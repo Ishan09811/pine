@@ -453,8 +453,7 @@ namespace skyline::gpu {
         static i64 lastFrameTime = 0;
         i64 currentTime = util::GetTimeNs();
 
-        // Scale the frame time by the speed percentage
-        i64 adjustedFrameTimeNs = static_cast<i64>(targetFrameTimeNs * (*state.settings->speedLimit / 100.0f));
+        i64 adjustedFrameTimeNs = static_cast<i64>(targetFrameTimeNs / (*state.settings->speedLimit / 100.0f));
 
         if (lastFrameTime != 0) {
             i64 elapsedTime = currentTime - lastFrameTime;
@@ -466,7 +465,6 @@ namespace skyline::gpu {
 
         lastFrameTime = util::GetTimeNs(); // Update last frame time
     }
-
 
     void PresentationEngine::Pause() {
         paused.store(true, std::memory_order_release);
