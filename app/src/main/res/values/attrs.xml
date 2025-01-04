@@ -32,4 +32,9 @@
         <!-- Index of the controller the preference corresponds to -->
         <attr name="index" format="integer" />
     </declare-styleable>
+    <declare-styleable name="MaterialSeekBarPreference">
+        <attr name="isPercentage" format="boolean" />
+        <attr name="minValue" format="string" />
+        <attr name="maxValue" format="string" />
+    </declare-styleable>
 </resources>
