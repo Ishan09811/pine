@@ -25,8 +25,8 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
         context.theme.obtainStyledAttributes(attrs, R.styleable.MaterialSeekBarPreference, 0, 0).apply {
             try {
                 isPercentage = getBoolean(R.styleable.MaterialSeekBarPreference_isPercentage, false)
-                val attrMinValue = getString(R.styleable.MaterialSeekBarPreference_minValue, "0").toInt()
-                val attrMaxValue = getString(R.styleable.MaterialSeekBarPreference_maxValue, "100").toInt()
+                val attrMinValue = getString(R.styleable.MaterialSeekBarPreference_minValue, "0")
+                val attrMaxValue = getString(R.styleable.MaterialSeekBarPreference_maxValue, "100")
                 minValue = attrMinValue.toInt()
                 maxValue = attrMaxValue.toInt()
             } finally {
