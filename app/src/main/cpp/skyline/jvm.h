@@ -68,6 +68,10 @@ namespace skyline {
         JniString GetString(const std::string_view &key) {
             return {env, static_cast<jstring>(env->GetObjectField(settingsInstance, env->GetFieldID(settingsClass, key.data(), "Ljava/lang/String;")))};
         }
+
+        float GetFloat(const std::string_view &key) {
+            return {env, static_cast<jfloat>(env->GetObjectField(settingsInstance, env->GetFieldID(settingsClass, key.data(), "F")))};
+        }
     };
 
     /**
