@@ -238,6 +238,7 @@ namespace skyline::gpu {
         } else {
             frameTimestamp = timestamp;
         }
+        if (*state.settings->enableSpeedLimit) LimitSpeed(constant::NsInSecond / 60);
     }
 
     void PresentationEngine::PresentationThread() {
@@ -447,6 +448,25 @@ namespace skyline::gpu {
 
         return nextFrameId++;
     }
+
+    void PresentationEngine::LimitSpeed(i64 targetFrameTimeNs) {
+        static i64 lastFrameTime = 0;
+        i64 currentTime = util::GetTimeNs();
+
+        // Scale the frame time by the speed percentage
+        i64 adjustedFrameTimeNs = static_cast<i64>(targetFrameTimeNs * (*state.settings->speedLimit / 100.0f));
+
+        if (lastFrameTime != 0) {
+            i64 elapsedTime = currentTime - lastFrameTime;
+            if (elapsedTime < adjustedFrameTimeNs) {
+                // Sleep for the remaining time to meet the adjusted frame time
+                std::this_thread::sleep_for(std::chrono::nanoseconds(adjustedFrameTimeNs - elapsedTime));
+            }
+        }
+
+        lastFrameTime = util::GetTimeNs(); // Update last frame time
+    }
+
 
     void PresentationEngine::Pause() {
         paused.store(true, std::memory_order_release);
