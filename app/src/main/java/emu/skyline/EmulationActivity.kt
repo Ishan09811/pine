@@ -210,6 +210,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
     private external fun setAudioSink(sink: String)
 
+    private external fun setAnisotropicFilter(anisotropy: Float)
+
     private var ambientJob: Job? = null
     private lateinit var ambientHelper: AmbientHelper
 
@@ -378,6 +380,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
                 else -> "null"
             }
         )
+
+        setAnisotropicFilter(emulationSettings.anisotropicFilter.toFloat())
 
         lifecycleScope.launch(Dispatchers.Main) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
