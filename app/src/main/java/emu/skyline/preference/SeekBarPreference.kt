@@ -14,7 +14,7 @@ import com.google.android.material.textview.MaterialTextView
 
 class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreference(context, attrs) {
 
-    private var currentValue: Float = 0f
+    private var currentValue: Number = 0 // Use Number to hold either Int or Float
     private var minValue: Float = 0f
     private var maxValue: Float = 100f
     private var step: Float = 1f
@@ -29,7 +29,8 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
                 recycle()
             }
         }
-        
+
+        // Set up the click listener
         setOnPreferenceClickListener {
             showMaterialDialog()
             true
@@ -45,14 +46,14 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
         slider.valueFrom = minValue
         slider.valueTo = maxValue
         slider.stepSize = step
-        slider.value = currentValue
+        slider.value = if (isPercentage) currentValue.toFloat() else currentValue.toInt().toFloat()
 
         // Display initial value
-        updateValueText(valueText, currentValue)
+        updateValueText(valueText, slider.value)
 
         slider.addOnChangeListener { _, value, _ ->
-            currentValue = value
             updateValueText(valueText, value)
+            currentValue = if (isPercentage) value else value.toInt()
         }
 
         // Build and show the MaterialAlertDialog
@@ -60,7 +61,11 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
             .setTitle(title)
             .setView(dialogView)
             .setPositiveButton(android.R.string.ok) { _, _ ->
-                persistFloat(currentValue)
+                if (isPercentage) {
+                    persistFloat(currentValue.toFloat())
+                } else {
+                    persistInt(currentValue.toInt())
+                }
                 updateSummary()
                 callChangeListener(currentValue)
             }
@@ -78,15 +83,18 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
 
     private fun updateSummary() {
         summary = if (isPercentage) {
-            "${currentValue.toInt()}%"
+            "${currentValue.toFloat().toInt()}%"
         } else {
             currentValue.toInt().toString()
         }
     }
 
     override fun onSetInitialValue(defaultValue: Any?) {
-        currentValue = getPersistedFloat((defaultValue as? Float) ?: minValue)
+        currentValue = if (isPercentage) {
+            getPersistedFloat((defaultValue as? Float) ?: minValue).toFloat()
+        } else {
+            getPersistedInt((defaultValue as? Int) ?: minValue.toInt())
+        }
         updateSummary()
     }
 }
-    
