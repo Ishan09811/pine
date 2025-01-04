@@ -4,7 +4,7 @@
         android:key="category_system"
         android:title="@string/system">
         <SwitchPreferenceCompat
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:summary="@string/enable_speed_limit_desc"
             app:key="enable_speed_limit"
             app:title="@string/enable_speed_limit" />
