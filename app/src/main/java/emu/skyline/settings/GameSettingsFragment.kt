@@ -62,7 +62,7 @@ class GameSettingsFragment : PreferenceFragmentCompat() {
 
         findPreference<GpuDriverPreference>("gpu_driver")?.item = item
 
-        disablePreference("speed_limit", !findPreference<SwitchPreferenceCompat>("enable_speed_limit")?.isChecked?, null)
+        disablePreference("speed_limit", !findPreference<SwitchPreferenceCompat>("enable_speed_limit")?.isChecked ?: false, null)
         disablePreference("force_max_gpu_clocks", !GpuDriverHelper.supportsForceMaxGpuClocks(), context?.getString(R.string.force_max_gpu_clocks_desc_unsupported))
 
         // Hide settings that don't support per-game configuration
