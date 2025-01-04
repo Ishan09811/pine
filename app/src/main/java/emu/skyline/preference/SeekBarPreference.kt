@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.preference.DialogPreference
 import androidx.preference.Preference
+import emu.skyline.R
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
 import com.google.android.material.textview.MaterialTextView
