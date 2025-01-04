@@ -70,7 +70,7 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
                 callChangeListener(currentValue)
             }
             .setNegativeButton(android.R.string.cancel) { _, _ ->
-                slider.value = valueText.text.toString().replace("%", "").toInt().toFloat()
+                slider.value = summary.toString().replace("%", "").toInt().toFloat()
             }
             .show()
     }
