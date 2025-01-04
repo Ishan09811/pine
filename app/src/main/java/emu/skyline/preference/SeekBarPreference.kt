@@ -56,11 +56,14 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
             currentValue = if (isPercentage) value else value.toInt()
         }
 
+        var dismissTrigger: String? = null
+
         // Build and show the MaterialAlertDialog
         MaterialAlertDialogBuilder(context)
             .setTitle(title)
             .setView(dialogView)
             .setPositiveButton(android.R.string.ok) { _, _ ->
+                dismissTrigger = "positive_button"
                 if (isPercentage) {
                     persistFloat(currentValue.toFloat())
                 } else {
@@ -69,8 +72,10 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
                 updateSummary()
                 callChangeListener(currentValue)
             }
-            .setNegativeButton(android.R.string.cancel) { _, _ ->
-                slider.value = summary.toString().replace("%", "").toInt().toFloat()
+            .setNegativeButton(android.R.string.cancel, null)
+            .setOnDismissListener {
+                if (dismissTrigger != "positive_button")
+                    slider.value = summary?.toString()?.replace("%", "")?.toIntOrNull()?.toFloat() ?: 0f
             }
             .show()
     }
