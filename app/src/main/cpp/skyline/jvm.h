@@ -50,7 +50,7 @@ namespace skyline {
          * @param key A null terminated string containing the key of the setting to get
          */
         template<typename T>
-        requires std::is_integral_v<T> || std::is_enum_v<T>
+        requires std::is_integral_v<T> || std::is_enum_v<T> || std::is_floating_point_v<T>
         T GetInt(const std::string_view &key) {
             return static_cast<T>(env->GetIntField(settingsInstance, env->GetFieldID(settingsClass, key.data(), "I")));
         }

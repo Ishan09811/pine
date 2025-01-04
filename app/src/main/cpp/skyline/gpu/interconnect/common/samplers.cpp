@@ -3,6 +3,7 @@
 
 #include <soc/gm20b/channel.h>
 #include <soc/gm20b/gmmu.h>
+#include <common/settings.h>
 #include "samplers.h"
 
 namespace skyline::gpu::interconnect {
@@ -171,7 +172,8 @@ namespace skyline::gpu::interconnect {
                 return vkMode;
             }};
 
-            auto maxAnisotropy{texSampler.MaxAnisotropy()};
+            auto maxAnisotropy{preferredAnisotropy};
+            if (maxAnisotropy == 1.0f) maxAnisotropy = texSampler.MaxAnisotropy();
             vk::StructureChain<vk::SamplerCreateInfo, vk::SamplerReductionModeCreateInfoEXT, vk::SamplerCustomBorderColorCreateInfoEXT> samplerInfo{
                 vk::SamplerCreateInfo{
                     .magFilter = ConvertSamplerFilter(texSampler.magFilter),

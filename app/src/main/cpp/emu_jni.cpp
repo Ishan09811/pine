@@ -276,3 +276,7 @@ extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_setAudioSin
     std::string sink = ConvertJStringToString(env, jSink);
     AudioCore::Sink::AudioSink = sink;
 }
+
+extern "C" JNIEXPORT void JNICALL Java_emu_skyline_EmulationActivity_setAnisotropicFilter(JNIEnv *env, jobject obj, jfloat jAnisotropy) {
+    skyline::gpu::interconnect::preferredAnisotropy = static_cast<float>(jAnisotropy);
+}

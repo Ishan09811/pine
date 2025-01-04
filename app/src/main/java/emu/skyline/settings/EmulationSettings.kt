@@ -44,6 +44,7 @@ class EmulationSettings private constructor(context : Context, prefName : String
     var enableFoldableLayout by sharedPreferences(context, false, prefName = prefName)
     var showPauseButton by sharedPreferences(context, false, prefName = prefName)
     var enableAmbientMode by sharedPreferences(context, false, prefName = prefName)
+    var anisotropicFilter by sharedPreferences(context, 1, prefName = prefName)
 
     // CPU
     var cpuBackend by sharedPreferences(context, 0, prefName = prefName)
