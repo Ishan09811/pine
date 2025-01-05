@@ -3,6 +3,7 @@ package emu.skyline.preference
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import androidx.preference.DialogPreference
@@ -97,13 +98,14 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
     }
 
     override fun onSetInitialValue(defaultValue: Any?) {
-        val actualDefaultValue = (defaultValue as? String)?.toFloatOrNull() ?: minValue.toFloat()
-        currentValue = if (isPercentage) {
-            getPersistedFloat(actualDefaultValue)
-        } else {
-            getPersistedInt(actualDefaultValue.toInt())
+        val actualDefaultValue = if (defaultValue is String) {
+            (defaultValue as? String)?.toIntOrNull() ?: minValue.toInt()
+        } else { 
+            (defaultValue as? Int)
         }
+        currentValue = getPersistedInt(actualDefaultValue)
         updateSummary()
+        Log.w("SeekBarPreference", "onSetInitialValue triggered currentValue: ${currentValue.toString()}")
     }
 
     fun setMaxValue(max: Any) { 
