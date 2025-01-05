@@ -16,6 +16,7 @@ import com.google.android.material.textview.MaterialTextView
 class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreference(context, attrs) {
 
     private var currentValue: Number = 0 // Use Number to hold either Int or Float
+    private var fallbackValue: Number = 0
     private var minValue: Number = 0
     private var maxValue: Number = 100
     private var step: Float = 1f
@@ -30,6 +31,8 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
                 val attrMaxValue = getString(R.styleable.MaterialSeekBarPreference_maxValue)?.toIntOrNull() ?: 100
                 minValue = attrMinValue
                 maxValue = attrMaxValue
+                val attrDefaultValue = getString(R.styleable.MaterialSeekBarPreference_defaultValue)?.toIntOrNull() ?: 0
+                fallbackValue = attrDefaultValue
             } finally {
                 recycle()
             }
@@ -43,6 +46,8 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
         val slider = dialogView.findViewById<Slider>(R.id.seekBar)
         val valueText = dialogView.findViewById<MaterialTextView>(R.id.value)
 
+        if (!isPersistent || currentValue < minValue) { currentValue = fallbackValue }
+        
         // Configure slider
         slider.valueFrom = if (isPercentage) minValue.toFloat() else minValue.toInt().toFloat()
         slider.valueTo = if (isPercentage) maxValue.toFloat() else maxValue.toInt().toFloat()
@@ -98,14 +103,14 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
     }
 
     override fun onSetInitialValue(defaultValue: Any?) {
-        val actualDefaultValue = if (defaultValue is String) {
-            (defaultValue as? String)?.toIntOrNull() ?: minValue.toInt()
-        } else { 
-            (defaultValue as? Int)
+        val actualDefaultValue = when (defaultValue) {
+            is String -> defaultValue.toIntOrNull() ?: minValue.toInt()
+            is Int -> defaultValue ?: minValue.toInt()
+            is Float -> defaultValue.toIntOrNull() ?: minValue.toInt()
+            else -> minValue.toInt() // fallback to minValue if default is invalid
         }
         currentValue = getPersistedInt(actualDefaultValue!!)!!
         updateSummary()
-        Log.w("SeekBarPreference", "onSetInitialValue triggered currentValue: ${currentValue.toString()}")
     }
 
     fun setMaxValue(max: Any) { 
