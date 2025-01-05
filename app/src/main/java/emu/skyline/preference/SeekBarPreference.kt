@@ -16,7 +16,6 @@ import com.google.android.material.textview.MaterialTextView
 class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreference(context, attrs) {
 
     private var currentValue: Number = 0 // Use Number to hold either Int or Float
-    private var fallbackValue: Number = 0
     private var minValue: Number = 0
     private var maxValue: Number = 100
     private var step: Float = 1f
@@ -31,18 +30,8 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
                 val attrMaxValue = getString(R.styleable.MaterialSeekBarPreference_maxValue)?.toIntOrNull() ?: 100
                 minValue = attrMinValue
                 maxValue = attrMaxValue
-                val attrDefaultValue = getString(R.styleable.MaterialSeekBarPreference_defValue)?.toIntOrNull() ?: 0
-                fallbackValue = attrDefaultValue
             } finally {
                 recycle()
-            }
-        }
-        if (!isPersistent || currentValue.toInt() < minValue.toInt()) { 
-            currentValue = fallbackValue 
-            if (isPercentage) {
-                persistFloat(currentValue.toFloat())
-            } else {
-                persistInt(currentValue.toInt())
             }
         }
     }
