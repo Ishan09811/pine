@@ -6,7 +6,6 @@
 #include <services/serviceman.h>
 
 namespace skyline::service::timesrv {
-    inline long customRtc = 0;
     namespace core {
         struct TimeServiceObject;
     }
