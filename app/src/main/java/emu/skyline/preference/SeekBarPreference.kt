@@ -103,7 +103,7 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
         } else { 
             (defaultValue as? Int)
         }
-        currentValue = getPersistedInt(actualDefaultValue)
+        currentValue = getPersistedInt(actualDefaultValue!!)!!
         updateSummary()
         Log.w("SeekBarPreference", "onSetInitialValue triggered currentValue: ${currentValue.toString()}")
     }
