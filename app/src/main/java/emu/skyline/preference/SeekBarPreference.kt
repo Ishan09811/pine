@@ -31,7 +31,7 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
                 val attrMaxValue = getString(R.styleable.MaterialSeekBarPreference_maxValue)?.toIntOrNull() ?: 100
                 minValue = attrMinValue
                 maxValue = attrMaxValue
-                val attrDefaultValue = getString(R.styleable.MaterialSeekBarPreference_defaultValue)?.toIntOrNull() ?: 0
+                val attrDefaultValue = getString(R.styleable.MaterialSeekBarPreference_defValue)?.toIntOrNull() ?: 0
                 fallbackValue = attrDefaultValue
             } finally {
                 recycle()
