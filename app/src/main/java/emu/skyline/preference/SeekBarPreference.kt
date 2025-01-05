@@ -97,7 +97,7 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
     }
 
     override fun onSetInitialValue(defaultValue: Any?) {
-        val actualDefaultValue = (defaultValue as? String).toFloatOrNull() ?: minValue.toFloat()
+        val actualDefaultValue = (defaultValue as? String)?.toFloatOrNull() ?: minValue.toFloat()
         currentValue = if (isPercentage) {
             getPersistedFloat(actualDefaultValue)
         } else {
