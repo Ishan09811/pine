@@ -87,7 +87,7 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
             .setNegativeButton(android.R.string.cancel, null)
             .setOnDismissListener {
                 if (dismissTrigger != "positive_button")
-                    slider.value = summary?.toString()?.replace("%", "")?.toIntOrNull()?.toFloat() ?: 0f
+                    slider.value = summary?.toString()?.replace("%", "")?.toIntOrNull()?.toFloat() ?: fallbackValue
             }
             .show()
     }
