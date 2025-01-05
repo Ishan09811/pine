@@ -65,6 +65,8 @@ class GlobalSettingsFragment : PreferenceFragmentCompat() {
                 }
             }
         }
+
+        findPreference<SeekBarPreference>("executor_slot_count_scale")?.setMaxValue(Runtime.getRuntime().availableProcessors().toInt())
         
         // Only show validation layer setting in debug builds
         @Suppress("SENSELESS_COMPARISON")
