@@ -97,6 +97,10 @@
     <string name="copy_global_settings_warning">Are you sure you want to copy global settings to this game? <b>Current settings will be lost</b></string>
     <!-- Settings - System -->
     <string name="system">System</string>
+    <string name="enable_speed_limit">Enable Speed Limit</string>
+    <string name="enable_speed_limit_desc">Emulation speed will be limited</string>
+    <string name="speed_limit">Speed Limit</string>
+    <string name="speed_limit_desc">Set the emulation speed limit</string>
     <string name="use_docked">Use Docked Mode</string>
     <string name="handheld_enabled">The system will emulate being in handheld mode</string>
     <string name="docked_enabled">The system will emulate being in docked mode</string>

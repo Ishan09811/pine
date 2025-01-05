@@ -61,6 +61,8 @@ namespace skyline {
 
       public:
         // System
+        Setting<bool> enableSpeedLimit;
+        Setting<float> speedLimit;
         Setting<bool> isDocked; //!< If the emulated Switch should be handheld or docked
         Setting<std::string> usernameValue; //!< The user name to be supplied to the guest
         Setting<std::string> profilePictureValue; //!< The profile picture path to be supplied to the guest

@@ -53,6 +53,11 @@ class GlobalSettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
+        findPreference<Preference>("enable_speed_limit")?.setOnPreferenceChangeListener { _, newValue ->
+            disablePreference("speed_limit", !(newValue as Boolean), null)
+            true
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
             WindowInfoTracker.getOrCreate(requireContext()).windowLayoutInfo(requireActivity()).collect { newLayoutInfo ->
                 withContext(Dispatchers.Main) {
@@ -68,6 +73,9 @@ class GlobalSettingsFragment : PreferenceFragmentCompat() {
 
         disablePreference("use_material_you", Build.VERSION.SDK_INT < Build.VERSION_CODES.S, null)
         disablePreference("force_max_gpu_clocks", !GpuDriverHelper.supportsForceMaxGpuClocks(), context!!.getString(R.string.force_max_gpu_clocks_desc_unsupported))
+        findPreference<SwitchPreferenceCompat>("enable_speed_limit")?.isChecked?.let {
+            disablePreference("speed_limit", !it, null)
+        }
         resources.getStringArray(R.array.credits_entries).asIterable().shuffled().forEach {
             findPreference<PreferenceCategory>("category_credits")?.addPreference(Preference(context!!).apply {
                 title = it

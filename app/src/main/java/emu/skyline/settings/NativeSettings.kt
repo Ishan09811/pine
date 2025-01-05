@@ -17,6 +17,8 @@ import kotlinx.serialization.Serializable
 @Suppress("unused")
 data class NativeSettings(
     // System
+    var enableSpeedLimit : Boolean,
+    var speedLimit : Float,
     var isDocked : Boolean,
     var usernameValue : String,
     var profilePictureValue : String,
@@ -50,6 +52,8 @@ data class NativeSettings(
     var validationLayer : Boolean
 ) {
     constructor(context : Context, pref : EmulationSettings) : this(
+        pref.enableSpeedLimit,
+        pref.speedLimit,
         pref.isDocked,
         pref.usernameValue,
         pref.profilePictureValue,

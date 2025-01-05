@@ -4,6 +4,19 @@
         android:key="category_system"
         android:title="@string/system">
         <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:summary="@string/enable_speed_limit_desc"
+            app:key="enable_speed_limit"
+            app:title="@string/enable_speed_limit" />
+        <emu.skyline.preference.SeekBarPreference
+            android:summary="@string/speed_limit_desc"
+            android:defaultValue="100"
+            android:key="speed_limit"
+            android:title="@string/speed_limit" 
+            app:maxValue="200"
+            app:minValue="0"
+            app:isPercentage="true" />
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:summaryOff="@string/handheld_enabled"
             android:summaryOn="@string/docked_enabled"
@@ -148,16 +161,16 @@
             app:title="@string/vsync_mode"
             app:useSimpleSummaryProvider="true"/>
         <emu.skyline.preference.SeekBarPreference
-            android:defaultValue="4"
             android:summary="@string/executor_slot_count_scale_desc"
+            android:defaultValue="4"
             android:key="executor_slot_count_scale"
             android:title="@string/executor_slot_count_scale" 
             app:maxValue="6"
             app:minValue="1"
             app:isPercentage="false" />
         <emu.skyline.preference.SeekBarPreference
-            android:defaultValue="256"
             android:summary="@string/executor_flush_threshold_desc"
+            android:defaultValue="256"
             android:key="executor_flush_threshold"
             android:title="@string/executor_flush_threshold" 
             app:maxValue="1024"

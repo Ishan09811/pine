@@ -2,7 +2,9 @@
 package emu.skyline.preference
 
 import android.content.Context
+import android.content.res.TypedArray
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import androidx.preference.DialogPreference
@@ -35,13 +37,17 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
         }
     }
 
+    override fun onGetDefaultValue(a: TypedArray, index: Int): Any {
+        return a.getInt(index, 0)
+    }
+
     override fun onClick() { showMaterialDialog() }
 
     private fun showMaterialDialog() {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.preference_dialog_seekbar, null)
         val slider = dialogView.findViewById<Slider>(R.id.seekBar)
         val valueText = dialogView.findViewById<MaterialTextView>(R.id.value)
-
+        
         // Configure slider
         slider.valueFrom = if (isPercentage) minValue.toFloat() else minValue.toInt().toFloat()
         slider.valueTo = if (isPercentage) maxValue.toFloat() else maxValue.toInt().toFloat()
@@ -56,11 +62,14 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
             currentValue = if (isPercentage) value else value.toInt()
         }
 
+        var dismissTrigger: String? = null
+
         // Build and show the MaterialAlertDialog
         MaterialAlertDialogBuilder(context)
             .setTitle(title)
             .setView(dialogView)
             .setPositiveButton(android.R.string.ok) { _, _ ->
+                dismissTrigger = "positive_button"
                 if (isPercentage) {
                     persistFloat(currentValue.toFloat())
                 } else {
@@ -69,8 +78,10 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
                 updateSummary()
                 callChangeListener(currentValue)
             }
-            .setNegativeButton(android.R.string.cancel) { _, _ ->
-                slider.value = summary.toString().replace("%", "").toInt().toFloat()
+            .setNegativeButton(android.R.string.cancel, null)
+            .setOnDismissListener {
+                if (dismissTrigger != "positive_button")
+                    slider.value = summary?.toString()?.replace("%", "")?.toIntOrNull()?.toFloat() ?: minValue.toFloat()
             }
             .show()
     }
@@ -92,11 +103,21 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
     }
 
     override fun onSetInitialValue(defaultValue: Any?) {
-        currentValue = if (isPercentage) {
-            getPersistedFloat((defaultValue as? Float) ?: minValue.toFloat()).toFloat()
-        } else {
-            getPersistedInt((defaultValue as? Int) ?: minValue.toInt())
+        val actualDefaultValue = when (defaultValue) {
+            is String -> defaultValue.toIntOrNull() ?: minValue.toInt()
+            is Int -> defaultValue ?: minValue.toInt()
+            is Float -> defaultValue.toInt()
+            else -> minValue.toInt() // fallback to minValue if default is invalid
         }
+        currentValue = if (!isPercentage) getPersistedInt(actualDefaultValue!!)!! else getPersistedFloat(actualDefaultValue.toFloat()!!).toInt()!!
         updateSummary()
+    }
+
+    fun setMaxValue(max: Any) { 
+        if (isPercentage) maxValue = max as Float else maxValue = max as Int
+    }
+
+    fun setMinValue(min: Any) {
+        if (isPercentage) minValue = min as Float else minValue = min as Int
     }
 }
