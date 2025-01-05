@@ -2,6 +2,7 @@
 package emu.skyline.preference
 
 import android.content.Context
+import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
@@ -80,7 +81,7 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
             .setNegativeButton(android.R.string.cancel, null)
             .setOnDismissListener {
                 if (dismissTrigger != "positive_button")
-                    slider.value = summary?.toString()?.replace("%", "")?.toIntOrNull()?.toFloat() ?: fallbackValue.toFloat()
+                    slider.value = summary?.toString()?.replace("%", "")?.toIntOrNull()?.toFloat() ?: minValue.toFloat()
             }
             .show()
     }
