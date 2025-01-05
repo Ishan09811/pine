@@ -36,6 +36,10 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
         }
     }
 
+    override fun onGetDefaultValue(a: TypedArray, index: Int): Any {
+        return a.getInt(index, minValue.toInt())
+    }
+
     override fun onClick() { showMaterialDialog() }
 
     private fun showMaterialDialog() {
