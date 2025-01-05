@@ -37,6 +37,14 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
                 recycle()
             }
         }
+        if (!isPersistent || currentValue.toInt() < minValue.toInt()) { 
+            currentValue = fallbackValue 
+            if (isPercentage) {
+                persistFloat(currentValue.toFloat())
+            } else {
+                persistInt(currentValue.toInt())
+            }
+        }
     }
 
     override fun onClick() { showMaterialDialog() }
@@ -45,8 +53,6 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
         val dialogView = LayoutInflater.from(context).inflate(R.layout.preference_dialog_seekbar, null)
         val slider = dialogView.findViewById<Slider>(R.id.seekBar)
         val valueText = dialogView.findViewById<MaterialTextView>(R.id.value)
-
-        if (!isPersistent || currentValue < minValue) { currentValue = fallbackValue }
         
         // Configure slider
         slider.valueFrom = if (isPercentage) minValue.toFloat() else minValue.toInt().toFloat()
@@ -106,10 +112,10 @@ class SeekBarPreference(context: Context, attrs: AttributeSet) : DialogPreferenc
         val actualDefaultValue = when (defaultValue) {
             is String -> defaultValue.toIntOrNull() ?: minValue.toInt()
             is Int -> defaultValue ?: minValue.toInt()
-            is Float -> defaultValue.toIntOrNull() ?: minValue.toInt()
+            is Float -> defaultValue.toInt()
             else -> minValue.toInt() // fallback to minValue if default is invalid
         }
-        currentValue = getPersistedInt(actualDefaultValue!!)!!
+        currentValue = if (!isPercentage) getPersistedInt(actualDefaultValue!!)!! else getPersistedFloat(actualDefaultValue.toFloat()!!).toInt()!!
         updateSummary()
     }
 
