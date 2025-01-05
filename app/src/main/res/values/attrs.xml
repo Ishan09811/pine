@@ -36,6 +36,5 @@
         <attr name="isPercentage" format="boolean" />
         <attr name="minValue" format="string" />
         <attr name="maxValue" format="string" />
-        <attr name="defValue" format="string" />
     </declare-styleable>
 </resources>
