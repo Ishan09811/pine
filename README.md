@@ -31,7 +31,7 @@ You can contact the core developers of Pine at our **[Discord]()**. If you have 
 Thanks for their many improvements.
 
 A few noteworthy teams/projects who've helped us along the way are:
-* **[Skyline](https://skyline-emu.one/):** Pine builds on top of Skyline and is meant as a continuation of that project.
+* **[Skyline](https://skyline-emu.one/):** Pine is an experimental project built on top of Skyline. While Skyline continues as Strato, Pine is designed for testing experimental features and for personal learning.
 
 * **[Ryujinx](https://ryujinx.org/):** We've used Ryujinx for reference throughout the project, the accuracy of their HLE implementations of Switch subsystems make it an amazing reference. The team behind the project has been extremely helpful with any queries we've had and have constantly helped us with any issues we've come across. **It should be noted that Pine is not based on Ryujinx**.
 
