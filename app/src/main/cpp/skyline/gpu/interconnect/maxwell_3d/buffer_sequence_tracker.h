@@ -21,7 +21,7 @@ public:
         currentSequence = sequence;
     }
 
-    size_t GenerateBufferBindingHash(const BufferBinding& binding) {
+    size_t GenerateBufferBindingHash(const skyline::gpu::BufferBinding& binding) {
         size_t bufferHash = std::hash<uint64_t>{}(reinterpret_cast<uint64_t>(static_cast<VkBuffer>(binding.buffer)));
         size_t offsetHash = std::hash<vk::DeviceSize>{}(binding.offset);
         return bufferHash ^ (offsetHash << 1);
