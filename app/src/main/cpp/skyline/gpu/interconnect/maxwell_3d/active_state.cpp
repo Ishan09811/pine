@@ -148,7 +148,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
 
         if (quadConversion)
             megaBufferBinding = GenerateQuadConversionIndexBuffer(ctx, engine->indexBuffer.indexSize, *view, firstIndex, elementCount);
-            quadBufferSequence.SetSequence(megaBufferBinding);
+            quadBufferSequence.SetSequence(quadBufferSequence.GenerateBufferBindingHash(megaBufferBinding));
         else
             megaBufferBinding = view->TryMegaBuffer(ctx.executor.cycle, ctx.gpu.megaBufferAllocator, ctx.executor.executionTag);
 
@@ -171,8 +171,8 @@ namespace skyline::gpu::interconnect::maxwell3d {
         if (usedQuadConversion) {
             if (!quadBufferSequence.IsValid() || quadBufferSequence.HasChanged()) {
                 megaBufferBinding = GenerateQuadConversionIndexBuffer(ctx, engine->indexBuffer.indexSize, *view, firstIndex, elementCount);
-                quadBufferSequence.Update(); // Update to the latest sequence
-                quadBufferSequence.SetSequence(megaBufferBinding);
+                quadBufferSequence.Update();
+                quadBufferSequence.SetSequence(quadBufferSequence.GenerateBufferBindingHash(megaBufferBinding));
             }
             builder.SetIndexBuffer(megaBufferBinding, indexType);
         } else if (megaBufferBinding) {
