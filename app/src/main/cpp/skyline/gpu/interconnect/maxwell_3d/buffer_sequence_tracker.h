@@ -1,4 +1,5 @@
 #include <functional>
+#include <gpu/buffer_manager.h>
 
 class BufferSequenceTracker {
 public:
