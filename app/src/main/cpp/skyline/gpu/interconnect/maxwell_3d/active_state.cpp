@@ -146,10 +146,12 @@ namespace skyline::gpu::interconnect::maxwell3d {
 
         indexType = ConvertIndexType(engine->indexBuffer.indexSize);
 
-        if (quadConversion)
+        if (quadConversion) {
             megaBufferBinding = GenerateQuadConversionIndexBuffer(ctx, engine->indexBuffer.indexSize, *view, firstIndex, elementCount);
-        else
+            quadBufferSequence.SetSequence(quadBufferSequence.GenerateBufferBindingHash(megaBufferBinding));
+        } else {
             megaBufferBinding = view->TryMegaBuffer(ctx.executor.cycle, ctx.gpu.megaBufferAllocator, ctx.executor.executionTag);
+        }
 
         if (megaBufferBinding)
             builder.SetIndexBuffer(megaBufferBinding, indexType);
@@ -161,17 +163,22 @@ namespace skyline::gpu::interconnect::maxwell3d {
         if (*view)
             view->GetBuffer()->PopulateReadBarrier(vk::PipelineStageFlagBits::eVertexInput, srcStageMask, dstStageMask);
 
-        if (didEstimateSize != estimateSize || (elementCount + firstIndex > usedElementCount + usedFirstIndex) || quadConversion != usedQuadConversion)
+        if (didEstimateSize != estimateSize || 
+            (elementCount + firstIndex > usedElementCount + usedFirstIndex) || 
+            quadConversion != usedQuadConversion) {
             return true;
+        }
 
-        // TODO: optimise this to use buffer sequencing to avoid needing to regenerate the quad buffer every time. We can't use as it is rn though because sequences aren't globally unique and may conflict after buffer recreation
         if (usedQuadConversion) {
-            megaBufferBinding = GenerateQuadConversionIndexBuffer(ctx, engine->indexBuffer.indexSize, *view, firstIndex, elementCount);
+            if (!quadBufferSequence.IsValid() || quadBufferSequence.HasChanged()) {
+                megaBufferBinding = GenerateQuadConversionIndexBuffer(ctx, engine->indexBuffer.indexSize, *view, firstIndex, elementCount);
+                quadBufferSequence.Update();
+                quadBufferSequence.SetSequence(quadBufferSequence.GenerateBufferBindingHash(megaBufferBinding));
+            }
             builder.SetIndexBuffer(megaBufferBinding, indexType);
         } else if (megaBufferBinding) {
-            if (auto newMegaBufferBinding{view->TryMegaBuffer(ctx.executor.cycle, ctx.gpu.megaBufferAllocator, ctx.executor.executionTag)};
-                newMegaBufferBinding != megaBufferBinding) {
-
+            auto newMegaBufferBinding = view->TryMegaBuffer(ctx.executor.cycle, ctx.gpu.megaBufferAllocator, ctx.executor.executionTag);
+            if (newMegaBufferBinding != megaBufferBinding) {
                 megaBufferBinding = newMegaBufferBinding;
                 if (megaBufferBinding)
                     builder.SetIndexBuffer(megaBufferBinding, indexType);
