@@ -146,11 +146,12 @@ namespace skyline::gpu::interconnect::maxwell3d {
 
         indexType = ConvertIndexType(engine->indexBuffer.indexSize);
 
-        if (quadConversion)
+        if (quadConversion) {
             megaBufferBinding = GenerateQuadConversionIndexBuffer(ctx, engine->indexBuffer.indexSize, *view, firstIndex, elementCount);
             quadBufferSequence.SetSequence(quadBufferSequence.GenerateBufferBindingHash(megaBufferBinding));
-        else
+        } else {
             megaBufferBinding = view->TryMegaBuffer(ctx.executor.cycle, ctx.gpu.megaBufferAllocator, ctx.executor.executionTag);
+        }
 
         if (megaBufferBinding)
             builder.SetIndexBuffer(megaBufferBinding, indexType);
