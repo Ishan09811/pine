@@ -51,6 +51,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
         u32 usedElementCount{};
         u32 usedFirstIndex{};
         bool usedQuadConversion{};
+        BufferSequenceTracker quadBufferSequence;
 
       public:
         IndexBufferState(dirty::Handle dirtyHandle, DirtyManager &manager, const EngineRegisters &engine);
