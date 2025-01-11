@@ -6,6 +6,7 @@
 #include <gpu/buffer_manager.h>
 #include "common.h"
 #include "pipeline_state.h"
+#include "buffer_sequence_tracker.h"
 
 namespace skyline::gpu::interconnect::maxwell3d {
     class VertexBufferState : dirty::RefreshableManualDirty, dirty::CachedManualDirty {
