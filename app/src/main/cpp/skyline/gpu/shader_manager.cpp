@@ -90,6 +90,7 @@ namespace skyline::gpu {
         auto &traits{gpu.traits};
         hostTranslateInfo = Shader::HostTranslateInfo{
             .support_float16 = traits.supportsFloat16,
+            .support_float64 = traits.supportsFloat64,
             .support_int64 = traits.supportsInt64,
             .needs_demote_reorder = false,
             .support_snorm_render_buffer = true,

@@ -31,6 +31,7 @@ namespace skyline::gpu {
         bool supportsSpirv14{}; //!< If SPIR-V 1.4 is supported (with VK_KHR_spirv_1_4)
         bool supportsShaderDemoteToHelper{}; //!< If a shader invocation can be demoted to a helper invocation (with VK_EXT_shader_demote_to_helper_invocation)
         bool supportsFloat16{}; //!< If 16-bit floating point integers are supported in shaders
+        bool supportsFloat64{}; //!< If 64-bit floating point integers are supported in shaders
         bool supportsInt8{}; //!< If 8-bit integers are supported in shaders
         bool supportsInt16{}; //!< If 16-bit integers are supported in shaders
         bool supportsInt64{}; //!< If 64-bit integers are supported in shaders
