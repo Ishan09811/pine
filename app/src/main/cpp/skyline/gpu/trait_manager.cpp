@@ -54,7 +54,6 @@ namespace skyline::gpu {
                 EXT_SET("VK_EXT_shader_demote_to_helper_invocation", hasShaderDemoteToHelperExt);
                 EXT_SET("VK_KHR_shader_atomic_int64", hasShaderAtomicInt64Ext);
                 EXT_SET("VK_KHR_shader_float16_int8", hasShaderFloat16Int8Ext);
-                EXT_SET("VK_KHR_shader_float64", hasShaderFloat64Ext);
                 EXT_SET("VK_KHR_shader_float_controls", supportsFloatControls);
                 EXT_SET("VK_KHR_uniform_buffer_standard_layout", supportsUniformBufferStandardLayout);
                 EXT_SET("VK_EXT_primitive_topology_list_restart", hasPrimitiveTopologyListRestartExt);
