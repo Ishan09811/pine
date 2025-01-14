@@ -441,7 +441,10 @@ namespace skyline::gpu {
         semaphore.acquire();
 
         auto future = std::async(std::launch::async, [this, &runtimeInfo, &program, &bindings, hash]() {
-            auto semaphoreReleaser = std::unique_ptr<void, decltype([](void*) { semaphore.release(); })>(nullptr, [](void*) { semaphore.release(); });
+            auto semaphoreReleaser = std::unique_ptr<void, decltype([this](void*) { this->semaphore.release(); })>(
+                nullptr, 
+                [this](void*) { this->semaphore.release(); }
+            );
             auto spirvEmitted{Shader::Backend::SPIRV::EmitSPIRV(profile, runtimeInfo, program, bindings)};
             auto spirv{ProcessShaderBinary(true, hash, span<u32>{spirvEmitted}.cast<u8>()).cast<u32>()};
 
