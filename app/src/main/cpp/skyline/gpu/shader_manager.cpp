@@ -12,6 +12,7 @@
 #include <shader_compiler/frontend/maxwell/translate_program.h>
 #include <shader_compiler/backend/spirv/emit_spirv.h>
 #include <vulkan/vulkan_raii.hpp>
+#include "semaphore_releaser.h"
 #include "shader_manager.h"
 
 static constexpr bool DumpShaders{false};
@@ -441,10 +442,7 @@ namespace skyline::gpu {
         semaphore.acquire();
 
         auto future = std::async(std::launch::async, [this, &runtimeInfo, &program, &bindings, hash]() {
-            auto semaphoreReleaser = std::unique_ptr<void, decltype([this](void*) { this->semaphore.release(); })>(
-                nullptr, 
-                [this](void*) { this->semaphore.release(); }
-            );
+            SemaphoreReleaser releaser(semaphore);
             auto spirvEmitted{Shader::Backend::SPIRV::EmitSPIRV(profile, runtimeInfo, program, bindings)};
             auto spirv{ProcessShaderBinary(true, hash, span<u32>{spirvEmitted}.cast<u8>()).cast<u32>()};
 
