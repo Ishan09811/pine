@@ -3,7 +3,6 @@
 
 #include <fstream>
 #include <future>
-#include <semaphore>
 #include <range/v3/algorithm.hpp>
 #include <boost/functional/hash.hpp>
 #include <gpu.h>

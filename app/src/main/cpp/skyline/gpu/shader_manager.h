@@ -4,6 +4,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <semaphore>
 #include <vulkan/vulkan.hpp>
 #include <shader_compiler/object_pool.h>
 #include <shader_compiler/frontend/maxwell/control_flow.h>
