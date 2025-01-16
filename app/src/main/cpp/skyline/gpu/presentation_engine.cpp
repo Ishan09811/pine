@@ -342,8 +342,10 @@ namespace skyline::gpu {
                 break;
         }
         auto modes{gpu.vkPhysicalDevice.getSurfacePresentModesKHR(**vkSurface)};
-        if (std::find(modes.begin(), modes.end(), requestedMode) == modes.end())
-            throw exception("Swapchain doesn't support present mode: {}", vk::to_string(requestedMode));
+        if (std::find(modes.begin(), modes.end(), requestedMode) == modes.end()) {
+            LOGW("Swapchain doesn't support present mode: {} fallbacking to fifo mode", vk::to_string(requestedMode));
+            requestedMode = vk::PresentModeKHR::eFifo;
+        }
 
         vkSwapchain.emplace(gpu.vkDevice, vk::SwapchainCreateInfoKHR{
             .surface = **vkSurface,
