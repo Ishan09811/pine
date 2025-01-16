@@ -438,7 +438,7 @@ namespace skyline::gpu {
             Shader::Maxwell::ConvertLegacyToGeneric(program, runtimeInfo);
         }
 
-        auto future = std::async(std::launch::async, [this, &runtimeInfo, &program, &bindings, hash]() {
+        auto compileShader = [this, &runtimeInfo, &program, &bindings, hash]() {
             auto spirvEmitted{Shader::Backend::SPIRV::EmitSPIRV(profile, runtimeInfo, program, bindings)};
             auto spirv{ProcessShaderBinary(true, hash, span<u32>{spirvEmitted}.cast<u8>()).cast<u32>()};
 
@@ -447,9 +447,14 @@ namespace skyline::gpu {
                 .codeSize = spirv.size_bytes(),
             };
             return (*gpu.vkDevice).createShaderModule(createInfo, nullptr, *gpu.vkDevice.getDispatcher());
-        });
+        };
         
-        return future.get();
+        if (*gpu.getState().settings->useAsyncShaders) {
+            auto future = std::async(std::launch::async, compileShader);
+            return future.get();
+        } else {
+            return compileShader();
+        }
     }
 
     void ShaderManager::ResetPools() {
