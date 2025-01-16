@@ -6,7 +6,6 @@
 #include <gpu/buffer_manager.h>
 #include "common.h"
 #include "pipeline_state.h"
-#include "buffer_sequence_tracker.h"
 
 namespace skyline::gpu::interconnect::maxwell3d {
     class VertexBufferState : dirty::RefreshableManualDirty, dirty::CachedManualDirty {
@@ -52,7 +51,6 @@ namespace skyline::gpu::interconnect::maxwell3d {
         u32 usedElementCount{};
         u32 usedFirstIndex{};
         bool usedQuadConversion{};
-        BufferSequenceTracker quadBufferSequence;
 
       public:
         IndexBufferState(dirty::Handle dirtyHandle, DirtyManager &manager, const EngineRegisters &engine);
