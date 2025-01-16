@@ -2,6 +2,7 @@
 // Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
 
 #include <fstream>
+#include <future>
 #include <range/v3/algorithm.hpp>
 #include <boost/functional/hash.hpp>
 #include <gpu.h>
@@ -433,18 +434,27 @@ namespace skyline::gpu {
     vk::ShaderModule ShaderManager::CompileShader(const Shader::RuntimeInfo &runtimeInfo, Shader::IR::Program &program, Shader::Backend::Bindings &bindings, u64 hash) {
         std::scoped_lock lock{poolMutex};
 
-        if (program.info.loads.Legacy() || program.info.stores.Legacy())
+        if (program.info.loads.Legacy() || program.info.stores.Legacy()) {
             Shader::Maxwell::ConvertLegacyToGeneric(program, runtimeInfo);
+        }
 
-        auto spirvEmitted{Shader::Backend::SPIRV::EmitSPIRV(profile, runtimeInfo, program, bindings)};
-        auto spirv{ProcessShaderBinary(true, hash, span<u32>{spirvEmitted}.cast<u8>()).cast<u32>()};
+        auto compileShader = [this, &runtimeInfo, &program, &bindings, hash]() {
+            auto spirvEmitted{Shader::Backend::SPIRV::EmitSPIRV(profile, runtimeInfo, program, bindings)};
+            auto spirv{ProcessShaderBinary(true, hash, span<u32>{spirvEmitted}.cast<u8>()).cast<u32>()};
 
-        vk::ShaderModuleCreateInfo createInfo{
-            .pCode = spirv.data(),
-            .codeSize = spirv.size_bytes(),
+            vk::ShaderModuleCreateInfo createInfo{
+                .pCode = spirv.data(),
+                .codeSize = spirv.size_bytes(),
+            };
+            return (*gpu.vkDevice).createShaderModule(createInfo, nullptr, *gpu.vkDevice.getDispatcher());
         };
-
-        return (*gpu.vkDevice).createShaderModule(createInfo, nullptr, *gpu.vkDevice.getDispatcher());
+        
+        if (*gpu.getState().settings->useAsyncShaders) {
+            auto future = std::async(std::launch::async, compileShader);
+            return future.get();
+        } else {
+            return compileShader();
+        }
     }
 
     void ShaderManager::ResetPools() {

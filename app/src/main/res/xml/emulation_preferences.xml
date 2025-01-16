@@ -193,6 +193,11 @@
             app:title="@string/free_guest_texture_memory" />
         <SwitchPreferenceCompat
             android:defaultValue="false"
+            android:summary="@string/use_async_shaders_desc"
+            app:key="use_async_shaders"
+            app:title="@string/use_async_shaders" />
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
             android:summaryOff="@string/shader_cache_enabled"
             android:summaryOn="@string/shader_cache_disabled"
             app:key="disable_shader_cache"
