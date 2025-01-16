@@ -4,7 +4,6 @@
 #pragma once
 
 #include <unordered_map>
-#include <semaphore>
 #include <vulkan/vulkan.hpp>
 #include <shader_compiler/object_pool.h>
 #include <shader_compiler/frontend/maxwell/control_flow.h>
@@ -31,7 +30,6 @@ namespace skyline::gpu {
         Shader::ObjectPool<Shader::IR::Block> blockPool;
         std::unordered_map<u64, std::vector<u8>> guestShaderReplacements; //!< Map of guest shader hash -> replacement guest shader binary, populated at init time and must not be modified after
         std::unordered_map<u64, std::vector<u8>> hostShaderReplacements; //!< ^^ same as above but for host
-        std::counting_semaphore<6> semaphore{6};
 
         std::mutex poolMutex;
         std::filesystem::path dumpPath;
