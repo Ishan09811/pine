@@ -61,6 +61,7 @@ class EmulationSettings private constructor(context : Context, prefName : String
     var useDirectMemoryImport by sharedPreferences(context, false, prefName = prefName)
     var forceMaxGpuClocks by sharedPreferences(context, false, prefName = prefName)
     var freeGuestTextureMemory by sharedPreferences(context, true, prefName = prefName)
+    var useAsyncShaders by sharedPreferences(context, false, prefName = prefName)
     var disableShaderCache by sharedPreferences(context, false, prefName = prefName)
     var enableDynamicResolution by sharedPreferences(context, false, prefName = prefName)
     var enableSampleShading by sharedPreferences(context, false, prefName = prefName)
