@@ -112,6 +112,8 @@ namespace skyline::gpu {
         auto texture{frame.textureView->texture};
         if (frame.textureView->format != swapchainFormat || texture->dimensions != swapchainExtent)
             UpdateSwapchain(frame.textureView->format, texture->dimensions);
+        
+        auto startTime = std::chrono::high_resolution_clock::now();
 
         int result;
         if (frame.crop && frame.crop != windowCrop) {
@@ -156,6 +158,15 @@ namespace skyline::gpu {
         });
 
         frameFence = nextImageTexture->cycle;
+
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto frameDuration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        const auto frameTimeThreshold = 16ms; // 16ms for 60 FPS
+
+        if (frameDuration > frameTimeThreshold) {
+            LOGW("Frame skipped due to long processing time: {}ms", frameDuration.count());
+            return; // Skip this frame
+        }
 
         auto getMonotonicNsNow{[]() -> i64 {
             timespec time;
