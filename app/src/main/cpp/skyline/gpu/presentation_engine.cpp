@@ -161,7 +161,7 @@ namespace skyline::gpu {
 
         auto endTime = std::chrono::high_resolution_clock::now();
         auto frameDuration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-        const auto frameTimeThreshold = 16ms; // 16ms for 60 FPS
+        const auto frameTimeThreshold = std::chrono::milliseconds(16); // 16ms for 60 FPS
 
         if (frameDuration > frameTimeThreshold) {
             LOGW("Frame skipped due to long processing time: {}ms", frameDuration.count());
