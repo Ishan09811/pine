@@ -122,11 +122,11 @@ namespace skyline::gpu::interconnect::maxwell3d {
 
         auto colorAttachments{activeState.GetColorAttachments()};
         auto depthStencilAttachment{activeState.GetDepthAttachment()};
-        auto depthStencilAttachmentSpan{depthStencilAttachment ? span<TextureView *>(depthStencilAttachment) : span<TextureView *>()};
+        auto depthStencilAttachmentSpan{depthStencilAttachment ? span<HostTextureView *>(depthStencilAttachment) : span<HostTextureView *>()};
         for (auto attachment : ranges::views::concat(colorAttachments, depthStencilAttachmentSpan)) {
             if (attachment) {
-                scissor.extent.width = std::min(scissor.extent.width, static_cast<u32>(static_cast<i32>(attachment->texture->dimensions.width) - scissor.offset.x));
-                scissor.extent.height = std::min(scissor.extent.height, static_cast<u32>(static_cast<i32>(attachment->texture->dimensions.height) - scissor.offset.y));
+                scissor.extent.width = std::min(scissor.extent.width, static_cast<u32>(static_cast<i32>(attachment->hostTexture->dimensions.width) - scissor.offset.x));
+                scissor.extent.height = std::min(scissor.extent.height, static_cast<u32>(static_cast<i32>(attachment->hostTexture->dimensions.height) - scissor.offset.y));
             }
         }
 
@@ -324,18 +324,9 @@ namespace skyline::gpu::interconnect::maxwell3d {
 
         vk::Rect2D scissor{GetDrawScissor()};
 
-        auto colorAttachments{activeState.GetColorAttachments()};
-        auto depthStencilAttachment{activeState.GetDepthAttachment()};
-        auto depthStencilAttachmentSpan{depthStencilAttachment ? span<HostTextureView *>(depthStencilAttachment) : span<HostTextureView *>()};
-        for (auto attachment : ranges::views::concat(colorAttachments, depthStencilAttachmentSpan)) {
-            if (attachment) {
-                scissor.extent.width = std::min(scissor.extent.width, static_cast<u32>(static_cast<i32>(attachment->hostTexture->dimensions.width) - scissor.offset.x));
-                scissor.extent.height = std::min(scissor.extent.height, static_cast<u32>(static_cast<i32>(attachment->hostTexture->dimensions.height) - scissor.offset.y));
-            }
-        }
-
         constantBuffers.ResetQuickBind();
-
+        
+        ctx.executor.AddCheckpoint("Before draw");
         ctx.executor.AddSubpass([drawParams](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &gpu) {
             drawParams->stateUpdater.RecordAll(gpu, commandBuffer);
 
