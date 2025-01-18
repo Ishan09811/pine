@@ -274,12 +274,8 @@ namespace skyline::gpu::interconnect::maxwell3d {
             }
         }
 
-        if (!clearAttachments.empty()) {
-            std::array<TextureView *, 1> colorAttachments{colorView ? &*colorView : nullptr};
-            ctx.executor.AddSubpass([clearAttachments, clearRects](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &, vk::RenderPass, u32) {
-                commandBuffer.clearAttachments(clearAttachments, span(clearRects).first(clearAttachments.size()));
-            }, renderArea, {}, {}, colorView ? colorAttachments : span<TextureView *>{}, depthStencilView ? &*depthStencilView : nullptr);
-        }
+        if (clearAttachments.empty())
+            return;
 
         std::array<HostTextureView *, 1> colorAttachments{colorView ? &*colorView : nullptr};
         ctx.executor.AddSubpass([clearAttachments, clearRects](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &) {
