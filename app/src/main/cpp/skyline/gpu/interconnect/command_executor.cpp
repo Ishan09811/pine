@@ -111,9 +111,39 @@ namespace skyline::gpu::interconnect {
         using namespace node;
         for (NodeVariant &node : slot->nodes) {
             std::visit(VariantVisitor{
-                NODE(FunctionNode),
-                NODE(RenderPassNode),
-                NODE(RenderPassEndNode),
+                [&](FunctionNode &node) {
+                    TRACE_EVENT_INSTANT("gpu", "FunctionNode");
+                    node(slot->commandBuffer, slot->cycle, gpu);
+                },
+
+                [&](CheckpointNode &node) {
+                    RecordFullBarrier(slot->commandBuffer);
+
+                    TRACE_EVENT_INSTANT("gpu", "CheckpointNode", "id", node.id, [&](perfetto::EventContext ctx) {
+                        ctx.event()->add_flow_ids(node.id);
+                    });
+
+                    std::array<vk::BufferCopy, 1> copy{vk::BufferCopy{
+                        .size = node.binding.size,
+                        .srcOffset = node.binding.offset,
+                        .dstOffset = 0,
+                    }};
+
+                    slot->commandBuffer.copyBuffer(node.binding.buffer, gpu.debugTracingBuffer.vkBuffer, copy);
+
+                    RecordFullBarrier(slot->commandBuffer);
+                },
+
+                [&](RenderPassNode &node) {
+                    TRACE_EVENT_INSTANT("gpu", "RenderPassNode");
+                    lRenderPass = node(slot->commandBuffer, slot->cycle, gpu);
+                    subpassIndex = 0;
+                },
+
+                [&](RenderPassEndNode &node) {
+                    TRACE_EVENT_INSTANT("gpu", "RenderPassEndNode");
+                    node(slot->commandBuffer, slot->cycle, gpu);
+                },
             }, node);
             #undef NODE
         }
