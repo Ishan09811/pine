@@ -277,8 +277,8 @@ namespace skyline::gpu {
     }
 
     void Texture::PopulateReadBarrier(vk::PipelineStageFlagBits dstStage, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
-        if (!guest)
-            return;
+        /*if (!guest)
+            return;*/
 
         readStageMask |= dstStage;
 
