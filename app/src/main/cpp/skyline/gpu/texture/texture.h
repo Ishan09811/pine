@@ -25,6 +25,7 @@ namespace skyline::gpu {
             GpuDirty, //!< The GPU texture has been modified but the CPU mappings have not been updated
         } dirtyState{DirtyState::CpuDirty}; //!< The state of the CPU mappings with respect to the GPU texture
         bool memoryFreed{}; //!< If the guest backing memory has been freed
+        bool everUsedAsRt{}; //!< If this texture has ever been used as a rendertarget
         std::recursive_mutex stateMutex; //!< Synchronizes access to the dirty state
 
         std::atomic<ContextTag> tag{}; //!< The tag associated with the last lock call on this texture
