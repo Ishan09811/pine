@@ -4,6 +4,7 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_format_traits.hpp>
 #include <range/v3/algorithm.hpp>
 #include <range/v3/view.hpp>
 #include <common.h>
