@@ -28,7 +28,7 @@ namespace skyline::gpu {
     }
 
     std::shared_ptr<Texture> TextureManager::CreateTexture(const texture::Mappings& mappings, texture::Dimensions sampleDimensions, texture::Dimensions imageDimensions, vk::SampleCountFlagBits sampleCount, texture::Format format, vk::ImageViewType viewType, texture::TileConfig tileConfig, u32 levelCount, u32 layerCount, u32 layerStride, bool mutableFormat) {
-        LOGE("0x{:X} - 0x{:X}, {}x{}x{} samples, {}x{}x{} pixels, {} sample count, {}, {} type, {} tile mode, {} levels, {} layers, {} layer stride, mutableFormat: {}", mappings.front().begin().base(), mappings.front().end().base(), sampleDimensions.width, sampleDimensions.height, sampleDimensions.depth, imageDimensions.width, imageDimensions.height, imageDimensions.depth, vk::to_string(sampleCount), vk::to_string(format->vkFormat), vk::to_string(viewType), tileConfig.mode, levelCount, layerCount, layerStride, mutableFormat);
+        //LOGE("0x{:X} - 0x{:X}, {}x{}x{} samples, {}x{}x{} pixels, {} sample count, {}, {} type, {} tile mode, {} levels, {} layers, {} layer stride, mutableFormat: {}", mappings.front().begin().base(), mappings.front().end().base(), sampleDimensions.width, sampleDimensions.height, sampleDimensions.depth, imageDimensions.width, imageDimensions.height, imageDimensions.depth, vk::to_string(sampleCount), vk::to_string(format->vkFormat), vk::to_string(viewType), tileConfig.mode, levelCount, layerCount, layerStride, mutableFormat);
 
         auto texture{std::make_shared<Texture>(gpu, mappings, sampleDimensions, imageDimensions, sampleCount, format, tileConfig, levelCount, layerCount, layerStride, mutableFormat)};
         std::scoped_lock lock{texture->mutex};
