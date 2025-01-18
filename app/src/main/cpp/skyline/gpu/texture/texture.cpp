@@ -301,7 +301,7 @@ namespace skyline::gpu {
             if (gpuDirty && dirtyState == DirtyState::Clean) {
                 // If a texture is Clean then we can just transition it to being GPU dirty and retrap it
                 dirtyState = DirtyState::GpuDirty;
-                gpu.state.nce->TrapRegions(*trapHandle, false);
+                gpu.state.process->trap.TrapRegions(*trapHandle, false);
                 gpu.state.process->memory.FreeMemory(mirror);
                 return;
             } else if (dirtyState != DirtyState::CpuDirty) {
@@ -309,7 +309,7 @@ namespace skyline::gpu {
             }
 
             dirtyState = gpuDirty ? DirtyState::GpuDirty : DirtyState::Clean;
-            gpu.state.nce->TrapRegions(*trapHandle, !gpuDirty); // Trap any future CPU reads (optionally) + writes to this texture
+            gpu.state.process->trap.TrapRegions(*trapHandle, !gpuDirty); // Trap any future CPU reads (optionally) + writes to this texture
         }
 
         // From this point on Clean -> CPU dirty state transitions can occur, GPU dirty -> * transitions will always require the full lock to be held and thus won't occur
@@ -341,7 +341,7 @@ namespace skyline::gpu {
             std::scoped_lock lock{stateMutex};
             if (gpuDirty && dirtyState == DirtyState::Clean) {
                 dirtyState = DirtyState::GpuDirty;
-                gpu.state.nce->TrapRegions(*trapHandle, false);
+                gpu.state.process->trap.TrapRegions(*trapHandle, false);
                 gpu.state.process->memory.FreeMemory(mirror);
                 return;
             } else if (dirtyState != DirtyState::CpuDirty) {
@@ -349,7 +349,7 @@ namespace skyline::gpu {
             }
 
             dirtyState = gpuDirty ? DirtyState::GpuDirty : DirtyState::Clean;
-            gpu.state.nce->TrapRegions(*trapHandle, !gpuDirty); // Trap any future CPU reads (optionally) + writes to this texture
+            gpu.state.process->trap.TrapRegions(*trapHandle, !gpuDirty); // Trap any future CPU reads (optionally) + writes to this texture
         }
 
         auto stagingBuffer{activeHost->SynchronizeHostImpl()};
@@ -376,7 +376,7 @@ namespace skyline::gpu {
             if (cpuDirty && dirtyState == DirtyState::Clean) {
                 dirtyState = DirtyState::CpuDirty;
                 if (!skipTrap)
-                    gpu.state.nce->RemoveTrap(*trapHandle);
+                    gpu.state.process->trap.RemoveTrap(*trapHandle);
                 return;
             } else if (dirtyState != DirtyState::GpuDirty) {
                 return;
@@ -410,8 +410,8 @@ namespace skyline::gpu {
 
         if (!skipTrap)
             if (cpuDirty)
-                gpu.state.nce->RemoveTrap(*trapHandle);
+                gpu.state.process->trap.RemoveTrap(*trapHandle);
             else
-                gpu.state.nce->TrapRegions(*trapHandle, true); // Trap any future CPU writes to this texture
+                gpu.state.process->trap.TrapRegions(*trapHandle, true); // Trap any future CPU writes to this texture
     }
 }
