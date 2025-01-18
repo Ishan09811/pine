@@ -342,4 +342,26 @@ namespace skyline::gpu::interconnect::maxwell3d {
                 commandBuffer.endTransformFeedbackEXT(0, {}, {});
         }, scissor, activeDescriptorSetSampledImages, activeState.GetColorAttachments(), activeState.GetDepthAttachment(), srcStageMask, dstStageMask);
     }
+
+    void Maxwell3D::Query(soc::gm20b::IOVA address, engine::SemaphoreInfo::CounterType type, std::optional<u64> timestamp) {
+        if (type != engine::SemaphoreInfo::CounterType::SamplesPassed) {
+            LOGE("Unsupported query type: {}", static_cast<u32>(type));
+            return;
+        }
+
+        queries.Query(ctx, address, Queries::CounterType::Occulusion, timestamp);
+    }
+
+    void Maxwell3D::ResetCounter(engine::ClearReportValue::Type type) {
+        if (type != engine::ClearReportValue::Type::ZPassPixelCount) {
+            LOGD("Unsupported query type: {}", static_cast<u32>(type));
+            return;
+        }
+
+        queries.ResetCounter(ctx, Queries::CounterType::Occulusion);
+    }
+
+    bool Maxwell3D::QueryPresentAtAddress(soc::gm20b::IOVA address) {
+        return queries.QueryPresentAtAddress(address);
+    }
 }
