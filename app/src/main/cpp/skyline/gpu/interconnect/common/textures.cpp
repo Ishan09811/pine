@@ -210,7 +210,7 @@ namespace skyline::gpu::interconnect {
             std::fill(textureHeaderCache.begin(), textureHeaderCache.end(), CacheEntry{});
         } else if (textureHeaders.size() > index && textureHeaderCache[index].view) {
             auto &cached{textureHeaderCache[index]};
-            if (cached.sequenceNumber == ctx.channelCtx.channelSequenceNumber)
+            if (cached.executionTag == ctx.executor.executionTag)
                 return cached.view;
 
             if (cached.tic == textureHeaders[index] && !cached.view->stale) {
