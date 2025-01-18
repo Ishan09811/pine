@@ -129,6 +129,9 @@ namespace skyline::gpu::interconnect {
         }, executor.tag, dstFermiTexture.mappings, dstFermiTexture.dimensions, {}, {}, dstFermiTexture.format, vk::ImageViewType::e2D, {}, dstFermiTexture.tileConfig, 1, 1, dstFermiTexture.layerStride)};
         executor.AttachTexture(dstTextureView);
 
+        float centredSrcRectX{sampleOrigin == SampleModeOrigin::Corner ? srcRectX - 0.5f : srcRectX};
+        float centredSrcRectY{sampleOrigin == SampleModeOrigin::Corner ? srcRectY - 0.5f : srcRectY};
+
         executor.AddCheckpoint("Before blit");
         gpu.helperShaders.blitHelperShader.Blit(
             gpu,
