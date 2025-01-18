@@ -341,6 +341,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
             if (drawParams->transformFeedbackEnable)
                 commandBuffer.endTransformFeedbackEXT(0, {}, {});
         }, scissor, activeDescriptorSetSampledImages, activeState.GetColorAttachments(), activeState.GetDepthAttachment(), srcStageMask, dstStageMask);
+        ctx.executor.AddCheckpoint("After draw");
     }
 
     void Maxwell3D::DrawIndirect(engine::DrawTopology topology, bool transformFeedbackEnable, bool indexed, span<u8> indirectBuffer, u32 count, u32 stride) {
@@ -388,7 +389,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
         constantBuffers.ResetQuickBind();
 
         ctx.executor.AddCheckpoint("Before indirect draw");
-        ctx.executor.AddSubpass([drawParams](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &gpu, vk::RenderPass, u32) {
+        ctx.executor.AddSubpass([drawParams](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &gpu) {
             drawParams->stateUpdater.RecordAll(gpu, commandBuffer);
 
             if (drawParams->transformFeedbackEnable)
