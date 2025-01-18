@@ -84,5 +84,13 @@ namespace skyline::gpu::interconnect::node {
         }
     };
 
-    using NodeVariant = std::variant<FunctionNode, RenderPassNode, RenderPassEndNode>; //!< A variant encompassing all command nodes types
+    /**
+     * @brief A node which copies the contained ID value to the debug tracking buffer
+     */
+    struct CheckpointNode {
+        BufferBinding binding; //!< Binding for a GPU-side buffer containing the checkpoint ID
+        u32 id;
+    };
+
+    using NodeVariant = std::variant<FunctionNode, CheckpointNode, RenderPassNode, RenderPassEndNode>; //!< A variant encompassing all command nodes types
 }
