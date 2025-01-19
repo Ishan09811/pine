@@ -403,7 +403,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
 
             if (drawParams->transformFeedbackEnable)
                 commandBuffer.endTransformFeedbackEXT(0, {}, {});
-        }, scissor, activeDescriptorSetSampledImages, {}, activeState.GetColorAttachments(), activeState.GetDepthAttachment(), !ctx.gpu.traits.quirks.relaxedRenderPassCompatibility, srcStageMask, dstStageMask);
+        }, scissor, activeDescriptorSetSampledImages, activeState.GetColorAttachments(), activeState.GetDepthAttachment(), srcStageMask, dstStageMask);
         ctx.executor.AddCheckpoint("After indirect draw");
     }
 
