@@ -208,6 +208,9 @@ namespace skyline::gpu {
     TextureManager::TextureManager(GPU &gpu) : gpu(gpu) {}
 
     HostTextureView *TextureManager::FindOrCreate(const RecordFunction &recordCb, ContextTag tag, texture::Mappings mappings, texture::Dimensions sampleDimensions, texture::Dimensions imageDimensions, vk::SampleCountFlagBits sampleCount, texture::Format format, vk::ImageViewType viewType, vk::ComponentMapping components, texture::TileConfig tileConfig, u32 levelCount, u32 layerCount, u32 layerStride, u32 viewMipBase, u32 viewMipCount) {
+        LOGW("Entering FindOrCreate: mappings.size()={}, sampleDimensions=({}, {}, {}), imageDimensions=({}, {}, {}), format={}, viewType={}", 
+         mappings.size(), sampleDimensions.width, sampleDimensions.height, sampleDimensions.depth, 
+         imageDimensions.width, imageDimensions.height, imageDimensions.depth, format, viewType);
         if (viewMipCount == 0)
             viewMipCount = levelCount - viewMipBase;
 
