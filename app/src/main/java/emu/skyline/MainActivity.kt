@@ -40,6 +40,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import emu.skyline.adapter.*
 import emu.skyline.di.getSettings
 import emu.skyline.data.AppItem
+import emu.skyline.data.BaseAppItem
 import emu.skyline.data.AppItemTag
 import emu.skyline.databinding.MainActivityBinding
 import emu.skyline.loader.AppEntry
