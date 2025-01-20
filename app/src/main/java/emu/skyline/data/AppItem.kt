@@ -17,13 +17,6 @@ import emu.skyline.loader.LoaderResult
 import java.io.Serializable
 
 /**
- * The tag used to pass [AppItem]s between activities and fragments
- */
-const val AppItemTag = BuildConfig.APPLICATION_ID + ".APP_ITEM"
-
-private val missingIcon by lazy { ContextCompat.getDrawable(SkylineApplication.instance, R.drawable.default_icon)!!.toBitmap(256, 256) }
-
-/**
  * This class is a wrapper around [AppEntry], it is used for passing around game metadata
  */
 @Suppress("SERIAL")
