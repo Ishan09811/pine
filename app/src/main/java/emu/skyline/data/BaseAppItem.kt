@@ -11,7 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import emu.skyline.BuildConfig
 import emu.skyline.R
-import emu.skyline.StratoApplication
+import emu.skyline.SkylineApplication
 import emu.skyline.loader.AppEntry
 import emu.skyline.loader.LoaderResult
 import java.io.Serializable
