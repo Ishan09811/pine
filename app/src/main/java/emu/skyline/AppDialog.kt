@@ -38,6 +38,7 @@ import emu.skyline.loader.RomFile
 import emu.skyline.loader.RomFormat
 import emu.skyline.loader.RomFormat.*
 import emu.skyline.settings.SettingsActivity
+import emu.skyline.settings.EmulationSettings
 import emu.skyline.utils.CacheManagementUtils
 import emu.skyline.utils.SaveManagementUtils
 import emu.skyline.utils.serializable
@@ -236,7 +237,9 @@ class AppDialog : BottomSheetDialogFragment() {
     }
 
     private fun loadContent(uri: Uri) {
-        //contents.saveContents(RomFile(requireContext(), null, uri, null).appEntry)
+        mapOf("nro" to NRO, "nso" to NSO, "nca" to NCA, "nsp" to NSP, "xci" to XCI)[uri.name?.substringAfterLast(".")?.lowercase()]?.let { contentFormat->
+            contents.saveContents(RomFile(requireContext(), contentFormat, uri, EmulationSettings.global.systemLanguage).appEntry)
+        }
     }
 
     private fun openContentPicker() {
