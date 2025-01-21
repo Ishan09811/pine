@@ -75,6 +75,7 @@ import emu.skyline.utils.ByteBufferSerializable
 import emu.skyline.utils.GpuDriverHelper
 import emu.skyline.utils.serializable
 import emu.skyline.utils.AmbientHelper
+import emu.skyline.utils.ContentsHelper
 import emu.skyline.input.onscreen.OnScreenEditActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -112,7 +113,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
     lateinit var dlcUris : ArrayList<Uri>
 
-    lateinit var updateUri : Uri
+    var updateUri : Uri = Uri.EMPTY
 
     /**
      * The built-in [Vibrator] of the device
@@ -318,9 +319,16 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         if (intentItem != null) {
             item = intentItem
 
-            dlcUris = item.getEnabledDlcs().map { it.uri }.toCollection(ArrayList())
+            val contents = ContentsHelper(this@EmulationActivity)
 
-            updateUri = item.getEnabledUpdate()?.uri ?: Uri.EMPTY
+            contents.loadContents().filter { appEntry ->
+                appEntry.parentTitleId == item.titleId
+            }.forEach { appEntry ->
+                appEntry.uri?.let { uri ->
+                    if (appEntry.romType == RomType.DLC) dlcUris.add(uri)
+                    if (appEntry.romType == RomType.Update) updateUri = uri
+                }
+            }
             return
         }
 
