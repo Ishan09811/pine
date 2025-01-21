@@ -8,6 +8,7 @@ package emu.skyline
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
+import android.net.Uri
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
@@ -21,6 +22,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.documentfile.provider.DocumentFile
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,6 +34,9 @@ import emu.skyline.data.BaseAppItem
 import emu.skyline.data.AppItemTag
 import emu.skyline.databinding.AppDialogBinding
 import emu.skyline.loader.LoaderResult
+import emu.skyline.loader.RomFile
+import emu.skyline.loader.RomFormat
+import emu.skyline.loader.RomFormat.*
 import emu.skyline.settings.SettingsActivity
 import emu.skyline.utils.CacheManagementUtils
 import emu.skyline.utils.SaveManagementUtils
@@ -71,6 +77,8 @@ class AppDialog : BottomSheetDialogFragment() {
 
     private val contents by lazy { ContentsHelper(requireContext()) }
 
+    private lateinit var contentPickerLauncher: ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
         documentPicker = SaveManagementUtils.registerDocumentPicker(requireActivity()) {
@@ -96,6 +104,15 @@ class AppDialog : BottomSheetDialogFragment() {
                         }
                     }
                 }
+            }
+        }
+
+        contentPickerLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val uri: Uri? = result.data?.data
+                loadContent(uri)
             }
         }
     }
@@ -194,11 +211,11 @@ class AppDialog : BottomSheetDialogFragment() {
         }
 
         binding.importUpdate.setOnClickListener {
-            // TODO: contents.save(list)
+            openContentPicker()
         }
 
         binding.importDlcs.setOnClickListener {
-            // TODO: contents.save(list)
+            openContentPicker()
         }
 
         binding.gameTitleId.setOnLongClickListener {
@@ -216,5 +233,16 @@ class AppDialog : BottomSheetDialogFragment() {
                 false
             }
         }
+    }
+
+    private fun loadContent(uri: Uri) {
+        //contents.saveContents(RomFile(requireContext(), null, uri, null).appEntry)
+    }
+
+    private fun openContentPicker() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "*/*"
+        }
+        contentPickerLauncher.launch(intent)
     }
 }
