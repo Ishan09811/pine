@@ -1,5 +1,5 @@
 
-package emu.skyline
+package emu.skyline.utils
 
 import android.content.Context
 import java.io.*
