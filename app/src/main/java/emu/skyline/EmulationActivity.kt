@@ -67,6 +67,8 @@ import emu.skyline.emulation.PipelineLoadingFragment
 import emu.skyline.input.*
 import emu.skyline.loader.RomFile
 import emu.skyline.loader.getRomFormat
+import emu.skyline.loader.AppEntry
+import emu.skyline.loader.RomType
 import emu.skyline.settings.AppSettings
 import emu.skyline.settings.EmulationSettings
 import emu.skyline.settings.NativeSettings
