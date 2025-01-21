@@ -218,5 +218,58 @@
                 app:icon="@drawable/ic_delete" />
 
         </com.google.android.flexbox.FlexboxLayout>
+        
+        <TextView
+            android:id="@+id/contents"
+            style="?attr/textAppearanceLabelLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/manage_contents"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/flexboxCache" />
+        
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/flexboxContents"
+            style="@style/ThemeOverlay.Material3.Button.IconButton.Filled.Tonal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:alignItems="center"
+            app:flexWrap="nowrap"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/contents"
+            app:layout_constraintVertical_bias="1">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/import_update"
+                style="@style/Widget.Material3.Button.TonalButton.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/import_update"
+                android:text="@string/import_update"
+                app:icon="@drawable/ic_add" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/import_dlcs"
+                style="@style/Widget.Material3.Button.TonalButton.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:contentDescription="@string/import_dlcs"
+                android:text="@string/import_dlcs"
+                app:icon="@drawable/ic_add" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/delete_contents"
+                style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                app:icon="@drawable/ic_delete"
+                app:iconGravity="textStart" />
+            
+        </com.google.android.flexbox.FlexboxLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </LinearLayout>
