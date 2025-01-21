@@ -44,6 +44,7 @@ import emu.skyline.data.BaseAppItem
 import emu.skyline.data.AppItemTag
 import emu.skyline.databinding.MainActivityBinding
 import emu.skyline.loader.AppEntry
+import emu.skyline.loader.RomType
 import emu.skyline.loader.LoaderResult
 import emu.skyline.provider.DocumentsProvider
 import emu.skyline.settings.AppSettings
@@ -53,6 +54,7 @@ import emu.skyline.utils.GpuDriverHelper
 import emu.skyline.utils.SearchLocationHelper
 import emu.skyline.utils.WindowInsetsHelper
 import emu.skyline.SkylineApplication
+import java.util.Collections
 import javax.inject.Inject
 import kotlin.math.ceil
 import kotlinx.coroutines.launch
