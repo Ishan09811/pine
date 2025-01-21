@@ -35,6 +35,7 @@ import emu.skyline.settings.SettingsActivity
 import emu.skyline.utils.CacheManagementUtils
 import emu.skyline.utils.SaveManagementUtils
 import emu.skyline.utils.serializable
+import emu.skyline.utils.ContentsHelper
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -67,6 +68,8 @@ class AppDialog : BottomSheetDialogFragment() {
      */
     private lateinit var documentPicker : ActivityResultLauncher<Array<String>>
     private lateinit var startForResultExportSave : ActivityResultLauncher<Intent>
+
+    private val contents by lazy { ContentsHelper(requireContext()) }
 
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
@@ -188,6 +191,14 @@ class AppDialog : BottomSheetDialogFragment() {
         binding.exportSave.isEnabled = saveExists
         binding.exportSave.setOnClickListener {
             SaveManagementUtils.exportSave(requireContext(), startForResultExportSave, item.titleId, "${item.title} (v${binding.gameVersion.text}) [${item.titleId}]")
+        }
+
+        binding.importUpdate.setOnClickListener {
+            // TODO: contents.save(list)
+        }
+
+        binding.importDlcs.setOnClickListener {
+            // TODO: contents.save(list)
         }
 
         binding.gameTitleId.setOnLongClickListener {
