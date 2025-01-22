@@ -78,10 +78,6 @@ class AppDialog : BottomSheetDialogFragment() {
     private val contents by lazy { ContentsHelper(requireContext()) }
 
     private lateinit var expectedContentType: RomType
-
-    private val contentType by lazy { 
-        if (expectedContentType == RomType.DLC) "DLCs" else "Update" 
-    }
     
     private lateinit var contentPickerLauncher: ActivityResultLauncher<Intent>
 
@@ -119,6 +115,7 @@ class AppDialog : BottomSheetDialogFragment() {
             if (result.resultCode == Activity.RESULT_OK) {
                 val uri: Uri? = result.data?.data
                 val result = loadContent(uri)
+                val contentType = if (expectedContentType == RomType.DLC) "DLCs" else "Update" 
                 when (result) {
                     LoaderResult.Success -> {
                         Snackbar.make(binding.root, "Imported ${contentType} successfully", Snackbar.LENGTH_SHORT).show()
@@ -275,11 +272,12 @@ class AppDialog : BottomSheetDialogFragment() {
             )
 
             val currentContents = contents.loadContents().toMutableList()
-            if (newContent.result == LoaderResult.Success && newContent.appEntry.romType == expectedContentType) {
+            val isDuplicate = currentContents.any { it.uri == newContent.appEntry.uri }
+            if (!isDuplicate && newContent.result == LoaderResult.Success && newContent.appEntry.romType == expectedContentType) {
                 currentContents.add(newContent.appEntry)
                 contents.saveContents(currentContents)
                 return LoaderResult.Success
-            }
+            } else if (!isDuplicate) File(newContent.appEntry.uri.path).delete()
         }
 
         return LoaderResult.ParsingError
