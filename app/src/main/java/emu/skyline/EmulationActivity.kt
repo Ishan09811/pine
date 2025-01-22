@@ -113,7 +113,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
      */
     lateinit var item : AppItem
 
-    lateinit var dlcUris : ArrayList<Uri>
+    var dlcUris: ArrayList<Uri> = arrayListOf()
 
     var updateUri : Uri = Uri.EMPTY
 
