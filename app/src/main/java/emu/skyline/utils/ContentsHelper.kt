@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.ContentResolver
 import android.net.Uri
 import android.provider.OpenableColumns
+import emu.skyline.SkylineApplication
 import java.io.*
 
 class ContentsHelper(private val context: Context) {
