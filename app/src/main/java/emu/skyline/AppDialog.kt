@@ -36,6 +36,7 @@ import emu.skyline.loader.RomFile
 import emu.skyline.loader.RomType
 import emu.skyline.loader.RomFormat
 import emu.skyline.loader.RomFormat.*
+import emu.skyline.loader.AppEntry
 import emu.skyline.settings.SettingsActivity
 import emu.skyline.settings.EmulationSettings
 import emu.skyline.utils.CacheManagementUtils
@@ -272,7 +273,7 @@ class AppDialog : BottomSheetDialogFragment() {
             )
 
             val currentContents = contents.loadContents().toMutableList()
-            val isDuplicate = currentContents.any { it.uri == newContent.appEntry.uri }
+            val isDuplicate = currentContents.any { (it as AppEntry).uri == newContent.appEntry.uri }
             if (!isDuplicate && newContent.result == LoaderResult.Success && newContent.appEntry.romType == expectedContentType) {
                 currentContents.add(newContent.appEntry)
                 contents.saveContents(currentContents)
