@@ -271,7 +271,7 @@ class AppDialog : BottomSheetDialogFragment() {
 
             val currentContents = contents.loadContents().toMutableList()
             if (newContent.result == LoaderResult.Success && newContent.appEntry.romType == expectedContentType) {
-                currentContents.add(newAppEntry)
+                currentContents.add(newContent.appEntry)
                 contents.saveContents(currentContents)
                 return LoaderResult.Success
             }
