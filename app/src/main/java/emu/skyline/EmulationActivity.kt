@@ -323,10 +323,10 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
             val contents = ContentsHelper(this@EmulationActivity)
 
-            contents.loadContents().filter { appEntry ->
+            contents.loadContents().filter { appEntry: AppEntry ->
                 appEntry.parentTitleId == item.titleId
-            }.forEach { appEntry ->
-                appEntry.uri?.let { uri ->
+            }.forEach { appEntry: AppEntry ->
+                appEntry.uri?.let { uri: Uri ->
                     if (appEntry.romType == RomType.DLC) dlcUris.add(uri)
                     if (appEntry.romType == RomType.Update) updateUri = uri
                 }
