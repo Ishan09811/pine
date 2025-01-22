@@ -33,6 +33,7 @@ import emu.skyline.data.AppItemTag
 import emu.skyline.databinding.AppDialogBinding
 import emu.skyline.loader.LoaderResult
 import emu.skyline.loader.RomFile
+import emu.skyline.loader.RomType
 import emu.skyline.loader.RomFormat
 import emu.skyline.loader.RomFormat.*
 import emu.skyline.settings.SettingsActivity
@@ -76,6 +77,10 @@ class AppDialog : BottomSheetDialogFragment() {
 
     private val contents by lazy { ContentsHelper(requireContext()) }
 
+    private lateinit var expectedContentType: RomType
+
+    private val contentType by lazy { (expectedContentType == RomType.DLC) "DLCs" ?: "Update" }
+
     private lateinit var contentPickerLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState : Bundle?) {
@@ -111,7 +116,15 @@ class AppDialog : BottomSheetDialogFragment() {
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val uri: Uri? = result.data?.data
-                loadContent(uri)
+                val result = loadContent(uri)
+                when (result) {
+                    LoaderResult.Success -> {
+                        Snackbar.make(binding.root, "Imported ${contentType} successfully", Snackbar.LENGTH_SHORT).show()
+                    }
+                    LoaderResult.Error -> {
+                        Snackbar.make(binding.root, getString("Failed to import ${contentType}"), Snackbar.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
     }
@@ -210,10 +223,12 @@ class AppDialog : BottomSheetDialogFragment() {
         }
 
         binding.importUpdate.setOnClickListener {
+            expectedContentType = RomType.Update
             openContentPicker()
         }
 
         binding.importDlcs.setOnClickListener {
+            expectedContentType = RomType.DLC
             openContentPicker()
         }
 
@@ -234,9 +249,9 @@ class AppDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun loadContent(uri: Uri?) {
+    private fun loadContent(uri: Uri?): LoaderResult {
         if (uri == Uri.EMPTY || uri == null) {
-            return
+            return LoaderResult.Error
         }
         
         mapOf(
@@ -247,16 +262,20 @@ class AppDialog : BottomSheetDialogFragment() {
             "xci" to XCI
         )[contents.getFileName(uri!!, requireContext().contentResolver)?.substringAfterLast(".")?.lowercase()]?.let { contentFormat ->
 
-            val newAppEntry = RomFile(
+            val newContent = RomFile(
                 requireContext(),
                 contentFormat,
                 contents.save(uri!!, requireContext().contentResolver)!!,
                 EmulationSettings.global.systemLanguage
-            ).appEntry
+            )
 
             val currentContents = contents.loadContents().toMutableList()
-            currentContents.add(newAppEntry)
-            contents.saveContents(currentContents)
+            if (newContent.result == LoaderResult.Success && newContent.appEntry.romType == expectedContentType) {
+                currentContents.add(newAppEntry)
+                contents.saveContents(currentContents)
+                return LoaderResult.Success
+            }
+            return LoaderResult.Error
         }
     }
 
