@@ -123,8 +123,11 @@ class AppDialog : BottomSheetDialogFragment() {
                     LoaderResult.Success -> {
                         Snackbar.make(binding.root, "Imported ${contentType} successfully", Snackbar.LENGTH_SHORT).show()
                     }
-                    LoaderResult.Error -> {
-                        Snackbar.make(binding.root, getString("Failed to import ${contentType}"), Snackbar.LENGTH_SHORT).show()
+                    LoaderResult.ParsingError -> {
+                        Snackbar.make(binding.root, "Failed to import ${contentType}", Snackbar.LENGTH_SHORT).show()
+                    }
+                    else -> {
+                        Snackbar.make(binding.root, "Unknown error occurred", Snackbar.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -253,7 +256,7 @@ class AppDialog : BottomSheetDialogFragment() {
 
     private fun loadContent(uri: Uri?): LoaderResult {
         if (uri == Uri.EMPTY || uri == null) {
-            return LoaderResult.Error
+            return LoaderResult.ParsingError
         }
         
         mapOf(
@@ -277,7 +280,7 @@ class AppDialog : BottomSheetDialogFragment() {
                 contents.saveContents(currentContents)
                 return LoaderResult.Success
             }
-            return LoaderResult.Error
+            return LoaderResult.ParsingError
         }
     }
 
