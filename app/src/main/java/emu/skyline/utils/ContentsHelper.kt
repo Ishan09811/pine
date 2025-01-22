@@ -6,6 +6,7 @@ import android.content.ContentResolver
 import android.net.Uri
 import android.provider.OpenableColumns
 import emu.skyline.SkylineApplication
+import emu.skyline.getPublicFilesDir
 import java.io.*
 
 class ContentsHelper(private val context: Context) {
