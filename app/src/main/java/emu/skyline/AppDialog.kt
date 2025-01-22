@@ -280,8 +280,9 @@ class AppDialog : BottomSheetDialogFragment() {
                 contents.saveContents(currentContents)
                 return LoaderResult.Success
             }
-            return LoaderResult.ParsingError
         }
+
+        return LoaderResult.ParsingError
     }
 
     private fun openContentPicker() {
