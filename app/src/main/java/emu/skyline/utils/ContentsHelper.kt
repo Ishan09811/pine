@@ -2,6 +2,9 @@
 package emu.skyline.utils
 
 import android.content.Context
+import android.content.ContentResolver
+import android.net.Uri
+import android.provider.OpenableColumns
 import java.io.*
 
 class ContentsHelper(private val context: Context) {
@@ -37,5 +40,40 @@ class ContentsHelper(private val context: Context) {
             e.printStackTrace()
             emptyList()
         }
+    }
+
+    fun save(uri: Uri, cr: ContentResolver): Uri? {
+        val destinationDir = File("${SkylineApplication.instance.getPublicFilesDir().canonicalPath}/contents/")
+        if (!destinationDir.exists()) destinationDir.mkdirs()
+
+        val fileName = getFileName(uri, cr) ?: return null
+        val destinationFile = File(destinationDir, fileName)
+
+        try {
+            cr.openInputStream(uri)?.use { inputStream ->
+                FileOutputStream(destinationFile).use { outputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+            }
+            return Uri.fromFile(destinationFile)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
+    }
+
+    fun getFileName(uri: Uri, cr: ContentResolver): String? {
+        if (uri.scheme == "content") {
+            val cursor = cr.query(uri, null, null, null, null)
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    val nameIndex = it.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME)
+                    return it.getString(nameIndex)
+                }
+            }
+        } else if (uri.scheme == "file") {
+            return File(uri.path!!).name
+        }
+        return null
     }
 }
