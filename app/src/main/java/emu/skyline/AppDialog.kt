@@ -79,8 +79,10 @@ class AppDialog : BottomSheetDialogFragment() {
 
     private lateinit var expectedContentType: RomType
 
-    private val contentType by lazy { (expectedContentType == RomType.DLC) "DLCs" ?: "Update" }
-
+    private val contentType by lazy { 
+        if (expectedContentType == RomType.DLC) "DLCs" else "Update" 
+    }
+    
     private lateinit var contentPickerLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState : Bundle?) {
