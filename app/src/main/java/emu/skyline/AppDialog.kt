@@ -234,19 +234,23 @@ class AppDialog : BottomSheetDialogFragment() {
         }
     }
 
-    private fun loadContent(uri: Uri) {
+    private fun loadContent(uri: Uri?) {
+        if (uri == Uri.EMPTY || uri == null) {
+            return
+        }
+        
         mapOf(
             "nro" to NRO,
             "nso" to NSO,
             "nca" to NCA,
             "nsp" to NSP,
             "xci" to XCI
-        )[uri.name?.substringAfterLast(".")?.lowercase()]?.let { contentFormat ->
+        )[contents.getFileName(uri!!, requireContext().contentResolver)?.substringAfterLast(".")?.lowercase()]?.let { contentFormat ->
 
             val newAppEntry = RomFile(
                 requireContext(),
                 contentFormat,
-                uri,
+                contents.save(uri!!, requireContext().contentResolver)!!,
                 EmulationSettings.global.systemLanguage
             ).appEntry
 
