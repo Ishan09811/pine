@@ -137,8 +137,10 @@ class AppDialog : BottomSheetDialogFragment() {
                     }
                 }
 
-                if (contents.getUriSize(requireContext(), uri) > 100 * 1024 * 1024) {
-                    IndeterminateProgressDialogFragment.newInstance(requireActivity(), "Importing", task).show(parentFragmentManager, IndeterminateProgressDialogFragment.TAG)
+                val uriSize = contents.getUriSize(requireContext(), uri!!) ?: null
+
+                if (uriSize != null && uriSize.toInt() > 100 * 1024 * 1024) {
+                    IndeterminateProgressDialogFragment.newInstance(requireActivity(), R.string.importing, task).show(parentFragmentManager, IndeterminateProgressDialogFragment.TAG)
                 } else {
                     ViewModelProvider(requireActivity())[TaskViewModel::class.java].task = task
                     taskViewModel.runTask()
