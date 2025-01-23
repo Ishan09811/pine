@@ -122,7 +122,7 @@ class AppDialog : BottomSheetDialogFragment() {
         ) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val uri: Uri? = result.data?.data
-                val result = loadContent(uri)
+                val result = CoroutineScope(Dispatchers.IO).launch { loadContent(uri) }
                 val task: () -> Unit = { 
                     val contentType = if (expectedContentType == RomType.DLC) "DLCs" else "Update" 
                     when (result) {
