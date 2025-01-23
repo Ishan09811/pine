@@ -265,7 +265,7 @@ class AppDialog : BottomSheetDialogFragment() {
             var contentList = contents.loadContents()
             val contentNames = contentList.map { contents.getFileName((it as AppEntry).uri!!, requireContext().contentResolver) }.toTypedArray()
             var selectedItemIndex = 0
-            MaterialAlertDialogBuilder(this)
+            MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Contents")
                 .setSingleChoiceItems(contentNames, selectedItemIndex) { _, which ->
                     selectedItemIndex = which
