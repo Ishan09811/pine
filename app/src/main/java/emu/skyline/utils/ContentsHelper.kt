@@ -78,4 +78,16 @@ class ContentsHelper(private val context: Context) {
         }
         return null
     }
+
+    private fun getUriSize(context: Context, uri: Uri): Long? {
+        var size: Long? = null
+        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+            if (sizeIndex != -1) {
+                cursor.moveToFirst()
+                size = cursor.getLong(sizeIndex)
+            }
+        }
+        return size
+    }
 }
