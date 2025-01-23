@@ -23,6 +23,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.activityViewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -140,7 +141,7 @@ class AppDialog : BottomSheetDialogFragment() {
                 val uriSize = contents.getUriSize(requireContext(), uri!!) ?: null
 
                 if (uriSize != null && uriSize.toInt() > 100 * 1024 * 1024) {
-                    IndeterminateProgressDialogFragment.newInstance(requireActivity(), R.string.importing, task).show(parentFragmentManager, IndeterminateProgressDialogFragment.TAG)
+                    IndeterminateProgressDialogFragment.newInstance(requireActivity() as AppCompatActivity, R.string.importing, task).show(parentFragmentManager, IndeterminateProgressDialogFragment.TAG)
                 } else {
                     ViewModelProvider(requireActivity())[TaskViewModel::class.java].task = task
                     taskViewModel.runTask()
