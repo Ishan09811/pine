@@ -258,6 +258,25 @@ class AppDialog : BottomSheetDialogFragment() {
             openContentPicker()
         }
 
+        binding.deleteContents.setOnClickListener {
+            var contentList = contents.loadContents()
+            val contentNames = contents.loadContents().map { contents.getFileName((it as AppEntry).uri!!, requireContext().contentResolver) }.toTypedArray()
+            var selectedItemIndex = 0
+            MaterialAlertDialogBuilder(this)
+                .setTitle("Contents")
+                .setSingleChoiceItems(contentNames, selectedItemIndex) { _, which ->
+                    selectedItemIndex = which
+                }
+                .setPositiveButton("Remove") { _, _ ->
+                    val selectedContent = contents[selectedItemIndex]
+                    Toast.makeText(this, "Deleted: $selectedContent", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+        }
+
         binding.gameTitleId.setOnLongClickListener {
             val clipboard = requireActivity().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
             clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Title ID", item.titleId))
