@@ -263,7 +263,10 @@ class AppDialog : BottomSheetDialogFragment() {
 
         binding.deleteContents.setOnClickListener {
             var contentList = contents.loadContents()
-            val contentNames = contentList.map { contents.getFileName((it as AppEntry).uri!!, requireContext().contentResolver) }.toTypedArray()
+            val currentItemContentList = contentList.filter { appEntry ->
+                (appEntry as AppEntry).parentTitleId == item.titleId
+            }
+            val contentNames = currentItemContentList.map { contents.getFileName((it as AppEntry).uri!!, requireContext().contentResolver) }.toTypedArray()
             var selectedItemIndex = 0
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle("Contents")
@@ -271,8 +274,10 @@ class AppDialog : BottomSheetDialogFragment() {
                     selectedItemIndex = which
                 }
                 .setPositiveButton("Remove") { _, _ ->
-                    val selectedContent = contentList[selectedItemIndex]
-                    //TODO: delete the uri + remove the content from content list
+                    val selectedContent = currentItemContentList[selectedItemIndex]
+                    File((selectedContent as AppEntry).uri.path).delete()
+                    contentList.remove(selectedContent)
+                    contents.saveContents(contentList)
                 }
                 .setNegativeButton("Cancel") { dialog, _ ->
                     dialog.dismiss()
