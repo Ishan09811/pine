@@ -262,7 +262,7 @@ class AppDialog : BottomSheetDialogFragment() {
         binding.deleteContents.isEnabled = !contents.loadContents().isEmpty()
 
         binding.deleteContents.setOnClickListener {
-            var contentList = contents.loadContents()
+            var contentList = contents.loadContents().toMutableList()
             val currentItemContentList = contentList.filter { appEntry ->
                 (appEntry as AppEntry).parentTitleId == item.titleId
             }
