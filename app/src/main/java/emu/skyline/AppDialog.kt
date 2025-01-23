@@ -22,6 +22,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.documentfile.provider.DocumentFile
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,6 +45,8 @@ import emu.skyline.utils.CacheManagementUtils
 import emu.skyline.utils.SaveManagementUtils
 import emu.skyline.utils.serializable
 import emu.skyline.utils.ContentsHelper
+import emu.skyline.model.TaskViewModel
+import emu.skyline.fragments.IndeterminateProgressDialogFragment
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -82,6 +86,8 @@ class AppDialog : BottomSheetDialogFragment() {
     
     private lateinit var contentPickerLauncher: ActivityResultLauncher<Intent>
 
+    private val taskViewModel : TaskViewModel by activityViewModels()
+
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
         documentPicker = SaveManagementUtils.registerDocumentPicker(requireActivity()) {
@@ -116,16 +122,30 @@ class AppDialog : BottomSheetDialogFragment() {
             if (result.resultCode == Activity.RESULT_OK) {
                 val uri: Uri? = result.data?.data
                 val result = loadContent(uri)
-                val contentType = if (expectedContentType == RomType.DLC) "DLCs" else "Update" 
-                when (result) {
-                    LoaderResult.Success -> {
-                        Snackbar.make(binding.root, "Imported ${contentType} successfully", Snackbar.LENGTH_SHORT).show()
+                val task: () -> Unit = { 
+                    val contentType = if (expectedContentType == RomType.DLC) "DLCs" else "Update" 
+                    when (result) {
+                        LoaderResult.Success -> {
+                           Snackbar.make(binding.root, "Imported ${contentType} successfully", Snackbar.LENGTH_SHORT).show()
+                        }
+                        LoaderResult.ParsingError -> {
+                           Snackbar.make(binding.root, "Failed to import ${contentType}", Snackbar.LENGTH_SHORT).show()
+                        }
+                        else -> {
+                           Snackbar.make(binding.root, "Unknown error occurred", Snackbar.LENGTH_SHORT).show()
+                        }
                     }
-                    LoaderResult.ParsingError -> {
-                        Snackbar.make(binding.root, "Failed to import ${contentType}", Snackbar.LENGTH_SHORT).show()
-                    }
-                    else -> {
-                        Snackbar.make(binding.root, "Unknown error occurred", Snackbar.LENGTH_SHORT).show()
+                }
+
+                if (contents.getUriSize(requireContext(), uri) > 100 * 1024 * 1024) {
+                    IndeterminateProgressDialogFragment.newInstance(requireActivity(), "Importing", task).show(parentFragmentManager, IndeterminateProgressDialogFragment.TAG)
+                } else {
+                    ViewModelProvider(requireActivity())[TaskViewModel::class.java].task = task
+                    taskViewModel.runTask()
+                    taskViewModel.isComplete.observe(this) { isComplete ->
+                        if (!isComplete)
+                            return@observe
+                        taskViewModel.clear()
                     }
                 }
             }
