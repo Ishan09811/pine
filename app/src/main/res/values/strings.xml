@@ -24,6 +24,10 @@
     <string name="delete_save">Delete save</string>
     <string name="import_save">Import</string>
     <string name="export_save">Export</string>
+    <string name="manage_contents">Contents</string>
+    <string name="import_update">Update</string>
+    <string name="import_dlcs">DLCs</string>
+    <string name="importing">Importing</string>
     <string name="searching_roms">Searching for ROMs</string>
     <string name="invalid_file">Invalid file</string>
     <string name="missing_title_key">Missing title key</string>

@@ -24,6 +24,7 @@ import android.graphics.PointF
 import android.graphics.drawable.Icon
 import android.hardware.display.DisplayManager
 import android.net.DhcpInfo
+import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.*
 import android.os.PowerManager
@@ -66,6 +67,8 @@ import emu.skyline.emulation.PipelineLoadingFragment
 import emu.skyline.input.*
 import emu.skyline.loader.RomFile
 import emu.skyline.loader.getRomFormat
+import emu.skyline.loader.AppEntry
+import emu.skyline.loader.RomType
 import emu.skyline.settings.AppSettings
 import emu.skyline.settings.EmulationSettings
 import emu.skyline.settings.NativeSettings
@@ -74,6 +77,7 @@ import emu.skyline.utils.ByteBufferSerializable
 import emu.skyline.utils.GpuDriverHelper
 import emu.skyline.utils.serializable
 import emu.skyline.utils.AmbientHelper
+import emu.skyline.utils.ContentsHelper
 import emu.skyline.input.onscreen.OnScreenEditActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -105,9 +109,13 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     private val binding by lazy { EmuActivityBinding.inflate(layoutInflater) }
 
     /**
-     * The [AppItem] of the app that is being emulated
+     * The [BaseAppItem] of the app that is being emulated
      */
     lateinit var item : AppItem
+
+    var dlcUris: ArrayList<Uri> = arrayListOf()
+
+    var updateUri : Uri = Uri.EMPTY
 
     /**
      * The built-in [Vibrator] of the device
@@ -171,7 +179,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
      * @param nativeLibraryPath The full path to the app native library directory
      * @param assetManager The asset manager used for accessing app assets
      */
-    private external fun executeApplication(romUri : String, romType : Int, romFd : Int, nativeSettings : NativeSettings, publicAppFilesPath : String, privateAppFilesPath : String, nativeLibraryPath : String, assetManager : AssetManager)
+    private external fun executeApplication(romUri : String, romType : Int, romFd : Int, dlcFds : IntArray?, updateFd : Int, nativeSettings : NativeSettings, publicAppFilesPath : String, privateAppFilesPath : String, nativeLibraryPath : String, assetManager : AssetManager)
 
     /**
      * @param join If the function should only return after all the threads join or immediately
@@ -286,9 +294,19 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         @SuppressLint("Recycle")
         val romFd = contentResolver.openFileDescriptor(rom, "r")!!
 
+        var dlcFds : IntArray? = null
+        if (dlcUris.isNotEmpty())
+            dlcFds = dlcUris.map { contentResolver.openFileDescriptor(it, "r")!!.detachFd() }.toIntArray()
+
+        var updateFd : Int = -1
+        if (updateUri != Uri.EMPTY) {
+            @SuppressLint("Recycle")
+            updateFd = contentResolver.openFileDescriptor(updateUri, "r")!!.detachFd()
+        }
+
         GpuDriverHelper.ensureFileRedirectDir(this)
         emulationThread = Thread {
-            executeApplication(rom.toString(), romType, romFd.detachFd(), NativeSettings(this, emulationSettings), applicationContext.getPublicFilesDir().canonicalPath + "/", applicationContext.filesDir.canonicalPath + "/", applicationInfo.nativeLibraryDir + "/", assets)
+            executeApplication(rom.toString(), romType, romFd.detachFd(), dlcFds, updateFd, NativeSettings(this, emulationSettings), applicationContext.getPublicFilesDir().canonicalPath + "/", applicationContext.filesDir.canonicalPath + "/", applicationInfo.nativeLibraryDir + "/", assets)
             returnFromEmulation()
         }
 
@@ -302,6 +320,17 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         val intentItem = intent.serializable(AppItemTag) as AppItem?
         if (intentItem != null) {
             item = intentItem
+
+            val contents = ContentsHelper(this@EmulationActivity)
+
+            contents.loadContents().filter { appEntry ->
+                (appEntry as AppEntry).parentTitleId == item.titleId
+            }.forEach { appEntry ->
+                (appEntry as AppEntry).uri?.let { uri: Uri ->
+                    if ((appEntry as AppEntry).romType == RomType.DLC) dlcUris.add(uri)
+                    if ((appEntry as AppEntry).romType == RomType.Update) updateUri = uri
+                }
+            }
             return
         }
 
@@ -310,7 +339,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         val romFormat = getRomFormat(uri, contentResolver)
         val romFile = RomFile(this, romFormat, uri, EmulationSettings.global.systemLanguage)
 
-        item = AppItem(romFile.takeIf { it.valid }!!.appEntry)
+        item = AppItem(romFile.takeIf { it.valid }!!.appEntry, emptyList(), emptyList())
     }
 
     @SuppressLint("SetTextI18n", "ClickableViewAccessibility")

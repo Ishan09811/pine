@@ -8,6 +8,7 @@ package emu.skyline
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
+import android.net.Uri
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
@@ -21,20 +22,33 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.documentfile.provider.DocumentFile
+import androidx.fragment.app.activityViewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
-import emu.skyline.data.AppItem
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import emu.skyline.data.BaseAppItem
 import emu.skyline.data.AppItemTag
 import emu.skyline.databinding.AppDialogBinding
 import emu.skyline.loader.LoaderResult
+import emu.skyline.loader.RomFile
+import emu.skyline.loader.RomType
+import emu.skyline.loader.RomFormat
+import emu.skyline.loader.RomFormat.*
+import emu.skyline.loader.AppEntry
 import emu.skyline.settings.SettingsActivity
+import emu.skyline.settings.EmulationSettings
 import emu.skyline.utils.CacheManagementUtils
 import emu.skyline.utils.SaveManagementUtils
 import emu.skyline.utils.serializable
+import emu.skyline.utils.ContentsHelper
+import emu.skyline.model.TaskViewModel
+import emu.skyline.fragments.IndeterminateProgressDialogFragment
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -46,9 +60,9 @@ import java.io.OutputStream
 class AppDialog : BottomSheetDialogFragment() {
     companion object {
         /**
-         * @param item This is used to hold the [AppItem] between instances
+         * @param item This is used to hold the [BaseAppItem] between instances
          */
-        fun newInstance(item : AppItem) : AppDialog {
+        fun newInstance(item : BaseAppItem) : AppDialog {
             val args = Bundle()
             args.putSerializable(AppItemTag, item)
 
@@ -60,13 +74,21 @@ class AppDialog : BottomSheetDialogFragment() {
 
     private lateinit var binding : AppDialogBinding
 
-    private val item by lazy { requireArguments().serializable<AppItem>(AppItemTag)!! }
+    private val item by lazy { requireArguments().serializable<BaseAppItem>(AppItemTag)!! }
 
     /**
      * Used to manage save files
      */
     private lateinit var documentPicker : ActivityResultLauncher<Array<String>>
     private lateinit var startForResultExportSave : ActivityResultLauncher<Intent>
+
+    private val contents by lazy { ContentsHelper(requireContext()) }
+
+    private lateinit var expectedContentType: RomType
+    
+    private lateinit var contentPickerLauncher: ActivityResultLauncher<Intent>
+
+    private val taskViewModel : TaskViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,6 +113,43 @@ class AppDialog : BottomSheetDialogFragment() {
                                 input.copyTo(output)
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        contentPickerLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val uri: Uri? = result.data?.data
+                val task: () -> Unit = { 
+                    val result = loadContent(uri)
+                    val contentType = if (expectedContentType == RomType.DLC) "DLCs" else "Update" 
+                    when (result) {
+                        LoaderResult.Success -> {
+                           Snackbar.make(binding.root, "Imported ${contentType} successfully", Snackbar.LENGTH_SHORT).show()
+                        }
+                        LoaderResult.ParsingError -> {
+                           Snackbar.make(binding.root, "Failed to import ${contentType}", Snackbar.LENGTH_SHORT).show()
+                        }
+                        else -> {
+                           Snackbar.make(binding.root, "Unknown error occurred", Snackbar.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+
+                val uriSize = contents.getUriSize(requireContext(), uri!!) ?: null
+
+                if (uriSize != null && uriSize.toInt() > 100 * 1024 * 1024) {
+                    IndeterminateProgressDialogFragment.newInstance(requireActivity() as AppCompatActivity, R.string.importing, task).show(parentFragmentManager, IndeterminateProgressDialogFragment.TAG)
+                } else {
+                    ViewModelProvider(requireActivity())[TaskViewModel::class.java].task = task
+                    taskViewModel.runTask()
+                    taskViewModel.isComplete.observe(this) { isComplete ->
+                        if (!isComplete)
+                            return@observe
+                        taskViewModel.clear()
                     }
                 }
             }
@@ -138,7 +197,7 @@ class AppDialog : BottomSheetDialogFragment() {
 
         binding.gamePin.setOnClickListener {
             val info = ShortcutInfo.Builder(context, item.title)
-            info.setShortLabel(item.title)
+            item.title?.let { title -> info.setShortLabel(title) }
             info.setActivity(ComponentName(requireContext(), EmulationActivity::class.java))
             info.setIcon(Icon.createWithAdaptiveBitmap(item.bitmapIcon))
 
@@ -190,6 +249,48 @@ class AppDialog : BottomSheetDialogFragment() {
             SaveManagementUtils.exportSave(requireContext(), startForResultExportSave, item.titleId, "${item.title} (v${binding.gameVersion.text}) [${item.titleId}]")
         }
 
+        binding.importUpdate.setOnClickListener {
+            expectedContentType = RomType.Update // we expects Update
+            openContentPicker()
+        }
+
+        binding.importDlcs.setOnClickListener {
+            expectedContentType = RomType.DLC // we expects DLC
+            openContentPicker()
+        }
+
+        binding.deleteContents.isEnabled = !contents.loadContents().filter { appEntry ->
+            (appEntry as AppEntry).parentTitleId == item.titleId
+        }.isEmpty()
+
+        binding.deleteContents.setOnClickListener {
+            var contentList = contents.loadContents().toMutableList()
+            val currentItemContentList = contentList.filter { appEntry ->
+                (appEntry as AppEntry).parentTitleId == item.titleId
+            }
+            val contentNames = currentItemContentList.map { contents.getFileName((it as AppEntry).uri!!, requireContext().contentResolver) }.toTypedArray()
+            var selectedItemIndex = 0
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Contents")
+                .setSingleChoiceItems(contentNames, selectedItemIndex) { _, which ->
+                    selectedItemIndex = which
+                }
+                .setPositiveButton("Remove") { _, _ ->
+                    val selectedContent = currentItemContentList[selectedItemIndex]
+                    File((selectedContent as AppEntry).uri.path).delete()
+                    contentList.remove(selectedContent)
+                    contents.saveContents(contentList)
+                    Snackbar.make(binding.root, "Successfully removed ${contentNames[selectedItemIndex].toString()}", Snackbar.LENGTH_SHORT).show()
+                    binding.deleteContents.isEnabled = !contents.loadContents().filter { appEntry ->
+                       (appEntry as AppEntry).parentTitleId == item.titleId
+                    }.isEmpty()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+        }
+
         binding.gameTitleId.setOnLongClickListener {
             val clipboard = requireActivity().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
             clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Title ID", item.titleId))
@@ -205,5 +306,46 @@ class AppDialog : BottomSheetDialogFragment() {
                 false
             }
         }
+    }
+
+    private fun loadContent(uri: Uri?): LoaderResult {
+        if (uri == Uri.EMPTY || uri == null) {
+            return LoaderResult.ParsingError
+        }
+        
+        mapOf(
+            "nro" to NRO,
+            "nso" to NSO,
+            "nca" to NCA,
+            "nsp" to NSP,
+            "xci" to XCI
+        )[contents.getFileName(uri!!, requireContext().contentResolver)?.substringAfterLast(".")?.lowercase()]?.let { contentFormat ->
+
+            // creates a new RomFile with a copied file uri so we don't need to create it by 2 times
+            val newContent = RomFile(
+                requireContext(),
+                contentFormat,
+                contents.save(uri!!, requireContext().contentResolver)!!,
+                EmulationSettings.global.systemLanguage
+            )
+
+            val currentContents = contents.loadContents().toMutableList()
+            val isDuplicate = currentContents.any { (it as AppEntry).uri == newContent.appEntry.uri }
+            if (!isDuplicate && newContent.result == LoaderResult.Success && newContent.appEntry.romType == expectedContentType && newContent.appEntry.parentTitleId == item.titleId) {
+                currentContents.add(newContent.appEntry)
+                contents.saveContents(currentContents)
+                return LoaderResult.Success
+            } else if (!isDuplicate) File(newContent.appEntry.uri.path).delete()
+            if (isDuplicate) return LoaderResult.Success // if it is duplicate then we indicate that it is reimported successfully
+        }
+
+        return LoaderResult.ParsingError
+    }
+
+    private fun openContentPicker() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "*/*"
+        }
+        contentPickerLauncher.launch(intent)
     }
 }
