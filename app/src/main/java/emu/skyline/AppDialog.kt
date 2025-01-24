@@ -250,16 +250,18 @@ class AppDialog : BottomSheetDialogFragment() {
         }
 
         binding.importUpdate.setOnClickListener {
-            expectedContentType = RomType.Update
+            expectedContentType = RomType.Update // we expects Update
             openContentPicker()
         }
 
         binding.importDlcs.setOnClickListener {
-            expectedContentType = RomType.DLC
+            expectedContentType = RomType.DLC // we expects DLC
             openContentPicker()
         }
 
-        binding.deleteContents.isEnabled = !contents.loadContents().isEmpty()
+        binding.deleteContents.isEnabled = !contents.loadContents().filter { appEntry ->
+            (appEntry as AppEntry).parentTitleId == item.titleId
+        }.isEmpty()
 
         binding.deleteContents.setOnClickListener {
             var contentList = contents.loadContents().toMutableList()
@@ -278,6 +280,10 @@ class AppDialog : BottomSheetDialogFragment() {
                     File((selectedContent as AppEntry).uri.path).delete()
                     contentList.remove(selectedContent)
                     contents.saveContents(contentList)
+                    Snackbar.make(binding.root, "Successfully removed ${contentNames[selectedItemIndex].toString()}", Snackbar.LENGTH_SHORT).show()
+                    binding.deleteContents.isEnabled = !contents.loadContents().filter { appEntry ->
+                       (appEntry as AppEntry).parentTitleId == item.titleId
+                    }.isEmpty()
                 }
                 .setNegativeButton("Cancel") { dialog, _ ->
                     dialog.dismiss()
@@ -315,6 +321,7 @@ class AppDialog : BottomSheetDialogFragment() {
             "xci" to XCI
         )[contents.getFileName(uri!!, requireContext().contentResolver)?.substringAfterLast(".")?.lowercase()]?.let { contentFormat ->
 
+            // creates a new RomFile with a copied file uri so we don't need to create it by 2 times
             val newContent = RomFile(
                 requireContext(),
                 contentFormat,
@@ -324,11 +331,12 @@ class AppDialog : BottomSheetDialogFragment() {
 
             val currentContents = contents.loadContents().toMutableList()
             val isDuplicate = currentContents.any { (it as AppEntry).uri == newContent.appEntry.uri }
-            if (!isDuplicate && newContent.result == LoaderResult.Success && newContent.appEntry.romType == expectedContentType) {
+            if (!isDuplicate && newContent.result == LoaderResult.Success && newContent.appEntry.romType == expectedContentType && newContent.appEntry.parentTitleId == item.titleId) {
                 currentContents.add(newContent.appEntry)
                 contents.saveContents(currentContents)
                 return LoaderResult.Success
             } else if (!isDuplicate) File(newContent.appEntry.uri.path).delete()
+            if (isDuplicate) return LoaderResult.Success // if it is duplicate then we indicate that it is reimported successfully
         }
 
         return LoaderResult.ParsingError
