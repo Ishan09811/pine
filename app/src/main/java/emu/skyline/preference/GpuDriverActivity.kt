@@ -35,6 +35,8 @@ import emu.skyline.utils.GpuDriverHelper
 import emu.skyline.utils.GpuDriverInstallResult
 import emu.skyline.utils.WindowInsetsHelper
 import emu.skyline.utils.serializable
+import emu.skyline.utils.DriversFetcher
+import emu.skyline.utils.DriversFetcher.DownloadResult
 import emu.skyline.di.getSettings
 import emu.skyline.SkylineApplication
 import emu.skyline.getPublicFilesDir
