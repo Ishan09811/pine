@@ -9,16 +9,19 @@ import android.content.Intent
 import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
 import android.os.Bundle
 import android.view.ViewTreeObserver
+import android.view.LayoutInflater
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.WindowCompat
+import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import emu.skyline.R
 import emu.skyline.adapter.GenericListItem
@@ -28,17 +31,24 @@ import emu.skyline.adapter.SpacingItemDecoration
 import emu.skyline.data.BaseAppItem
 import emu.skyline.data.AppItemTag
 import emu.skyline.databinding.GpuDriverActivityBinding
+import emu.skyline.databinding.DialogKeyboardBinding
 import emu.skyline.settings.EmulationSettings
 import emu.skyline.utils.GpuDriverHelper
 import emu.skyline.utils.GpuDriverInstallResult
 import emu.skyline.utils.WindowInsetsHelper
 import emu.skyline.utils.serializable
+import emu.skyline.utils.DriversFetcher
+import emu.skyline.utils.DriversFetcher.DownloadResult
 import emu.skyline.di.getSettings
 import emu.skyline.SkylineApplication
+import emu.skyline.getPublicFilesDir
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.distinctUntilChanged
+import java.io.File
+import java.io.FileInputStream
 
 /**
  * This activity is used to manage the installed gpu drivers and select one to use.
@@ -189,11 +199,28 @@ class GpuDriverActivity : AppCompatActivity() {
         binding.driverList.addItemDecoration(SpacingItemDecoration(resources.getDimensionPixelSize(R.dimen.grid_padding)))
 
         binding.addDriverButton.setOnClickListener {
-            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-                addFlags(FLAG_GRANT_READ_URI_PERMISSION)
-                type = "application/zip"
-            }
-            installCallback.launch(intent)
+            val items = arrayOf(getString(R.string.driver_import), getString(R.string.install))
+            var checkedItem = 0
+            var selectedItem: String? = items[0]
+    
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.choose)
+                .setSingleChoiceItems(items, checkedItem) { dialog, which ->
+                    selectedItem = items[which]
+                }
+                .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                    if (selectedItem == getString(R.string.install)) {
+                        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                            addFlags(FLAG_GRANT_READ_URI_PERMISSION)
+                            type = "application/zip"
+                        }
+                        installCallback.launch(intent)
+                    } else {
+                        handleGpuDriverImport()
+                    }
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
         }
 
         populateAdapter()
@@ -203,6 +230,72 @@ class GpuDriverActivity : AppCompatActivity() {
                 SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
                     recreate()
                 }
+            }
+        }
+    }
+
+    private fun handleGpuDriverImport() {
+        val inflater = LayoutInflater.from(this)
+        val inputBinding = DialogKeyboardBinding.inflate(inflater)
+        var textInputValue: String = getString(R.string.default_driver_repo_url)
+
+        inputBinding.editTextInput.setText(textInputValue)
+        inputBinding.editTextInput.doOnTextChanged { text, _, _, _ ->
+            textInputValue = text.toString()
+        }
+
+        MaterialAlertDialogBuilder(this)
+            .setView(inputBinding.root)
+            .setTitle(R.string.enter_repo_url)
+            .setPositiveButton(R.string.fetch) { _, _ ->
+                if (textInputValue.isNotEmpty()) {
+                     fetchAndShowDrivers(textInputValue)
+                }
+            }
+            .setNegativeButton(android.R.string.cancel) {_, _ -> }
+            .show()
+    }
+
+    private fun fetchAndShowDrivers(repoUrl: String) {
+        lifecycleScope.launch(Dispatchers.Main) {
+            val releases = DriversFetcher.fetchReleases(repoUrl)
+            if (releases.isEmpty()) {
+                Snackbar.make(binding.root, "Failed to fetch ${repoUrl}: validation failed or check your internet connection", Snackbar.LENGTH_SHORT).show()
+                return@launch
+            }
+        
+            val releaseNames = releases.map { it.first }
+            val releaseUrls = releases.map { it.second }
+            var chosenUrl: String? = releaseUrls[0]
+            var chosenName: String? = releaseNames[0]
+
+            MaterialAlertDialogBuilder(this@GpuDriverActivity)
+                .setTitle(R.string.drivers)
+                .setSingleChoiceItems(releaseNames.toTypedArray(), 0) { _, which ->
+                    chosenUrl = releaseUrls[which]
+                    chosenName = releaseNames[which]
+                }
+                .setPositiveButton(R.string.driver_import) { _, _ ->
+                    downloadDriver(chosenUrl!!, chosenName!!)
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
+    }
+
+    private fun downloadDriver(chosenUrl: String, chosenName: String) {
+        GlobalScope.launch(Dispatchers.Main) {
+            var driverFile = File("${SkylineApplication.instance.getPublicFilesDir().canonicalPath}/${chosenName}.zip")
+            if (!driverFile.exists()) driverFile.createNewFile()
+            val result = DriversFetcher.downloadAsset(chosenUrl!!, driverFile)
+            when (result) { 
+                is DownloadResult.Success -> {
+                    val result = GpuDriverHelper.installDriver(this@GpuDriverActivity, FileInputStream(driverFile))
+                    Snackbar.make(binding.root, resolveInstallResultString(result), Snackbar.LENGTH_LONG).show()
+                    if (result == GpuDriverInstallResult.Success) populateAdapter()
+                    driverFile.delete()
+                }
+                is DownloadResult.Error -> Snackbar.make(binding.root, "Failed to import ${chosenName}: ${result.message}", Snackbar.LENGTH_SHORT).show()
             }
         }
     }
