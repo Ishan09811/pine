@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.OutputStream
+import java.io.FileOutputStream
 
 object DriversFetcher {
     private val httpClient = HttpClient {
@@ -68,11 +69,11 @@ object DriversFetcher {
         }
     }
 
-    suspend fun downloadAsset(context: Context, assetUrl: String, destinationUri: Uri): DownloadResult {
+    suspend fun downloadAsset(assetUrl: String, destinationFile: File): DownloadResult {
         return try {
             withContext(Dispatchers.IO) {
                 val response: HttpResponse = httpClient.get(assetUrl)
-                context.contentResolver.openOutputStream(destinationUri)?.use { outputStream ->
+                FileOutputStream(destinationFile)?.use { outputStream ->
                     writeResponseToStream(response, outputStream)
                 } ?: return@withContext DownloadResult.Error("Failed to open ${destinationUri.toString()}")
             }
