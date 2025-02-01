@@ -194,7 +194,7 @@ class GpuDriverActivity : AppCompatActivity() {
         binding.driverList.addItemDecoration(SpacingItemDecoration(resources.getDimensionPixelSize(R.dimen.grid_padding)))
 
         binding.addDriverButton.setOnClickListener {
-            val items = arrayOf(getString(R.string.import), getString(R.string.install))
+            val items = arrayOf(getString(R.string.driver_import), getString(R.string.install))
             var checkedItem = 0
             var selectedItem: String? = items[0]
     
@@ -270,7 +270,7 @@ class GpuDriverActivity : AppCompatActivity() {
                     chosenUrl = releaseUrls[which]
                     chosenName = releaseNames[which]
                 }
-                .setPositiveButton(R.string.import) { _, _ ->
+                .setPositiveButton(R.string.driver_import) { _, _ ->
                     downloadDriver(chosenUrl!!, chosenName!!)
                 }
                 .setNegativeButton(android.R.string.cancel, null)
