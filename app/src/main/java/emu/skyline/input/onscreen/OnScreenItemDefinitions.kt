@@ -25,16 +25,16 @@ import emu.skyline.input.StickId.Right
 import emu.skyline.utils.SwitchColors
 import emu.skyline.utils.add
 import emu.skyline.utils.multiply
+import emu.skyline.SkylineApplication
 import kotlin.math.roundToInt
 
-@Suppress("UnresolvedReference")
 open class CircularButton(
     onScreenControllerView : OnScreenControllerView,
     buttonId : ButtonId,
     defaultRelativeX : Float,
     defaultRelativeY : Float,
     defaultRelativeRadiusToX : Float,
-    drawableId : Int = R.drawable.ic_button,
+    drawableId : Int = SkylineApplication.context.resources.getIdentifier("ic_button", "drawable", SkylineApplication.context.packageName),
     defaultEnabled : Boolean = true
 ) : OnScreenButton(
     onScreenControllerView,
@@ -54,7 +54,6 @@ open class CircularButton(
     override fun isTouched(x : Float, y : Float) : Boolean = (PointF(currentX, currentY) - (PointF(x, y))).length() <= radius
 }
 
-@Suppress("UnresolvedReference")
 open class JoystickButton(
     onScreenControllerView : OnScreenControllerView,
     val stickId : StickId,
@@ -67,9 +66,9 @@ open class JoystickButton(
     defaultRelativeX,
     defaultRelativeY,
     defaultRelativeRadiusToX,
-    R.drawable.ic_button
+    SkylineApplication.context.resources.getIdentifier("ic_button", "drawable", SkylineApplication.context.packageName)
 ) {
-    private val innerButton = CircularButton(onScreenControllerView, buttonId, config.relativeX, config.relativeY, defaultRelativeRadiusToX * 0.75f, R.drawable.ic_stick)
+    private val innerButton = CircularButton(onScreenControllerView, buttonId, config.relativeX, config.relativeY, defaultRelativeRadiusToX * 0.75f, SkylineApplication.context.resources.getIdentifier("ic_stick", "drawable", SkylineApplication.context.packageName))
 
     open var recenterSticks = false
         set(value) {
@@ -270,7 +269,6 @@ class JoystickRegion(
     }
 }
 
-@Suppress("UnresolvedReference")
 open class RectangularButton(
     onScreenControllerView : OnScreenControllerView,
     buttonId : ButtonId,
@@ -278,7 +276,7 @@ open class RectangularButton(
     defaultRelativeY : Float,
     defaultRelativeWidth : Float,
     defaultRelativeHeight : Float,
-    drawableId : Int = R.drawable.ic_rectangular_button,
+    drawableId : Int = SkylineApplication.context.resources.getIdentifier("ic_rectangular_button", "drawable", SkylineApplication.context.packageName),
     defaultEnabled : Boolean = true
 ) : OnScreenButton(
     onScreenControllerView,
@@ -293,7 +291,6 @@ open class RectangularButton(
     override fun isTouched(x : Float, y : Float) = currentBounds.contains(x.roundToInt(), y.roundToInt())
 }
 
-@Suppress("UnresolvedReference")
 class TriggerButton(
     onScreenControllerView : OnScreenControllerView,
     buttonId : ButtonId,
@@ -309,9 +306,9 @@ class TriggerButton(
     defaultRelativeWidth,
     defaultRelativeHeight,
     when (buttonId) {
-        ZL -> R.drawable.ic_trigger_button_left
+        ZL -> SkylineApplication.context.resources.getIdentifier("ic_trigger_button_left", "drawable", SkylineApplication.context.packageName)
 
-        ZR -> R.drawable.ic_trigger_button_right
+        ZR -> SkylineApplication.context.resources.getIdentifier("ic_trigger_button_right", "drawable", SkylineApplication.context.packageName)
 
         else -> error("Unsupported trigger button")
     }
