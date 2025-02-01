@@ -201,6 +201,10 @@
     <string name="system_driver">System Driver</string>
     <string name="system_driver_desc">The GPU driver provided by your system</string>
     <string name="install">Install</string>
+    <string name="import">Import</string>
+    <string name="enter_repo_url">Enter repo url</string>
+    <string name="default_driver_repo_url">https://github.com/K11MCH1/AdrenoToolsDrivers</string>
+    <string name="fetch">Fetch</string>
     <string name="gpu_driver_install_inprogress">Installing the GPU driver…</string>
     <string name="gpu_driver_install_success">GPU driver installed successfully</string>
     <string name="gpu_driver_install_invalid_archive">Failed to unzip the provided driver package</string>
