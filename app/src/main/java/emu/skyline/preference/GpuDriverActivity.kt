@@ -269,7 +269,7 @@ class GpuDriverActivity : AppCompatActivity() {
             var chosenUrl: String? = releaseUrls[0]
             var chosenName: String? = releaseNames[0]
 
-            MaterialAlertDialogBuilder(this)
+            MaterialAlertDialogBuilder(this@GpuDriverActivity)
                 .setTitle(R.string.drivers)
                 .setSingleChoiceItems(releaseNames.toTypedArray(), 0) { _, which ->
                     chosenUrl = releaseUrls[which]
