@@ -76,7 +76,7 @@ object DriversFetcher {
                 val response: HttpResponse = httpClient.get(assetUrl)
                 FileOutputStream(destinationFile)?.use { outputStream ->
                     writeResponseToStream(response, outputStream)
-                } ?: return@withContext DownloadResult.Error("Failed to open ${destinationUri.toString()}")
+                } ?: return@withContext DownloadResult.Error("Failed to open ${destinationFile.absolutePath.toString()}")
             }
             DownloadResult.Success
         } catch (e: Exception) {
