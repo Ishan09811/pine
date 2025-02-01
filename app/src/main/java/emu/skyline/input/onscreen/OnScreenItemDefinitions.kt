@@ -27,6 +27,7 @@ import emu.skyline.utils.add
 import emu.skyline.utils.multiply
 import kotlin.math.roundToInt
 
+@file:Suppress("UnresolvedReference")
 open class CircularButton(
     onScreenControllerView : OnScreenControllerView,
     buttonId : ButtonId,
