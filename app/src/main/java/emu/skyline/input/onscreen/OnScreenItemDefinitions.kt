@@ -27,7 +27,7 @@ import emu.skyline.utils.add
 import emu.skyline.utils.multiply
 import kotlin.math.roundToInt
 
-@file:Suppress("UnresolvedReference")
+@Suppress("UnresolvedReference")
 open class CircularButton(
     onScreenControllerView : OnScreenControllerView,
     buttonId : ButtonId,
@@ -54,6 +54,7 @@ open class CircularButton(
     override fun isTouched(x : Float, y : Float) : Boolean = (PointF(currentX, currentY) - (PointF(x, y))).length() <= radius
 }
 
+@Suppress("UnresolvedReference")
 open class JoystickButton(
     onScreenControllerView : OnScreenControllerView,
     val stickId : StickId,
@@ -269,6 +270,7 @@ class JoystickRegion(
     }
 }
 
+@Suppress("UnresolvedReference")
 open class RectangularButton(
     onScreenControllerView : OnScreenControllerView,
     buttonId : ButtonId,
@@ -291,6 +293,7 @@ open class RectangularButton(
     override fun isTouched(x : Float, y : Float) = currentBounds.contains(x.roundToInt(), y.roundToInt())
 }
 
+@Suppress("UnresolvedReference")
 class TriggerButton(
     onScreenControllerView : OnScreenControllerView,
     buttonId : ButtonId,
