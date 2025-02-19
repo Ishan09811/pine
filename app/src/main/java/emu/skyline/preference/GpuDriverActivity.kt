@@ -257,7 +257,7 @@ class GpuDriverActivity : AppCompatActivity() {
                      fetchAndShowDrivers(textInputValue)
                 }
             }
-            .setNegativeButton(android.R.string.cancel) {_, _ -> }
+            .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
 
@@ -287,8 +287,8 @@ class GpuDriverActivity : AppCompatActivity() {
                 return@launch
             }
         
-            val releaseNames = releases.map { it.first }
-            val releaseUrls = releases.map { it.second }
+            val releaseNames = fetchOutput.fetchedDrivers.map { it.first }
+            val releaseUrls = fetchOutput.fetchedDrivers.map { it.second }
             var chosenUrl: String? = releaseUrls[0]
             var chosenName: String? = releaseNames[0]
 
