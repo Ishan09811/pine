@@ -10,6 +10,8 @@ import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
 import android.os.Bundle
 import android.view.ViewTreeObserver
 import android.view.LayoutInflater
+import android.view.View
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -257,11 +259,29 @@ class GpuDriverActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun fetchAndShowDrivers(repoUrl: String) {
+    private fun fetchAndShowDrivers(repoUrl: String, bypassValidation: Boolean = false) {
         lifecycleScope.launch(Dispatchers.Main) {
-            val releases = DriversFetcher.fetchReleases(repoUrl)
-            if (releases.isEmpty()) {
-                Snackbar.make(binding.root, "Failed to fetch ${repoUrl}: validation failed or check your internet connection", Snackbar.LENGTH_SHORT).show()
+            val progressDialog = MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.fetching)
+                .setView(R.layout.dialog_progress_bar)
+                .setCancelable(false)
+                .create()
+            progressDialog.show()
+            val progressBar = progressDialog.findViewById<LinearProgressIndicator>(R.id.progress_bar)
+            val progressText = progressDialog.findViewById<TextView>(R.id.progress_text)
+            progressText?.visibility = View.GONE  
+            progressBar?.isIndeterminate = true
+            
+            val fetchOutput = DriversFetcher.fetchReleases(repoUrl)         
+            progressDialog.dismiss()
+            
+            if (fetchOutput.result is FetchResult.Error) {
+                showErrorDialog(fetchOutput.result.message ?: "Something unexpected occurred while fetching $repoUrl drivers")
+                return@launch
+            }
+
+            if (fetchOutput.result is FetchResult.Warning) {
+                showWarningDialog(repoUrl, fetchOutput.result.message ?: "Something unexpected occurred while fetching $repoUrl drivers")
                 return@launch
             }
         
@@ -327,6 +347,27 @@ class GpuDriverActivity : AppCompatActivity() {
                 is DownloadResult.Error -> Snackbar.make(binding.root, "Failed to import ${chosenName}: ${result.message}", Snackbar.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun showErrorDialog(message: String) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.error)
+            .setMessage(message)
+            .setPositiveButton(R.string.close, null)
+            .create()
+            .show()
+    }
+
+    private fun showWarningDialog(repoUrl: String, message: String) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.warning)
+            .setMessage(message)
+            .setPositiveButton(R.string.misc_continue) { _, _ ->
+                fetchAndShowDrivers(repoUrl, true)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .create()
+            .show()
     }
 
     private fun resolveInstallResultString(result : GpuDriverInstallResult) = when (result) {
