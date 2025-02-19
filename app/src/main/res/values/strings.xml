@@ -4,6 +4,7 @@
     <string name="search">Search</string>
     <string name="error">An error has occurred</string>
     <string name="warning">Warning</string>
+    <string name="fetching">Fetching</string>
     <string name="downloading">Downloading</string>
     <string name="misc_continue">Continue</string>
     <string name="close">Close</string>
