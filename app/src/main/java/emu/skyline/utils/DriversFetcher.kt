@@ -11,6 +11,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.*
+import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -70,13 +71,20 @@ object DriversFetcher {
         }
     }
 
-    suspend fun downloadAsset(assetUrl: String, destinationFile: File): DownloadResult {
+    suspend fun downloadAsset(
+        context: Context,
+        assetUrl: String,
+        destinationUri: Uri,
+        progressCallback: (Long, Long) -> Unit
+    ): DownloadResult {
         return try {
             withContext(Dispatchers.IO) {
                 val response: HttpResponse = httpClient.get(assetUrl)
-                FileOutputStream(destinationFile)?.use { outputStream ->
-                    writeResponseToStream(response, outputStream)
-                } ?: return@withContext DownloadResult.Error("Failed to open ${destinationFile.absolutePath.toString()}")
+                val contentLength = response.headers[HttpHeaders.ContentLength]?.toLong() ?: -1L
+
+                context.contentResolver.openOutputStream(destinationUri)?.use { outputStream ->
+                    writeResponseToStream(response, outputStream, contentLength, progressCallback)
+                } ?: return@withContext DownloadResult.Error("Failed to open ${destinationUri}")
             }
             DownloadResult.Success
         } catch (e: Exception) {
@@ -85,14 +93,22 @@ object DriversFetcher {
         }
     }
 
-    private suspend fun writeResponseToStream(response: HttpResponse, outputStream: OutputStream) {
+    private suspend fun writeResponseToStream(
+        response: HttpResponse,
+        outputStream: OutputStream,
+        contentLength: Long,
+        progressCallback: (Long, Long) -> Unit
+    ) {
         val channel = response.bodyAsChannel()
-        val buffer = ByteArray(8192) // 8KB buffer size
+        val buffer = ByteArray(1024) // 1KB buffer size
+        var totalBytesRead = 0L
 
         while (!channel.isClosedForRead) {
             val bytesRead = channel.readAvailable(buffer)
             if (bytesRead > 0) {
                 outputStream.write(buffer, 0, bytesRead)
+                totalBytesRead += bytesRead
+                progressCallback(totalBytesRead, contentLength)
             }
         }
         outputStream.flush()
