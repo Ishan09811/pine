@@ -77,7 +77,6 @@ object DriversFetcher {
     }
 
     suspend fun downloadAsset(
-        context: Context,
         assetUrl: String,
         destinationFile: File,
         progressCallback: (Long, Long) -> Unit
