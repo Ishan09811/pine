@@ -11,6 +11,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.*
+import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -38,12 +39,19 @@ object DriversFetcher {
     @Serializable
     data class Asset(val browser_download_url: String)
 
-    suspend fun fetchReleases(repoUrl: String): List<Pair<String, String?>> {
+    suspend fun fetchReleases(repoUrl: String, bypassValidation: Boolean = false): FetchResultOutput {
         val repoPath = repoUrl.removePrefix("https://github.com/")
         val validationUrl = "https://api.github.com/repos/$repoPath/contents/.adrenoDrivers"
         val apiUrl = "https://api.github.com/repos/$repoPath/releases"
 
         return try {
+            val response: HttpResponse = withContext(Dispatchers.IO) {
+                httpClient.get(apiUrl)
+            }
+
+            if (response.status.value != 200) 
+                return FetchResultOutput(emptyList(), FetchResult.Error("Failed to fetch drivers"))
+                
             val isValid = withContext(Dispatchers.IO) {
                 try {
                     httpClient.get(validationUrl).status.value == 200
@@ -52,31 +60,35 @@ object DriversFetcher {
                 }
             }
 
-            if (!isValid) {
-                Log.d("DriversFetcher", "Provided driver repo url is not valid.")
-                return emptyList()
+            if (!isValid && !bypassValidation) {
+                return FetchResultOutput(emptyList(), FetchResult.Warning("Provided driver repo url is not valid."))
             }
 
-            val releases: List<GitHubRelease> = withContext(Dispatchers.IO) {
-                httpClient.get(apiUrl).body()
-            }
-            releases.map { release ->
+            val releases: List<GitHubRelease> = response.body()
+            val drivers = releases.map { release ->
                 val assetUrl = release.assets.firstOrNull()?.browser_download_url
                 release.name to assetUrl
             }
+            FetchResultOutput(drivers, FetchResult.Success)
         } catch (e: Exception) {
             Log.e("DriversFetcher", "Error fetching releases: ${e.message}", e)
-            emptyList()
+            FetchResultOutput(emptyList(), FetchResult.Error("Error fetching releases: ${e.message}"))
         }
     }
 
-    suspend fun downloadAsset(assetUrl: String, destinationFile: File): DownloadResult {
+    suspend fun downloadAsset(
+        assetUrl: String,
+        destinationFile: File,
+        progressCallback: (Long, Long) -> Unit
+    ): DownloadResult {
         return try {
             withContext(Dispatchers.IO) {
                 val response: HttpResponse = httpClient.get(assetUrl)
+                val contentLength = response.headers[HttpHeaders.ContentLength]?.toLong() ?: -1L
+
                 FileOutputStream(destinationFile)?.use { outputStream ->
-                    writeResponseToStream(response, outputStream)
-                } ?: return@withContext DownloadResult.Error("Failed to open ${destinationFile.absolutePath.toString()}")
+                    writeResponseToStream(response, outputStream, contentLength, progressCallback)
+                } ?: return@withContext DownloadResult.Error("Failed to open ${destinationFile.absolutePath}")
             }
             DownloadResult.Success
         } catch (e: Exception) {
@@ -85,14 +97,22 @@ object DriversFetcher {
         }
     }
 
-    private suspend fun writeResponseToStream(response: HttpResponse, outputStream: OutputStream) {
+    private suspend fun writeResponseToStream(
+        response: HttpResponse,
+        outputStream: OutputStream,
+        contentLength: Long,
+        progressCallback: (Long, Long) -> Unit
+    ) {
         val channel = response.bodyAsChannel()
-        val buffer = ByteArray(8192) // 8KB buffer size
+        val buffer = ByteArray(1024) // 1KB buffer size
+        var totalBytesRead = 0L
 
         while (!channel.isClosedForRead) {
             val bytesRead = channel.readAvailable(buffer)
             if (bytesRead > 0) {
                 outputStream.write(buffer, 0, bytesRead)
+                totalBytesRead += bytesRead
+                progressCallback(totalBytesRead, contentLength)
             }
         }
         outputStream.flush()
@@ -101,5 +121,16 @@ object DriversFetcher {
     sealed class DownloadResult {
         object Success : DownloadResult()
         data class Error(val message: String?) : DownloadResult()
+    }
+
+    data class FetchResultOutput(
+        val fetchedDrivers: List<Pair<String, String?>>,
+        val result: FetchResult
+    )
+
+    sealed class FetchResult {
+        object Success : FetchResult()
+        data class Error(val message: String?) : FetchResult()
+        data class Warning(val message: String?) : FetchResult()
     }
 }
