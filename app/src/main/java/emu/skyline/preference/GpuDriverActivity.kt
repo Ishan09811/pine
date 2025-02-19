@@ -272,7 +272,7 @@ class GpuDriverActivity : AppCompatActivity() {
             progressText?.visibility = View.GONE  
             progressBar?.isIndeterminate = true
             
-            val fetchOutput = DriversFetcher.fetchReleases(repoUrl)         
+            val fetchOutput = DriversFetcher.fetchReleases(repoUrl, bypassValidation)         
             progressDialog.dismiss()
             
             if (fetchOutput.result is FetchResult.Error) {
