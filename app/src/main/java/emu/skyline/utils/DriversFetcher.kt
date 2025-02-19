@@ -65,7 +65,7 @@ object DriversFetcher {
             }
 
             val releases: List<GitHubRelease> = response.body()
-            releases.map { release ->
+            val drivers = releases.map { release ->
                 val assetUrl = release.assets.firstOrNull()?.browser_download_url
                 release.name to assetUrl
             }
@@ -88,7 +88,7 @@ object DriversFetcher {
 
                 FileOutputStream(destinationFile)?.use { outputStream ->
                     writeResponseToStream(response, outputStream, contentLength, progressCallback)
-                } ?: return@withContext DownloadResult.Error("Failed to open ${destinationUri}")
+                } ?: return@withContext DownloadResult.Error("Failed to open ${destinationFile.absolutePath}")
             }
             DownloadResult.Success
         } catch (e: Exception) {
