@@ -22,6 +22,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import dagger.hilt.android.AndroidEntryPoint
 import emu.skyline.R
 import emu.skyline.adapter.GenericListItem
@@ -285,9 +286,37 @@ class GpuDriverActivity : AppCompatActivity() {
 
     private fun downloadDriver(chosenUrl: String, chosenName: String) {
         GlobalScope.launch(Dispatchers.Main) {
+            val progressDialog =  MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.downloading)
+                .setView(R.layout.dialog_progress_bar)
+                .setCancelable(false)
+                .create()
+                
+            progressDialog.show()
+            val progressBar = progressDialog.findViewById<LinearProgressIndicator>(R.id.progress_bar)
+            val progressText = progressDialog.findViewById<TextView>(R.id.progress_text)
+            progressText?.visibility = View.GONE  
+            progressBar?.isIndeterminate = true
+            
             var driverFile = File("${SkylineApplication.instance.getPublicFilesDir().canonicalPath}/${chosenName}.zip")
             if (!driverFile.exists()) driverFile.createNewFile()
-            val result = DriversFetcher.downloadAsset(chosenUrl!!, driverFile)
+            val result = DriversFetcher.downloadAsset(chosenUrl, driverFile) { downloadedBytes, totalBytes ->
+                // when using unit it stays to of this unit origin thread that's why we need to use main thread
+                GlobalScope.launch(Dispatchers.Main) {
+                    if (totalBytes > 0) {
+                        if (progressBar?.isIndeterminate ?: false) progressBar?.isIndeterminate = false
+                        if (progressText?.visibility == View.GONE) progressText?.visibility = View.VISIBLE
+                        val progress = (downloadedBytes * 100 / totalBytes).toInt()
+                        progressBar?.max = 100
+                        progressBar?.progress = progress
+                        progressText?.text = "$progress%"
+                    } else { 
+                        if (progressText?.visibility == View.VISIBLE) progressText?.visibility = View.GONE  
+                        if (!(progressBar?.isIndeterminate ?: false)) progressBar?.isIndeterminate = true
+                    }
+                }
+            }
+            progressDialog.dismiss()
             when (result) { 
                 is DownloadResult.Success -> {
                     val result = GpuDriverHelper.installDriver(this@GpuDriverActivity, FileInputStream(driverFile))
