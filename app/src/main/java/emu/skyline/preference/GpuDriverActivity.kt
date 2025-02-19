@@ -41,6 +41,8 @@ import emu.skyline.utils.GpuDriverInstallResult
 import emu.skyline.utils.WindowInsetsHelper
 import emu.skyline.utils.serializable
 import emu.skyline.utils.DriversFetcher
+import emu.skyline.utils.DriversFetcher.FetchResult
+import emu.skyline.utils.DriversFetcher.FetchResultOutput
 import emu.skyline.utils.DriversFetcher.DownloadResult
 import emu.skyline.di.getSettings
 import emu.skyline.SkylineApplication
@@ -261,7 +263,7 @@ class GpuDriverActivity : AppCompatActivity() {
 
     private fun fetchAndShowDrivers(repoUrl: String, bypassValidation: Boolean = false) {
         lifecycleScope.launch(Dispatchers.Main) {
-            val progressDialog = MaterialAlertDialogBuilder(requireContext())
+            val progressDialog = MaterialAlertDialogBuilder(this@GpuDriverActivity)
                 .setTitle(R.string.fetching)
                 .setView(R.layout.dialog_progress_bar)
                 .setCancelable(false)
@@ -306,7 +308,7 @@ class GpuDriverActivity : AppCompatActivity() {
 
     private fun downloadDriver(chosenUrl: String, chosenName: String) {
         GlobalScope.launch(Dispatchers.Main) {
-            val progressDialog =  MaterialAlertDialogBuilder(requireContext())
+            val progressDialog = MaterialAlertDialogBuilder(this@GpuDriverActivity)
                 .setTitle(R.string.downloading)
                 .setView(R.layout.dialog_progress_bar)
                 .setCancelable(false)
@@ -342,15 +344,15 @@ class GpuDriverActivity : AppCompatActivity() {
                     val result = GpuDriverHelper.installDriver(this@GpuDriverActivity, FileInputStream(driverFile))
                     Snackbar.make(binding.root, resolveInstallResultString(result), Snackbar.LENGTH_LONG).show()
                     if (result == GpuDriverInstallResult.Success) populateAdapter()
-                    driverFile.delete()
                 }
                 is DownloadResult.Error -> Snackbar.make(binding.root, "Failed to import ${chosenName}: ${result.message}", Snackbar.LENGTH_SHORT).show()
             }
+            driverFile.delete()
         }
     }
 
     private fun showErrorDialog(message: String) {
-        MaterialAlertDialogBuilder(requireContext())
+        MaterialAlertDialogBuilder(this@GpuDriverActivity)
             .setTitle(R.string.error)
             .setMessage(message)
             .setPositiveButton(R.string.close, null)
@@ -359,7 +361,7 @@ class GpuDriverActivity : AppCompatActivity() {
     }
 
     private fun showWarningDialog(repoUrl: String, message: String) {
-        MaterialAlertDialogBuilder(requireContext())
+        MaterialAlertDialogBuilder(this@GpuDriverActivity)
             .setTitle(R.string.warning)
             .setMessage(message)
             .setPositiveButton(R.string.misc_continue) { _, _ ->
