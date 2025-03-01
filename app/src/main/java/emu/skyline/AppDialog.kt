@@ -80,7 +80,7 @@ class AppDialog : BottomSheetDialogFragment() {
      * Used to manage save files
      */
     private lateinit var documentPicker : ActivityResultLauncher<Array<String>>
-    private lateinit var startForResultExportSave : ActivityResultLauncher<Intent>
+    private lateinit var startForResultExportSave : ActivityResultLauncher<String>
 
     private val contents by lazy { ContentsHelper(requireContext()) }
 
@@ -96,28 +96,9 @@ class AppDialog : BottomSheetDialogFragment() {
             val isSaveFileOfThisGame = SaveManagementUtils.saveFolderGameExists(item.titleId)
             binding.deleteSave.isEnabled = isSaveFileOfThisGame
             binding.exportSave.isEnabled = isSaveFileOfThisGame
-        }
+        }       
+        startForResultExportSave = SaveManagementUtils.registerStartForResultExportSave(requireActivity())
         
-        startForResultExportSave = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                result.data?.data?.let { uri ->
-                    val pickedDir = DocumentFile.fromTreeUri(requireContext(), uri) ?: return@let
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val zipFilePath = "${SkylineApplication.instance.getPublicFilesDir().canonicalPath}/temp/${SaveManagementUtils.saveZipName}"
-                        val zipFile = File(zipFilePath)
-                        val inputStream: InputStream = zipFile.inputStream()
-                        val outputStream: OutputStream? = requireContext().contentResolver.openOutputStream(pickedDir.createFile("application/zip", zipFile.name)?.uri!!)
-                        
-                        inputStream.use { input ->
-                            outputStream?.use { output ->
-                                input.copyTo(output)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         contentPickerLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
@@ -246,7 +227,7 @@ class AppDialog : BottomSheetDialogFragment() {
 
         binding.exportSave.isEnabled = saveExists
         binding.exportSave.setOnClickListener {
-            SaveManagementUtils.exportSave(requireContext(), startForResultExportSave, item.titleId, "${item.title} (v${binding.gameVersion.text}) [${item.titleId}]")
+            SaveManagementUtils.exportSave(startForResultExportSave, item.titleId, "${item.title} (v${binding.gameVersion.text}) [${item.titleId}]")
         }
 
         binding.importUpdate.setOnClickListener {
