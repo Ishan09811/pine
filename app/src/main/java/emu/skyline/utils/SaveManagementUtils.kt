@@ -61,7 +61,7 @@ interface SaveManagementUtils {
             context.getPublicFilesDir()?.let { it.deleteRecursively() }
             return (context as ComponentActivity).registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
                 uri?.let {
-                    exportSave(it)
+                    exportSave(context, it)
                 }
             }
         }
@@ -75,7 +75,7 @@ interface SaveManagementUtils {
                     activity.contentResolver.takePersistableUriPermission(
                         it, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     )
-                    exportSave(it)
+                    exportSave(fragmentAct as Context, it)
                 }
             }
         }
