@@ -29,7 +29,7 @@ class ImportExportSavesPreference @JvmOverloads constructor(context : Context, a
         if (saveDataExists) {
             dialog.setMessage(R.string.save_data_found)
                 .setNegativeButton(R.string.export_save) { _, _ ->
-                    SaveManagementUtils.exportSave(context, startForResultExportSave, "", context.getString(R.string.global_save_data_zip_name))
+                    SaveManagementUtils.exportSave(startForResultExportSave, "", context.getString(R.string.global_save_data_zip_name))
                 }
         } else {
             dialog.setMessage(R.string.save_data_not_found)

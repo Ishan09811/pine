@@ -29,6 +29,7 @@
     <string name="delete_save">Delete save</string>
     <string name="import_save">Import</string>
     <string name="export_save">Export</string>
+    <string name="save_exported_successfully">Successfully exported save file</string>
     <string name="manage_contents">Contents</string>
     <string name="import_update">Update</string>
     <string name="import_dlcs">DLCs</string>
