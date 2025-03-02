@@ -363,7 +363,7 @@ namespace skyline::gpu {
 
         auto vkImages{vkSwapchain->getImages()};
         if (vkImages.size() > MaxSwapchainImageCount)
-            throw exception("Swapchain has higher image count ({}) than maximum slot count ({})", minImageCount, MaxSwapchainImageCount);
+            LOGE("Swapchain has higher image count ({}) than maximum slot count ({})", vkImages.size(), MaxSwapchainImageCount);
 
         for (size_t index{}; index < vkImages.size(); index++) {
             auto &slot{images[index]};
