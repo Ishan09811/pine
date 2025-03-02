@@ -58,8 +58,8 @@ interface SaveManagementUtils {
             }
         }
 
-        fun registerStartForResultExportSave(context : Context, titleId: String?) : ActivityResultLauncher<String> {
-            context.getPublicFilesDir()?.let { it.deleteRecursively() }
+        fun registerStartForResultExportSave(context : Context) : ActivityResultLauncher<String> {
+            File(context.getPublicFilesDir().canonicalPath, "temp").deleteRecursively()
             return (context as ComponentActivity).registerForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
                 uri?.let {
                     exportSave(context, it)
@@ -70,7 +70,7 @@ interface SaveManagementUtils {
         fun registerStartForResultExportSave(fragmentAct : FragmentActivity) : ActivityResultLauncher<String> {
             val activity = fragmentAct as AppCompatActivity
             val activityResultRegistry = fragmentAct.activityResultRegistry
-            activity.getPublicFilesDir()?.let { it.deleteRecursively() }
+            File(activity.getPublicFilesDir().canonicalPath, "temp").deleteRecursively()
             return activityResultRegistry.register("saveExportFolderPickerKey", ActivityResultContracts.CreateDocument("application/zip")) { uri ->
                 uri?.let {
                     activity.contentResolver.takePersistableUriPermission(
