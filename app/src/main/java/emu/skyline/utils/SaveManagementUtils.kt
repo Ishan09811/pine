@@ -33,6 +33,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
+import java.io.FileInputStream
 
 interface SaveManagementUtils {
 
@@ -140,7 +141,7 @@ interface SaveManagementUtils {
             if (exportZipTitleId == null) return
             CoroutineScope(Dispatchers.IO).launch {
                 val saveFolderPath = "$savesFolderRoot/$exportZipTitleId"
-                val zipCreated = zipSave(saveFolderPath, outputZipName)
+                val zipCreated = zipSave(saveFolderPath, exportZipName)
                 if (zipCreated == null) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(context, R.string.error, Toast.LENGTH_LONG).show()
