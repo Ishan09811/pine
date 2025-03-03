@@ -17,7 +17,8 @@ namespace skyline::service::nfp {
 
         enum class State : u32 {
             NotInitialized = 0,
-            Initialized = 1
+            Initialized = 1,
+            Mounted = 2
         } nfpState{State::NotInitialized};
 
       public:
