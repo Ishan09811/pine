@@ -6,7 +6,7 @@
 #include "IUser.h"
 
 namespace skyline::service::nfp {
-    IUser::IUser(const DeviceState &state, ServiceManager &manager) : BaseService(state, manager), attachAvailabilityChangeEvent(std::make_shared<type::KEvent>(state, false)) {}
+    IUser::IUser(const DeviceState &state, ServiceManager &manager) : BaseService(state, manager), attachAvailabilityChangeEvent(std::make_shared<type::KEvent>(state, false)), mountedDevice(std::nullopt) {}
 
     Result IUser::Initialize(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
         nfpState = State::Initialized;
@@ -33,6 +33,39 @@ namespace skyline::service::nfp {
         LOGD("Attach Availability Change Event Handle: 0x{:X}", handle);
         response.copyHandles.push_back(handle);
 
+        return {};
+    }
+
+    Result IUser::Mount(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
+        u32 device_handle = request.Pop<u32>();
+        u32 model_type = request.Pop<u32>();
+        u32 mount_target = request.Pop<u32>();
+
+        LOGD("IUser::Mount called with device_handle=0x{:X}, model_type={}, mount_target={}", device_handle, model_type, mount_target);
+
+        if (mountedDevice.has_value()) {
+            LOGE("Error: Another device is already mounted.");
+            return ResultError(0xF601); // Error: Already mounted
+        }
+        mountedDevice = {device_handle, model_type, mount_target};
+        nfpState = State::Mounted;
+        attachAvailabilityChangeEvent->Signal();
+        return {};
+    }
+
+    Result IUser::Unmount(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
+        u32 device_handle = request.Pop<u32>();
+
+        LOGD("IUser::Unmount called with device_handle=0x{:X}", device_handle);
+
+        if (!mountedDevice.has_value() || mountedDevice->handle != device_handle) {
+            LOGE("Error: No such device mounted.");
+            return ResultError(0xF602);
+        }
+
+        mountedDevice.reset();
+        nfpState = State::Initialized;
+        attachAvailabilityChangeEvent->Signal();
         return {};
     }
 }
