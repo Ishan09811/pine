@@ -21,6 +21,14 @@ namespace skyline::service::nfp {
             Mounted = 2
         } nfpState{State::NotInitialized};
 
+        struct MountedDevice {
+            u32 handle;
+            u32 model_type;
+            u32 mount_target;
+        };
+
+        std::optional<MountedDevice> mountedDevice;
+
       public:
         IUser(const DeviceState &state, ServiceManager &manager);
 
