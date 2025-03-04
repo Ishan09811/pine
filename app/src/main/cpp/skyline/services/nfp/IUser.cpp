@@ -45,7 +45,7 @@ namespace skyline::service::nfp {
 
         if (mountedDevice.has_value()) {
             LOGE("Error: Another device is already mounted.");
-            return ResultError(0xF601); // Error: Already mounted
+            return {}; // Error: Already mounted
         }
         mountedDevice = {device_handle, model_type, mount_target};
         nfpState = State::Mounted;
@@ -60,7 +60,7 @@ namespace skyline::service::nfp {
 
         if (!mountedDevice.has_value() || mountedDevice->handle != device_handle) {
             LOGE("Error: No such device mounted.");
-            return ResultError(0xF602);
+            return {};
         }
 
         mountedDevice.reset();
