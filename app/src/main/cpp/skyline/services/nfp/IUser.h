@@ -54,9 +54,9 @@ namespace skyline::service::nfp {
          */
         Result AttachAvailabilityChangeEvent(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response);
 
-        Result Unmount(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response)
+        Result Unmount(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response);
        
-        Result Mount(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response)
+        Result Mount(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response);
 
         SERVICE_DECL(
             SFUNC(0x0, IUser, Initialize),
