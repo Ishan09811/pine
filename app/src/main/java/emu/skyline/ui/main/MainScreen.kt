@@ -15,16 +15,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import emu.skyline.viewmodel.MainViewModel
-import com.skyline.ui.MainState
-import com.skyline.model.AppSettings
+import emu.skyline.MainViewModel
+import com.skyline.MainState
+import emu.skyline.settings.AppSettings
+import emu.skyline.di.getSettings
 import com.skyline.utils.SearchLocationHelper 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(viewModel: MainViewModel, appSettings: AppSettings) {
+fun MainScreen(viewModel: MainViewModel, navigateBack: () -> Unit) {
     val state by viewModel.stateData.collectAsState()
     val context = LocalContext.current
+    val appSettings = remember { getSettings() }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
