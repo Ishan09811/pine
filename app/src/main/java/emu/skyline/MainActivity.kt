@@ -9,6 +9,8 @@ import android.content.Intent
 import androidx.activity.viewModels
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import emu.skyline.ui.main.AppNavHost
+import emu.skyline.ui.main.PineTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
