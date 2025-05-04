@@ -5,10 +5,12 @@
 
 package emu.skyline
 
+import android.os.Bundle
 import android.content.Intent
 import androidx.activity.viewModels
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.view.WindowCompat
 import emu.skyline.ui.main.AppNavHost
 
 class MainActivity : ComponentActivity() {
