@@ -72,7 +72,6 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
      * This initializes all of the elements in the activity and displays the settings fragment
      */
     override fun onCreate(savedInstanceState : Bundle?) {
-        //setTheme(if (getSettings().useMaterialYou) R.style.AppTheme_MaterialYou else R.style.AppTheme)
         super.onCreate(savedInstanceState)
 
         setContentView(binding.root)
@@ -137,37 +136,6 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
                 .replace(R.id.settings, preferenceFragment)
                 .commit()
         }
-
-        binding.statusBarShade.setBackgroundColor(
-            SkylineApplication.applyAlphaToColor(
-                MaterialColors.getColor(
-                    binding.root,
-                    MaterialR.attr.colorSurface
-                ),
-                0.9f
-            )
-        )
-
-        if (SkylineApplication.detectNavigationType(this) != SkylineApplication.NAV_TYPE_GESTURE) {
-            binding.navigationBarShade.setBackgroundColor(
-                SkylineApplication.applyAlphaToColor(
-                    MaterialColors.getColor(
-                        binding.root,
-                        MaterialR.attr.colorSurface
-                    ),
-                    0.9f
-                )
-            )
-        }
-        
-        /* we collect the themeChanges and apply
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
-                    recreate()
-                }
-            }
-        }*/
         setInsets()
     }
 
