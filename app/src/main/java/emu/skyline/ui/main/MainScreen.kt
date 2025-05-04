@@ -4,6 +4,8 @@ package emu.skyline.ui.main
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -14,12 +16,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.layout.ContentScale
 import kotlinx.coroutines.launch
 import emu.skyline.MainViewModel
 import emu.skyline.MainState
 import emu.skyline.EmulationActivity
 import emu.skyline.data.BaseAppItem
-import emu.skyline.data.LoaderResult
+import emu.skyline.loader.LoaderResult
 import emu.skyline.settings.AppSettings
 import emu.skyline.di.getSettings
 import emu.skyline.utils.SearchLocationHelper 
@@ -123,7 +126,7 @@ fun AppItemRow(
             modifier = Modifier.fillMaxWidth()
         ) {
             Image(
-                painter = icon,
+                painter = item.icon,
                 contentDescription = "App Icon",
                 modifier = Modifier
                     .fillMaxWidth()
