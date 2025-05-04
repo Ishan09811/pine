@@ -160,14 +160,14 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
             )
         }
         
-        // we collect the themeChanges and apply
+        /* we collect the themeChanges and apply
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
                     recreate()
                 }
             }
-        }
+        }*/
         setInsets()
     }
 
