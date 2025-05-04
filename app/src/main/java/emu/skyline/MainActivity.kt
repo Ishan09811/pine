@@ -10,7 +10,6 @@ import androidx.activity.viewModels
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import emu.skyline.ui.main.AppNavHost
-import emu.skyline.ui.main.PineTheme
 
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()
