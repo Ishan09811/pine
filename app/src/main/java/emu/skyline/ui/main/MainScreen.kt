@@ -1,6 +1,7 @@
 
 package emu.skyline.ui.main
 
+import android.content.Intent
 import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,7 +35,7 @@ import emu.skyline.utils.SearchLocationHelper
 fun MainScreen(viewModel: MainViewModel, navigateBack: () -> Unit) {
     val state by viewModel.stateData.collectAsState()
     val context = LocalContext.current
-    val appSettings = remember { getSettings() }
+    val appSettings = remember { context.getSettings() }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
