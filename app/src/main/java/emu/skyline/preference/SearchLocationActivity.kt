@@ -95,7 +95,6 @@ class SearchLocationActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState : Bundle?) {
-        setTheme(if (getSettings().useMaterialYou) R.style.AppTheme_MaterialYou else R.style.AppTheme)
         super.onCreate(savedInstanceState)
 
         setContentView(binding.root)
@@ -150,14 +149,6 @@ class SearchLocationActivity : AppCompatActivity() {
         }
 
         populateAdapter()
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.CREATED) {
-                SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
-                    recreate()
-                }
-            }
-        }
     }
 
     private fun resolveActionResultString(result : SearchLocationResult) = when (result) {
