@@ -12,12 +12,7 @@ import androidx.activity.compose.setContent
 import emu.skyline.ui.main.AppNavHost
 import emu.skyline.ui.main.PineTheme
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    @Inject
-    lateinit var appSettings : AppSettings
-
     private val viewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState : Bundle?) {
