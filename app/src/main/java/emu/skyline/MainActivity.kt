@@ -18,13 +18,15 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var appSettings : AppSettings
 
+    private val viewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             PineTheme {
-                AppNavHost()
+                AppNavHost(viewModel)
             }
         }
     }
