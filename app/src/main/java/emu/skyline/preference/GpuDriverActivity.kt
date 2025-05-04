@@ -146,7 +146,7 @@ class GpuDriverActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState : Bundle?) {
-        setTheme(if (getSettings().useMaterialYou) R.style.AppTheme_MaterialYou else R.style.AppTheme)
+        //setTheme(if (getSettings().useMaterialYou) R.style.AppTheme_MaterialYou else R.style.AppTheme)
         super.onCreate(savedInstanceState)
 
         setContentView(binding.root)
@@ -230,13 +230,13 @@ class GpuDriverActivity : AppCompatActivity() {
 
         populateAdapter()
 
-        lifecycleScope.launch {
+        /*lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 SkylineApplication.themeChangeFlow.distinctUntilChanged().collect { themeId ->
                     recreate()
                 }
             }
-        }
+        }*/
     }
 
     private fun handleGpuDriverImport() {
