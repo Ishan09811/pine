@@ -5,7 +5,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("idea")
-    id("org.jetbrains.kotlin.plugin.serialization") version kotlinVersion
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.0.10"
 }
 
 idea {
