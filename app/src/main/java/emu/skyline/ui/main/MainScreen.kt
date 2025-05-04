@@ -17,6 +17,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import kotlinx.coroutines.launch
 import emu.skyline.MainViewModel
 import emu.skyline.MainState
@@ -126,7 +128,7 @@ fun AppItemRow(
             modifier = Modifier.fillMaxWidth()
         ) {
             Image(
-                painter = item.icon,
+                painter = BitmapPainter(item.bitmapIcon.asImageBitmap()),
                 contentDescription = "App Icon",
                 modifier = Modifier
                     .fillMaxWidth()
