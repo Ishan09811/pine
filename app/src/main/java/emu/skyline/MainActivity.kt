@@ -20,9 +20,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            PineTheme {
-                AppNavHost(viewModel)
-            }
+            AppNavHost(viewModel)
         }
     }
 }
