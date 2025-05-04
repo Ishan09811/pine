@@ -49,8 +49,8 @@ class GlobalSettingsFragment : PreferenceFragmentCompat() {
 
         // Re-launch the app if Material You is toggled
         findPreference<Preference>("use_material_you")?.setOnPreferenceChangeListener { _, newValue ->
-            val isMaterialYouEnabled = newValue as Boolean
-            SkylineApplication.setTheme(isMaterialYouEnabled)
+            //val isMaterialYouEnabled = newValue as Boolean
+            //SkylineApplication.setTheme(isMaterialYouEnabled)
             true
         }
 
