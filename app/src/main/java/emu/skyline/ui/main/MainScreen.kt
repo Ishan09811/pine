@@ -16,10 +16,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import emu.skyline.MainViewModel
-import com.skyline.MainState
+import emu.skyline.MainState
+import emu.skyline.data.AppItem
 import emu.skyline.settings.AppSettings
 import emu.skyline.di.getSettings
-import com.skyline.utils.SearchLocationHelper 
+import emu.skyline.utils.SearchLocationHelper 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,7 +127,7 @@ fun AppItemRow(
         }
 
         Text(
-            text = title,
+            text = item.title,
             style = MaterialTheme.typography.titleSmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -135,7 +136,7 @@ fun AppItemRow(
         )
 
         Text(
-            text = version,
+            text = item.version,
             style = MaterialTheme.typography.bodySmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -144,7 +145,7 @@ fun AppItemRow(
         )
 
         Text(
-            text = author,
+            text = item.author,
             style = MaterialTheme.typography.bodySmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
