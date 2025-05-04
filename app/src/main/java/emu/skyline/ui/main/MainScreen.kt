@@ -17,7 +17,9 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import emu.skyline.MainViewModel
 import emu.skyline.MainState
-import emu.skyline.data.AppItem
+import emu.skyline.EmulationActivity
+import emu.skyline.data.BaseAppItem
+import emu.skyline.data.LoaderResult
 import emu.skyline.settings.AppSettings
 import emu.skyline.di.getSettings
 import emu.skyline.utils.SearchLocationHelper 
@@ -84,7 +86,12 @@ fun MainScreen(viewModel: MainViewModel, navigateBack: () -> Unit) {
 
                     LazyColumn {
                         items(items) { item ->
-                            AppItemRow(item)
+                            AppItemRow(
+                                item, 
+                                onClick = {
+                                    startGame(context, item)
+                                }
+                            )
                         }
                     }
                 }
@@ -100,7 +107,7 @@ fun MainScreen(viewModel: MainViewModel, navigateBack: () -> Unit) {
 
 @Composable
 fun AppItemRow(
-    item: AppItem,
+    item: BaseAppItem,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
@@ -152,5 +159,14 @@ fun AppItemRow(
             modifier = Modifier
                 .padding(horizontal = 10.dp, vertical = 5.dp)
         )
+    }
+}
+
+fun startGame(ctx: Context, appItem : BaseAppItem) {
+    if (appItem.loaderResult == LoaderResult.Success) {
+        ctx.startActivity(Intent(ctx, EmulationActivity::class.java).apply {
+            putExtra(AppItemTag, appItem)
+            putExtra(EmulationActivity.ReturnToMainTag, true)
+        })
     }
 }
