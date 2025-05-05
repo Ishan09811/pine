@@ -146,7 +146,7 @@ fun AppItemRow(
         }
 
         Text(
-            text = item.title,
+            text = item.title ?: "",
             style = MaterialTheme.typography.titleSmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -155,7 +155,7 @@ fun AppItemRow(
         )
 
         Text(
-            text = item.version,
+            text = item.version ?: "",
             style = MaterialTheme.typography.bodySmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -164,7 +164,7 @@ fun AppItemRow(
         )
 
         Text(
-            text = item.author,
+            text = item.author ?: "",
             style = MaterialTheme.typography.bodySmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
