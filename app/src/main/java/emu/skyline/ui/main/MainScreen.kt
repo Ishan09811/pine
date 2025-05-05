@@ -203,7 +203,7 @@ fun getAppItems(appEntries: List<AppEntry>, appSettings: AppSettings) = mutableL
 private fun sortGameList(gameList : List<AppEntry>, appSettings: AppSettings) : List<AppEntry> {
     val sortedApps : MutableList<AppEntry> = mutableListOf()
     gameList.forEach { entry ->
-        if (validateAppEntry(entry))à/
+        if (validateAppEntry(entry, appSettings))
             sortedApps.add(entry)
     }
     when (appSettings.sortAppsBy) {
@@ -213,7 +213,7 @@ private fun sortGameList(gameList : List<AppEntry>, appSettings: AppSettings) : 
     return sortedApps
 }
 
-fun validateAppEntry(entry : AppEntry) : Boolean {
+fun validateAppEntry(entry : AppEntry, appSettings: AppSettings) : Boolean {
     // Unknown ROMs are shown because NROs have this type
     return !appSettings.filterInvalidFiles || entry.loaderResult != LoaderResult.ParsingError && (entry.romType == RomType.Base || entry.romType == RomType.Unknown)
 }
