@@ -7,9 +7,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
@@ -95,30 +96,30 @@ fun MainScreen(navigateBack: () -> Unit) {
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(Modifier.padding(paddingValues)) {
-            when (state) {
-                is MainState.Loading -> {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                }
-                is MainState.Loaded -> {
-                    val items = getAppItems((state as MainState.Loaded).items, appSettings)
+            val items = if (state is MainState.Loaded) {
+                getAppItems((state as MainState.Loaded).items, appSettings)
+            } else {
+                emptyList()
+            }
 
-                    LazyColumn {
-                        items(items) { item ->
-                            AppItemRow(
-                                item, 
-                                onClick = {
-                                    startGame(context, item)
-                                }
-                            )
-                        }
-                    }
+            if (state is MainState.Loading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(items) { item ->
+                    AppItemRow(
+                        item = item,
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { startGame(context, item) }
+                    )
                 }
-                is MainState.Error -> {
-                    scope.launch {
-                        snackbarHostState.showSnackbar("Error: ${(state as MainState.Error).ex.localizedMessage}")
-                    }
-                }
-                else -> {}
             }
         }
     }
