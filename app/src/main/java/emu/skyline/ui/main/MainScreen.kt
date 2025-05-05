@@ -139,7 +139,7 @@ fun AppItemRow(
     ) {
         Card(
             shape = MaterialTheme.shapes.large,
-            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Image(
@@ -148,7 +148,7 @@ fun AppItemRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .padding(8.dp),
+                    .padding(0.dp),
                 contentScale = ContentScale.Fit
             )
         }
