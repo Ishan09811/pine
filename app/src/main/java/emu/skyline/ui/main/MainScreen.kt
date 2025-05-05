@@ -24,6 +24,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import emu.skyline.MainViewModel
 import emu.skyline.MainState
@@ -40,7 +41,8 @@ import emu.skyline.utils.SearchLocationHelper
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(viewModel: MainViewModel, navigateBack: () -> Unit) {
+fun MainScreen(navigateBack: () -> Unit) {
+    val viewModel: MainViewModel = hiltViewModel()
     val state by viewModel.stateData.observeAsState()
     val context = LocalContext.current
     val appSettings = remember { context.getSettings() }
