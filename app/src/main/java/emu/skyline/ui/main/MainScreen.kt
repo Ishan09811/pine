@@ -29,7 +29,9 @@ import emu.skyline.MainViewModel
 import emu.skyline.MainState
 import emu.skyline.EmulationActivity
 import emu.skyline.data.BaseAppItem
+import emu.skyline.data.AppItem
 import emu.skyline.loader.LoaderResult
+import emu.skyline.loader.AppEntry
 import emu.skyline.settings.AppSettings
 import emu.skyline.di.getSettings
 import emu.skyline.settings.EmulationSettings
@@ -94,7 +96,7 @@ fun MainScreen(viewModel: MainViewModel, navigateBack: () -> Unit) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 }
                 is MainState.Loaded -> {
-                    val items = (state as MainState.Loaded).items
+                    val items = getAppItems((state as MainState.Loaded).items, appSettings)
 
                     LazyColumn {
                         items(items) { item ->
@@ -112,6 +114,7 @@ fun MainScreen(viewModel: MainViewModel, navigateBack: () -> Unit) {
                         snackbarHostState.showSnackbar("Error: ${(state as MainState.Error).ex.localizedMessage}")
                     }
                 }
+                else -> {}
             }
         }
     }
@@ -181,4 +184,37 @@ fun startGame(ctx: Context, appItem : BaseAppItem) {
             putExtra(EmulationActivity.ReturnToMainTag, true)
         })
     }
+}
+
+fun getAppItems(appEntries: List<AppEntry>, appSettings: AppSettings) = mutableListOf<BaseAppItem>().apply {
+    appEntries?.let { entries ->
+        sortGameList(entries.toList()).forEach { entry ->
+            val updates : List<BaseAppItem> = entries.filter { it.romType == RomType.Update && it.parentTitleId == entry.titleId }.map { BaseAppItem(it, true) }
+            val dlcs : List<BaseAppItem> = entries.filter { it.romType == RomType.DLC && it.parentTitleId == entry.titleId }.map { BaseAppItem(it, true) }
+            add(AppItem(entry, updates, dlcs))
+        }
+    }
+}
+
+private fun sortGameList(gameList : List<AppEntry>, appSettings: AppSettings) : List<AppEntry> {
+    val sortedApps : MutableList<AppEntry> = mutableListOf()
+    gameList.forEach { entry ->
+        if (validateAppEntry(entry))à/
+            sortedApps.add(entry)
+    }
+    when (appSettings.sortAppsBy) {
+        SortingOrder.AlphabeticalAsc.ordinal -> sortedApps.sortBy { it.name }
+        SortingOrder.AlphabeticalDesc.ordinal -> sortedApps.sortByDescending { it.name }
+    }
+    return sortedApps
+}
+
+fun validateAppEntry(entry : AppEntry) : Boolean {
+    // Unknown ROMs are shown because NROs have this type
+    return !appSettings.filterInvalidFiles || entry.loaderResult != LoaderResult.ParsingError && (entry.romType == RomType.Base || entry.romType == RomType.Unknown)
+}
+
+enum class SortingOrder {
+    AlphabeticalAsc,
+    AlphabeticalDesc
 }
