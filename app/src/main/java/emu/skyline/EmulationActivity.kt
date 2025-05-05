@@ -884,7 +884,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     /**
      * Stop the currently executing ROM and replace it with the one specified in the new intent
      */
-    override fun onNewIntent(intent : Intent?) {
+    override fun onNewIntent(intent : Intent) {
         super.onNewIntent(intent!!)
         if (getIntent().data != intent.data) {
             setIntent(intent)
