@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.text.style.TextOverflow
 import kotlinx.coroutines.launch
 import emu.skyline.MainViewModel
 import emu.skyline.MainState
@@ -28,6 +29,8 @@ import emu.skyline.data.BaseAppItem
 import emu.skyline.loader.LoaderResult
 import emu.skyline.settings.AppSettings
 import emu.skyline.di.getSettings
+import emu.skyline.settings.EmulationSettings
+import emu.skyline.settings.SettingsActivity
 import emu.skyline.utils.SearchLocationHelper 
 
 @OptIn(ExperimentalMaterial3Api::class)
