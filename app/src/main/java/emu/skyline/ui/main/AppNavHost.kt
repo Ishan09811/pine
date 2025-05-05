@@ -6,10 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import emu.skyline.MainViewModel
 
 @Composable
-fun AppNavHost(viewModel: MainViewModel) {
+fun AppNavHost() {
     //val context = LocalContext.current
     val navController = rememberNavController()
 
@@ -21,8 +20,7 @@ fun AppNavHost(viewModel: MainViewModel) {
             route = "main"
         ) {
             MainScreen(
-                navigateBack = navController::navigateUp,
-                viewModel = viewModel
+                navigateBack = navController::navigateUp
             )
         }
     }
