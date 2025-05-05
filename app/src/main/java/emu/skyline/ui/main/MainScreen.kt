@@ -31,8 +31,10 @@ import emu.skyline.MainState
 import emu.skyline.EmulationActivity
 import emu.skyline.data.BaseAppItem
 import emu.skyline.data.AppItem
+import emu.skyline.data.AppItemTag
 import emu.skyline.loader.LoaderResult
 import emu.skyline.loader.AppEntry
+import emu.skyline.loader.RomType
 import emu.skyline.settings.AppSettings
 import emu.skyline.di.getSettings
 import emu.skyline.settings.EmulationSettings
@@ -190,7 +192,7 @@ fun startGame(ctx: Context, appItem : BaseAppItem) {
 
 fun getAppItems(appEntries: List<AppEntry>, appSettings: AppSettings) = mutableListOf<BaseAppItem>().apply {
     appEntries?.let { entries ->
-        sortGameList(entries.toList()).forEach { entry ->
+        sortGameList(entries.toList(), appSettings).forEach { entry ->
             val updates : List<BaseAppItem> = entries.filter { it.romType == RomType.Update && it.parentTitleId == entry.titleId }.map { BaseAppItem(it, true) }
             val dlcs : List<BaseAppItem> = entries.filter { it.romType == RomType.DLC && it.parentTitleId == entry.titleId }.map { BaseAppItem(it, true) }
             add(AppItem(entry, updates, dlcs))
