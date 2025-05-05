@@ -11,17 +11,17 @@ import androidx.activity.viewModels
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
+import dagger.hilt.android.AndroidEntryPoint
 import emu.skyline.ui.main.AppNavHost
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel: MainViewModel by viewModels()
-
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            AppNavHost(viewModel)
+            AppNavHost()
         }
     }
 }
