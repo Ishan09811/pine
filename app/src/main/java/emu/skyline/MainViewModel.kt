@@ -19,7 +19,7 @@ import java.io.File
 import javax.inject.Inject
 
 sealed class MainState {
-    object Loading : MainState()
+    class Loading(val partialData: ArrayList<AppEntry> = emptyList()) : MainState()
     class Loaded(val items : ArrayList<AppEntry>) : MainState()
     class Error(val ex : Exception) : MainState()
 }
@@ -67,6 +67,7 @@ class MainViewModel @Inject constructor(@ApplicationContext context : Context, p
                     searchLocations.forEach { searchLocation ->
                         KeyReader.importFromLocation(context, searchLocation)
                         romElements.addAll(romProvider.loadRoms(searchLocation, systemLanguage))
+                        state = MainState.Loading(romElements)
                     }
                     romElements.toFile(romsFile)
                     MainState.Loaded(romElements)
