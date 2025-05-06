@@ -42,9 +42,9 @@ class MainViewModel @Inject constructor(@ApplicationContext context : Context, p
      * @param loadFromFile If this is false then trying to load cached adapter data is skipped entirely
      */
     fun loadRoms(context: Context, loadFromFile: Boolean, searchLocations: List<Uri>, systemLanguage: Int) {
-        if (state == MainState.Loading)
+        if (state is MainState.Loading)
             return
-        state = MainState.Loading
+        state = MainState.Loading()
 
         val romsFile = File(getApplication<SkylineApplication>().filesDir.canonicalPath + "/roms.bin")
 
