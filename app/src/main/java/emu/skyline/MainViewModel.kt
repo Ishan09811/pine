@@ -19,6 +19,7 @@ import java.io.File
 import javax.inject.Inject
 
 sealed class MainState {
+    object Idle : MainState()
     data class Loading(val partialData: ArrayList<AppEntry> = arrayListOf()) : MainState()
     data class Loaded(val items: ArrayList<AppEntry>) : MainState()
     data class Error(val ex: Exception) : MainState()
@@ -33,7 +34,7 @@ class MainViewModel @Inject constructor(@ApplicationContext context : Context, p
     private var state
         get() = _stateData.value
         set(value) = _stateData.postValue(value)
-    private val _stateData = MutableLiveData<MainState>()
+    private val _stateData = MutableLiveData<MainState>(MainState.Idle)
     val stateData : LiveData<MainState> = _stateData
 
     /**
