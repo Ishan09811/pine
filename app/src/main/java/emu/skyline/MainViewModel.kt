@@ -19,9 +19,9 @@ import java.io.File
 import javax.inject.Inject
 
 sealed class MainState {
-    class Loading(val partialData: ArrayList<AppEntry> = emptyList()) : MainState()
-    class Loaded(val items : ArrayList<AppEntry>) : MainState()
-    class Error(val ex : Exception) : MainState()
+    data class Loading(val partialData: ArrayList<AppEntry> = arrayListOf()) : MainState()
+    data class Loaded(val items: ArrayList<AppEntry>) : MainState()
+    data class Error(val ex: Exception) : MainState()
 }
 
 @HiltViewModel
@@ -59,8 +59,8 @@ class MainViewModel @Inject constructor(@ApplicationContext context : Context, p
                 }
             }
 
-            state = if (searchLocations.isEmpty()) {
-                MainState.Loaded(ArrayList())
+            if (searchLocations.isEmpty()) {
+                state = MainState.Loaded(ArrayList())
             } else {
                 try {
                     val romElements = ArrayList<AppEntry>()
@@ -70,10 +70,10 @@ class MainViewModel @Inject constructor(@ApplicationContext context : Context, p
                         state = MainState.Loading(romElements)
                     }
                     romElements.toFile(romsFile)
-                    MainState.Loaded(romElements)
+                    state = MainState.Loaded(romElements)
                 } catch (e: Exception) {
                     Log.w(TAG, "Ran into exception while saving: ${e.message}")
-                    MainState.Error(e)
+                    state = MainState.Error(e)
                 }
             }
         }
