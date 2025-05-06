@@ -118,7 +118,7 @@ fun MainScreen(navigateBack: () -> Unit) {
             val items = if (state is MainState.Loaded) {
                 getAppItems((state as MainState.Loaded).items, appSettings)
             } else {
-                emptyList()
+                getAppItems((state as MainState.Loaded).partialData, appSettings)
             }
 
             val filteredItems = if (searchQuery.isBlank()) {
