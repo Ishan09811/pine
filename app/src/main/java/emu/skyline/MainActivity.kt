@@ -13,6 +13,7 @@ import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 import dagger.hilt.android.AndroidEntryPoint
 import emu.skyline.ui.main.AppNavHost
+import emu.skyline.ui.main.PineTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -21,7 +22,9 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            AppNavHost()
+            PineTheme {
+                AppNavHost()
+            }
         }
     }
 }
