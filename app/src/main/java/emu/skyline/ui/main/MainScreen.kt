@@ -71,12 +71,29 @@ fun MainScreen(navigateBack: () -> Unit) {
         topBar = {
             TopAppBar(
                 title = {
-                    TextField(
+                    OutlinedTextField(
                         value = searchQuery,
-                        onValueChange = {
-                            searchQuery = it
+                        onValueChange = { searchQuery = it },
+                        placeholder = { Text("Search") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Search, contentDescription = "Search Icon")
                         },
-                        placeholder = { Text("Search") }
+                        singleLine = true,
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            focusedLeadingIconColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurface,
+                            cursorColor = MaterialTheme.colorScheme.primary
+                        )
                     )
                 },
                 actions = {
@@ -102,6 +119,16 @@ fun MainScreen(navigateBack: () -> Unit) {
                 emptyList()
             }
 
+            val filteredItems = if (searchQuery.isBlank()) {
+                items
+            } else {
+                items.filter {
+                    it.title?.contains(searchQuery, ignoreCase = true) == true ||
+                    it.author?.contains(searchQuery, ignoreCase = true) == true ||
+                    it.version?.contains(searchQuery, ignoreCase = true) == true
+                }
+            }
+
             if (state is MainState.Loading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
@@ -113,7 +140,7 @@ fun MainScreen(navigateBack: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(items) { item ->
+                items(filteredItems) { item ->
                     AppItemRow(
                         item = item,
                         modifier = Modifier.fillMaxWidth(),
