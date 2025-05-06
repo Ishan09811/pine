@@ -115,11 +115,21 @@ fun MainScreen(navigateBack: () -> Unit) {
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(Modifier.padding(paddingValues)) {
-            val items = if (state is MainState.Loaded) {
-                getAppItems((state as MainState.Loaded).items, appSettings)
-            } else {
-                getAppItems((state as MainState.Loading).partialData, appSettings)
-            }
+            val items = when (state) {
+                is MainState.Loaded -> getAppItems((state as MainState.Loaded).items, appSettings)
+                is MainState.Loading -> getAppItems((state as MainState.Loading).partialData, appSettings)
+                is MainState.Error -> {
+                    // exception occurred while loading so reload until we get items 
+                    viewModel.loadRoms(context, false, SearchLocationHelper.getSearchLocations(context), EmulationSettings.global.systemLanguage)
+                    emptyList()
+                }
+                is MainState.Idle -> {
+                    // not initialised yet
+                    viewModel.loadRoms(context, false, SearchLocationHelper.getSearchLocations(context), EmulationSettings.global.systemLanguage)
+                    emptyList()
+                }
+                else -> emptyList()         
+            } 
 
             val filteredItems = if (searchQuery.isBlank()) {
                 items
