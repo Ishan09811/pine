@@ -959,6 +959,17 @@ namespace skyline::kernel::svc {
             // 6.0.0+
             TotalMemoryAvailableWithoutSystemResource = 21,
             TotalMemoryUsageWithoutSystemResource = 22,
+            // 9.0.0+
+            IsApplication = 23,
+            // 11.0.0+
+            FreeThreadCount = 24,
+            ThreadTickCount = 25,
+            // 14.0.0+
+            IsSvcPermitted = 26,
+            // 16.0.0+
+            IoRegionHint = 27,
+            // 18.0.0+
+            AliasRegionExtraSize = 28,
         };
 
         InfoState info{static_cast<u32>(ctx.w1)};
