@@ -350,18 +350,17 @@ class InputHandler(private val inputManager : InputManager, private val emulatio
             else -> {}
         }
 
-        // Only update state on accelerometer data
-        if (event.sensor.type != Sensor.TYPE_ACCELEROMETER)
-            return
-
-        motionSensor.deltaTimestamp = event.timestamp.toULong() - motionSensor.timestamp
-        motionSensor.timestamp = event.timestamp.toULong()
-        motionDataBuffer.clear()
-        setMotionState(0, 0, motionSensor.writeToByteBuffer(motionDataBuffer))
-        motionDataBuffer.clear()
-        setMotionState(0, 1, motionSensor.writeToByteBuffer(motionDataBuffer))
-        motionDataBuffer.clear()
-        setMotionState(0, 2, motionSensor.writeToByteBuffer(motionDataBuffer))
+        // Only update state on accelerometer/gyroscope data
+        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER || event.sensor.type == Sensor.TYPE_GYROSCOPE) {
+            motionSensor.deltaTimestamp = event.timestamp.toULong() - motionSensor.timestamp
+            motionSensor.timestamp = event.timestamp.toULong()
+            motionDataBuffer.clear()
+            setMotionState(0, 0, motionSensor.writeToByteBuffer(motionDataBuffer))
+            motionDataBuffer.clear()
+            setMotionState(0, 1, motionSensor.writeToByteBuffer(motionDataBuffer))
+            motionDataBuffer.clear()
+            setMotionState(0, 2, motionSensor.writeToByteBuffer(motionDataBuffer))
+        }
     }
 
     fun handleTouchEvent(view : View, event : MotionEvent) : Boolean {
