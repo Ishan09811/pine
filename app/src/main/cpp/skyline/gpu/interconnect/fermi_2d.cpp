@@ -87,7 +87,7 @@ namespace skyline::gpu::interconnect {
 
         u64 addressOffset{};
         if (surface.memoryLayout == MemoryLayout::Pitch) {
-            texture.dimensions = gpu::texture::Dimensions{surface.stride / texture.format->bpb, surface.height, 1};
+            texture.dimensions = gpu::texture::Dimensions{std::max<u32>(1u, static_cast<u32>((surface.stride / texture.format->bpb) * 0.5f)), std::max<u32>(1u, static_cast<u32>(surface.height * 0.5f)), 1};
 
             // OpenGL games rely on reads wrapping around to the next line when reading out of bounds, emulate this behaviour by offsetting the address
             if (oobReadStart && surface.width == (oobReadWidth + oobReadStart) && (oobReadWidth + oobReadStart) > texture.dimensions.width)
@@ -98,7 +98,7 @@ namespace skyline::gpu::interconnect {
                 .pitch = surface.stride
             };
         } else {
-            texture.dimensions = gpu::texture::Dimensions{surface.width, surface.height, surface.depth};
+            texture.dimensions = gpu::texture::Dimensions{std::max<u32>(1u, static_cast<u32>(surface.width * 0.5f)), std::max<u32>(1u, static_cast<u32>(surface.height * 0.5f)), surface.depth};
             texture.tileConfig = gpu::texture::TileConfig{
                 .mode = gpu::texture::TileMode::Block,
                 .blockHeight = surface.blockSize.Height(),
