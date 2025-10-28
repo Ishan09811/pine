@@ -24,6 +24,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
         // If the calculated sizes don't match then always use the RT dimensions
         if (clippedRtLayerSize != underlyingRtLayerSize)
             guest.dimensions = underlyingRtDimensions;
+        guest.dimensions = texture::Dimensions{std::max<u32>(1u, static_cast<u32>(guest.dimensions.width  * 0.5f)), std::max<u32>(1u, static_cast<u32>(guest.dimensions.height  * 0.5f)), guest.dimensions.depth};
     }
 
     /* Colour Render Target */
@@ -54,7 +55,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
 
         u32 depth{thirdDimensionDefinesArraySize ? 1U : target.thirdDimension};
         if (target.memory.layout == engine::TargetMemory::Layout::Pitch) {
-            guest.dimensions = texture::Dimensions{target.width / guest.format->bpb, target.height, depth};
+            guest.dimensions = texture::Dimensions{std::max<u32>(1u, static_cast<u32>((target.width / guest.format->bpb) * 0.5f)), std::max<u32>(1u, static_cast<u32>(target.height * 0.5f)), depth};
             guest.tileConfig = texture::TileConfig{
                 .mode = gpu::texture::TileMode::Pitch,
                 .pitch = target.width,
