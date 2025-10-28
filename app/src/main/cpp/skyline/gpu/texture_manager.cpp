@@ -48,9 +48,10 @@ namespace skyline::gpu {
             // Only the start of the first matched mapping and the end of the last mapping can not match up as this is the case for views
             auto firstHostMapping{hostMapping->iterator};
             auto lastGuestMapping{guestTexture.mappings.back()};
-            auto lastHostMapping{std::find_if(firstHostMapping, hostMappings.end(), [&lastGuestMapping](const span<u8> &it) {
-                return lastGuestMapping.begin() > it.begin() && lastGuestMapping.end() > it.end();
-            })}; //!< A past-the-end iterator for the last host mapping, the final valid mapping is prior to this iterator
+            auto lastHostMapping = firstHostMapping;
+            while (lastHostMapping != hostMappings.end() && !(lastGuestMapping.begin() > lastHostMapping->begin() && lastGuestMapping.end() > lastHostMapping->end())) {
+                ++lastHostMapping;
+            }
             bool mappingMatch{std::equal(firstHostMapping, lastHostMapping, guestTexture.mappings.begin(), guestTexture.mappings.end(), [](const span<u8> &lhs, const span<u8> &rhs) {
                 return lhs.end() == rhs.end(); // We check end() here to implicitly ignore any offset from the first mapping
             })};
