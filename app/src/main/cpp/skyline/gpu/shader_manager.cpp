@@ -149,7 +149,9 @@ namespace skyline::gpu {
             .disable_shader_loop_safety_checks = true,
             #endif
             .resolution_info = {
-                .active = false,
+                .active = true,
+                .downscale = true,
+                .down_factor = 0.5f,
             },
         };
     }
