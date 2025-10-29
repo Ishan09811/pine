@@ -66,6 +66,7 @@ namespace skyline::gpu::memory {
             .instance = *gpu.vkInstance,
             .pVulkanFunctions = &vulkanFunctions,
             .vulkanApiVersion = VkApiVersion,
+            .preferredLargeHeapBlockSize = 8 * 1024 * 1024,
         };
         ThrowOnFail(vmaCreateAllocator(&allocatorCreateInfo, &vmaAllocator));
     }
@@ -83,8 +84,8 @@ namespace skyline::gpu::memory {
             .pQueueFamilyIndices = &gpu.vkQueueFamilyIndex,
         };
         VmaAllocationCreateInfo allocationCreateInfo{
+            .usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST,
             .flags = VMA_ALLOCATION_CREATE_MAPPED_BIT,
-            .requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             .preferredFlags = VK_MEMORY_PROPERTY_HOST_CACHED_BIT, // may increase performance
         };
 
@@ -106,7 +107,7 @@ namespace skyline::gpu::memory {
         };
         VmaAllocationCreateInfo allocationCreateInfo{
             .flags = VMA_ALLOCATION_CREATE_MAPPED_BIT,
-            .usage = VMA_MEMORY_USAGE_UNKNOWN,
+            .usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
             .requiredFlags = static_cast<VkMemoryPropertyFlags>(vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent | vk::MemoryPropertyFlagBits::eDeviceLocal),
         };
 
