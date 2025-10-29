@@ -281,8 +281,8 @@ namespace skyline::gpu::interconnect {
 
             guest.baseArrayLayer = static_cast<u16>(textureHeader.BaseLayer());
             guest.dimensions = texture::Dimensions(
-                std::max(1u, static_cast<u32>((textureHeader.widthMinusOne + 1) * 0.5f)),
-                std::max(1u, static_cast<u32>((textureHeader.heightMinusOne + 1) * 0.5f)),
+                textureHeader.widthMinusOne + 1,
+                textureHeader.heightMinusOne + 1,
                 1
             );
             u16 depth{static_cast<u16>(textureHeader.depthMinusOne + 1)};
