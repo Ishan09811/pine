@@ -48,7 +48,7 @@ open class BaseAppItem(private val meta : AppEntry, val enabled: Boolean = false
     /**
      * The application version
      */
-    val version get() = meta.version
+    val titleVersion get() = meta.version
 
     /**
      * The application author

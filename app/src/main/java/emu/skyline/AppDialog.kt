@@ -33,6 +33,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import emu.skyline.data.BaseAppItem
+import emu.skyline.data.AppItem
 import emu.skyline.data.AppItemTag
 import emu.skyline.databinding.AppDialogBinding
 import emu.skyline.loader.LoaderResult
@@ -155,7 +156,7 @@ class AppDialog : BottomSheetDialogFragment() {
 
         binding.gameIcon.setImageBitmap(item.bitmapIcon)
         binding.gameTitle.text = item.title
-        binding.gameVersion.text = item.version ?: item.loaderResultString(requireContext())
+        binding.gameVersion.text = (item as AppItem).getVersion() ?: item.loaderResultString(requireContext())
         binding.gameTitleId.text = item.titleId
         binding.gameAuthor.text = item.author
 

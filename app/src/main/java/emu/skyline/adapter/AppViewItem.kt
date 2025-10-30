@@ -18,6 +18,7 @@ import android.widget.TextView
 import androidx.viewbinding.ViewBinding
 import emu.skyline.R
 import emu.skyline.data.BaseAppItem
+import emu.skyline.data.AppItem
 import emu.skyline.databinding.AppItemGridBinding
 import emu.skyline.databinding.AppItemGridCompactBinding
 import emu.skyline.databinding.AppItemLinearBinding
@@ -94,7 +95,7 @@ class AppViewItem(var layoutType : LayoutType, private val item : BaseAppItem, p
     override fun bind(holder : GenericViewHolder<LayoutBinding<*>>, position : Int) {
         val binding = holder.binding
         binding.textTitle.text = item.title
-        binding.textVersion.text = item.version ?: item.loaderResultString(binding.root.context)
+        binding.textVersion.text = (item as AppItem).getVersion() ?: item.loaderResultString(binding.root.context)
         binding.textAuthor.text = item.author
         // Make text views selected for marquee to work
         binding.textTitle.isSelected = true

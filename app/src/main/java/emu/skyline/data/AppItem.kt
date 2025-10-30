@@ -29,4 +29,8 @@ class AppItem(meta : AppEntry, private val updates : List<BaseAppItem>, private 
     fun getEnabledUpdate() : BaseAppItem? {
         return updates.firstOrNull { it.enabled }
     }
+
+    fun getVersion() : String? {
+        return updates.firstOrNull { it.enabled }?.titleVersion ?: titleVersion
+    }
 }

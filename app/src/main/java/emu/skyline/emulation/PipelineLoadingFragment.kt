@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.google.android.renderscript.Toolkit
 import emu.skyline.data.BaseAppItem
+import emu.skyline.data.AppItem
 import emu.skyline.data.AppItemTag
 import emu.skyline.databinding.PipelineLoadingBinding
 import emu.skyline.utils.serializable
@@ -39,7 +40,7 @@ class PipelineLoadingFragment : Fragment() {
             text = item.title
             isSelected = true
         }
-        binding.gameVersion.text = item.version
+        binding.gameVersion.text = (item as AppItem).getVersion()
         binding.gameIcon.setImageBitmap(item.bitmapIcon)
 
         val progress = savedInstanceState?.getInt(PipelineProgressTag) ?: 0
