@@ -2,6 +2,7 @@
 // Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
 
 #include <gpu.h>
+#include <shared_mutex>
 #include <soc/gm20b/engines/maxwell/types.h>
 #include "descriptor_allocator.h"
 
