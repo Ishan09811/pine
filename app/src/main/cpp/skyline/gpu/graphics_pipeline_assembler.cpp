@@ -242,7 +242,10 @@ namespace skyline::gpu {
             return std::prev(compilePendingDescs.end());
         }()};
 
-        auto pipelineFuture{pool.submit_task(&GraphicsPipelineAssembler::AssemblePipeline, this, descIt, *pipelineLayout)};
+        auto pipelineFuture = pool.submit_task([this, descIt, pipelineLayout]() {
+            return AssemblePipeline(descIt, *pipelineLayout);
+        });
+        
         return CompiledPipeline{std::move(descriptorSetLayout), std::move(pipelineLayout), std::move(pipelineFuture)};
     }
 
