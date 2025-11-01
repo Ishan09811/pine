@@ -58,7 +58,7 @@ namespace skyline::gpu {
       private:
         GPU &gpu;
         vk::raii::PipelineCache vkPipelineCache; //!< A Vulkan Pipeline Cache which stores all unique graphics pipelines
-        BS::thread_pool pool;
+        BS::thread_pool<std::any> pool;
         std::string pipelineCacheDir;
         std::function<void()> compilationCallback;
 
