@@ -5,7 +5,6 @@
 
 #include <functional>
 #include <future>
-#include <any>
 #include <BS_thread_pool.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
@@ -59,7 +58,7 @@ namespace skyline::gpu {
       private:
         GPU &gpu;
         vk::raii::PipelineCache vkPipelineCache; //!< A Vulkan Pipeline Cache which stores all unique graphics pipelines
-        BS::thread_pool<std::any> pool;
+        BS::thread_pool<tp::none> pool;
         std::string pipelineCacheDir;
         std::function<void()> compilationCallback;
 
