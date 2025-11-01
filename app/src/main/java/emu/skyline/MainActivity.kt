@@ -51,6 +51,7 @@ import emu.skyline.settings.AppSettings
 import emu.skyline.settings.EmulationSettings
 import emu.skyline.settings.SettingsActivity
 import emu.skyline.utils.GpuDriverHelper
+import emu.skyline.utils.ContentsHelper
 import emu.skyline.utils.SearchLocationHelper
 import emu.skyline.utils.WindowInsetsHelper
 import emu.skyline.SkylineApplication
@@ -258,10 +259,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getAppItems() = mutableListOf<AppViewItem>().apply {
+        val contents = ContentsHelper(this@MainActivity)
+        val updates = mutableListOf<BaseAppItem>()
+        val dlcs = mutableListOf<BaseAppItem>()
+        
         appEntries?.let { entries ->
             sortGameList(entries.toList()).forEach { entry ->
-                val updates : List<BaseAppItem> = entries.filter { it.romType == RomType.Update && it.parentTitleId == entry.titleId }.map { BaseAppItem(it, true) }
-                val dlcs : List<BaseAppItem> = entries.filter { it.romType == RomType.DLC && it.parentTitleId == entry.titleId }.map { BaseAppItem(it, true) }
+                contents.loadContents().filter { appEntry ->
+                    (appEntry as AppEntry).parentTitleId == entry.titleId
+                }.forEach { appEntry ->
+                    if ((appEntry as AppEntry).romType == RomType.DLC) dlcs.add(BaseAppItem(appEntry as AppEntry, true))
+                    if ((appEntry as AppEntry).romType == RomType.Update) updates.add(BaseAppItem(appEntry as AppEntry, true))
+                }
                 add(AppItem(entry, updates, dlcs).toViewItem())
             }
         }

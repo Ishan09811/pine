@@ -320,17 +320,8 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         val intentItem = intent.serializable(AppItemTag) as AppItem?
         if (intentItem != null) {
             item = intentItem
-
-            val contents = ContentsHelper(this@EmulationActivity)
-
-            contents.loadContents().filter { appEntry ->
-                (appEntry as AppEntry).parentTitleId == item.titleId
-            }.forEach { appEntry ->
-                (appEntry as AppEntry).uri?.let { uri: Uri ->
-                    if ((appEntry as AppEntry).romType == RomType.DLC) dlcUris.add(uri)
-                    if ((appEntry as AppEntry).romType == RomType.Update) updateUri = uri
-                }
-            }
+            updateUri = item.getEnabledUpdate()?.uri ?: Uri.EMPTY
+            dlcUris = item.getEnabledDlcs().map { it.uri }.toCollection(ArrayList())
             return
         }
 
@@ -340,6 +331,17 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         val romFile = RomFile(this, romFormat, uri, EmulationSettings.global.systemLanguage)
 
         item = AppItem(romFile.takeIf { it.valid }!!.appEntry, emptyList(), emptyList())
+        
+        val contents = ContentsHelper(this@EmulationActivity)
+
+        contents.loadContents().filter { appEntry ->
+            (appEntry as AppEntry).parentTitleId == item.titleId
+        }.forEach { appEntry ->
+            (appEntry as AppEntry).uri?.let { uri: Uri ->
+                if ((appEntry as AppEntry).romType == RomType.DLC) dlcUris.add(uri)
+                if ((appEntry as AppEntry).romType == RomType.Update) updateUri = uri            
+            }
+        }
     }
 
     @SuppressLint("SetTextI18n", "ClickableViewAccessibility")
