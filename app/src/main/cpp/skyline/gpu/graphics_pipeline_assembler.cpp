@@ -248,7 +248,7 @@ namespace skyline::gpu {
             }
         );
         
-        return CompiledPipeline{std::move(descriptorSetLayout), std::move(pipelineLayout), std::move(pipelineFuture)};
+        return CompiledPipeline{std::move(descriptorSetLayout), std::move(pipelineLayout), pipelineFuture.share()};
     }
 
     void GraphicsPipelineAssembler::WaitIdle() {
