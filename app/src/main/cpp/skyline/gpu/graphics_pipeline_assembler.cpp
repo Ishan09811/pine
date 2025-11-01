@@ -242,9 +242,11 @@ namespace skyline::gpu {
             return std::prev(compilePendingDescs.end());
         }()};
 
+        vk::PipelineLayout pipelineLayoutHandle = *pipelineLayout;
+
         auto pipelineFuture = pool.submit_task(
-            [this, descIt, pl = std::move(pipelineLayout)]() mutable {
-                AssemblePipeline(descIt, *pl);
+            [this, descIt, pipelineLayoutHandle]() -> vk::raii::Pipeline {
+                AssemblePipeline(descIt, pipelineLayoutHandle);
             }
         );
         
