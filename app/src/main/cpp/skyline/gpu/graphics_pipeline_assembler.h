@@ -136,9 +136,9 @@ namespace skyline::gpu {
 
             CompiledPipeline() : descriptorSetLayout{nullptr}, pipelineLayout{nullptr} {};
 
-            CompiledPipeline(vk::raii::DescriptorSetLayout descriptorSetLayout,
-                             vk::raii::PipelineLayout pipelineLayout,
-                             std::shared_future<vk::raii::Pipeline> pipeline)
+            CompiledPipeline(vk::raii::DescriptorSetLayout&& descriptorSetLayout,
+                             vk::raii::PipelineLayout&& pipelineLayout,
+                             std::shared_future<vk::raii::Pipeline>&& pipeline)
                 : descriptorSetLayout{std::move(descriptorSetLayout)},
                   pipelineLayout{std::move(pipelineLayout)},
                   pipeline{std::move(pipeline)} {};
