@@ -30,7 +30,7 @@ namespace skyline::gpu {
 
             DescriptorSetSlot(vk::DescriptorSet descriptorSet);
 
-            DescriptorSetSlot(DescriptorSetSlot &&other);
+            DescriptorSetSlot(DescriptorSetSlot &&other) noexcept;
         };
 
         /**
@@ -51,6 +51,9 @@ namespace skyline::gpu {
          */
         void AllocateDescriptorPool();
 
+        inline vk::Result AllocateVkDescriptorSetInternal(vk::DescriptorSetLayout layout,
+                                                      vk::DescriptorSet &outSet);
+
         /**
          * @brief Allocates a descriptor set with the specified layout from the pool
          * @return An error code that's either `eSuccess`, `eErrorOutOfPoolMemory` or `eErrorFragmentedPool`
@@ -68,7 +71,7 @@ namespace skyline::gpu {
 
             friend class DescriptorAllocator;
 
-            ActiveDescriptorSet(std::shared_ptr<DescriptorPool> pool, DescriptorSetSlot *slot);
+            ActiveDescriptorSet(std::shared_ptr<DescriptorPool> pool, DescriptorSetSlot *slot) noexcept;
 
           public:
             ActiveDescriptorSet(ActiveDescriptorSet &&other) noexcept;
