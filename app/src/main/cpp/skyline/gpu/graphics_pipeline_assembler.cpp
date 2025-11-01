@@ -242,16 +242,23 @@ namespace skyline::gpu {
             return std::prev(compilePendingDescs.end());
         }()};
 
-        auto pipelineFuture{pool.submit(&GraphicsPipelineAssembler::AssemblePipeline, this, descIt, *pipelineLayout)};
-        return CompiledPipeline{std::move(descriptorSetLayout), std::move(pipelineLayout), std::move(pipelineFuture)};
+        vk::PipelineLayout pipelineLayoutHandle = *pipelineLayout;
+
+        auto pipelineFuture = pool.submit_task(
+            [this, descIt, pipelineLayoutHandle]() -> vk::raii::Pipeline {
+                return AssemblePipeline(descIt, pipelineLayoutHandle);
+            }
+        );
+        
+        return CompiledPipeline{std::move(descriptorSetLayout), std::move(pipelineLayout), pipelineFuture.share()};
     }
 
     void GraphicsPipelineAssembler::WaitIdle() {
-        pool.wait_for_tasks();
+        pool.wait();
     }
 
     void GraphicsPipelineAssembler::SavePipelineCache() {
-        std::ignore = pool.submit([this] () {
+        std::ignore = pool.submit_task([this] () {
             std::vector<u8> rawData{vkPipelineCache.getData()};
             SerialisePipelineCache(gpu, pipelineCacheDir, rawData);
         });

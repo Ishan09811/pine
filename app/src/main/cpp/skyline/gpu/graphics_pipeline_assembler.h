@@ -58,7 +58,7 @@ namespace skyline::gpu {
       private:
         GPU &gpu;
         vk::raii::PipelineCache vkPipelineCache; //!< A Vulkan Pipeline Cache which stores all unique graphics pipelines
-        BS::thread_pool pool;
+        BS::thread_pool<BS::tp::none> pool;
         std::string pipelineCacheDir;
         std::function<void()> compilationCallback;
 
@@ -136,9 +136,9 @@ namespace skyline::gpu {
 
             CompiledPipeline() : descriptorSetLayout{nullptr}, pipelineLayout{nullptr} {};
 
-            CompiledPipeline(vk::raii::DescriptorSetLayout descriptorSetLayout,
-                             vk::raii::PipelineLayout pipelineLayout,
-                             std::shared_future<vk::raii::Pipeline> pipeline)
+            CompiledPipeline(vk::raii::DescriptorSetLayout&& descriptorSetLayout,
+                             vk::raii::PipelineLayout&& pipelineLayout,
+                             std::shared_future<vk::raii::Pipeline>&& pipeline)
                 : descriptorSetLayout{std::move(descriptorSetLayout)},
                   pipelineLayout{std::move(pipelineLayout)},
                   pipeline{std::move(pipeline)} {};
