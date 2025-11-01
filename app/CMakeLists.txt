@@ -103,7 +103,7 @@ add_subdirectory("libraries/robin-map")
 include_directories("libraries/renderdoc")
 
 # Thread Pool
-include_directories("libraries/thread-pool")
+include_directories("libraries/thread-pool/include")
 
 # Build Skyline with full debugging data and -Og for debug builds
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -glldb -gdwarf-5 -fno-omit-frame-pointer")
