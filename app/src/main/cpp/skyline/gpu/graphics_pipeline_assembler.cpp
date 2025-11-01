@@ -246,7 +246,7 @@ namespace skyline::gpu {
 
         auto pipelineFuture = pool.submit_task(
             [this, descIt, pipelineLayoutHandle]() -> vk::raii::Pipeline {
-                AssemblePipeline(descIt, pipelineLayoutHandle);
+                return AssemblePipeline(descIt, pipelineLayoutHandle);
             }
         );
         
