@@ -104,9 +104,9 @@ namespace skyline::gpu {
         }
 
         if (hasSync2)
-            FEAT_SET(vk::PhysicalDeviceSynchronization2FeaturesKHR, synchronization2, supportsSynchronization2)
+            FEAT_SET(vk::PhysicalDeviceSynchronization2Features, synchronization2, supportsSynchronization2)
         else
-            enabledFeatures2.unlink<vk::PhysicalDeviceSynchronization2FeaturesKHR>();
+            enabledFeatures2.unlink<vk::PhysicalDeviceSynchronization2Features>();
 
         if (hasCustomBorderColorExt) {
             bool hasCustomBorderColorFeature{};
