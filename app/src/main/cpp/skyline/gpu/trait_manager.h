@@ -51,6 +51,7 @@ namespace skyline::gpu {
         bool supportsDepthClamp{}; //!< If the device supports the 'depthClamp' Vulkan feature
         bool supportsExtendedDynamicState{}; //!< If the device supports the 'VK_EXT_extended_dynamic_state' Vulkan extension
         bool supportsNullDescriptor{}; //!< If the device supports the null descriptor feature in the 'VK_EXT_robustness2' Vulkan extension
+        bool supportsSynchronization2{};
         u32 subgroupSize{}; //!< Size of a subgroup on the host GPU
         u32 hostVisibleCoherentCachedMemoryType{std::numeric_limits<u32>::max()};
         u32 minimumStorageBufferAlignment{}; //!< Minimum alignment for storage buffers passed to shaders
@@ -119,7 +120,8 @@ namespace skyline::gpu {
             vk::PhysicalDeviceTransformFeedbackFeaturesEXT,
             vk::PhysicalDeviceIndexTypeUint8FeaturesEXT,
             vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT,
-            vk::PhysicalDeviceRobustness2FeaturesEXT>;
+            vk::PhysicalDeviceRobustness2FeaturesEXT,
+            vk::PhysicalDeviceSynchronization2Features>;
 
         TraitManager(const DeviceFeatures2 &deviceFeatures2, DeviceFeatures2 &enabledFeatures2, const std::vector<vk::ExtensionProperties> &deviceExtensions, std::vector<std::array<char, VK_MAX_EXTENSION_NAME_SIZE>> &enabledExtensions, const DeviceProperties2 &deviceProperties2, const vk::raii::PhysicalDevice &physicalDevice);
 
