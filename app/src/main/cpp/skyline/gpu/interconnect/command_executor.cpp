@@ -15,12 +15,27 @@
 
 namespace skyline::gpu::interconnect {
     static void RecordFullBarrier(vk::raii::CommandBuffer &commandBuffer) {
-        commandBuffer.pipelineBarrier(
-            vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eAllCommands, {}, vk::MemoryBarrier{
-                .srcAccessMask = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite,
-                .dstAccessMask = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite,
-            }, {}, {}
-        );
+        if (gpu.traits.supportsSynchronization2) {
+            vk::MemoryBarrier2 memoryBarrier{
+                .srcStageMask = vk::PipelineStageFlagBits2::eAllCommands,
+                .srcAccessMask = vk::AccessFlagBits2::eMemoryWrite | vk::AccessFlagBits2::eMemoryRead,
+                .dstStageMask = vk::PipelineStageFlagBits2::eAllCommands,
+                .dstAccessMask = vk::AccessFlagBits2::eMemoryWrite | vk::AccessFlagBits2::eMemoryRead,
+            };
+
+            vk::DependencyInfo dependencyInfo{
+                .memoryBarrierCount = 1,
+                .pMemoryBarriers = &memoryBarrier,
+            };
+            commandBuffer.pipelineBarrier2(dependencyInfo);
+        } else {
+            commandBuffer.pipelineBarrier(
+                vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eAllCommands, {}, vk::MemoryBarrier{
+                    .srcAccessMask = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite,
+                    .dstAccessMask = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite,
+                }, {}, {}
+            );
+        }
     }
 
     CommandRecordThread::CommandRecordThread(const DeviceState &state)
