@@ -70,11 +70,27 @@ namespace skyline::gpu::interconnect::kepler_compute {
         ctx.executor.AddOutsideRpCommand([drawParams](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &gpu) {
             drawParams->stateUpdater.RecordAll(gpu, commandBuffer);
 
-            if (drawParams->srcStageMask && drawParams->dstStageMask)
-                commandBuffer.pipelineBarrier(drawParams->srcStageMask, drawParams->dstStageMask, {}, {vk::MemoryBarrier{
-                    .srcAccessMask = vk::AccessFlagBits::eMemoryWrite,
-                    .dstAccessMask = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite
-                }}, {}, {});
+            if (drawParams->srcStageMask && drawParams->dstStageMask) {
+                if (gpu.traits.supportsSynchronization2) {
+                    vk::MemoryBarrier2 memoryBarrier{
+                        .srcStageMask = drawParams->srcStageMask,
+                        .srcAccessMask = vk::AccessFlagBits::eMemoryWrite,
+                        .dstStageMask = drawParams->dstStageMask,
+                        .dstAccessMask = vk::AccessFlagBits2::eMemoryRead | vk::AccessFlagBits2::eMemoryWrite,
+                    };
+
+                    vk::DependencyInfo dependencyInfo{
+                        .memoryBarrierCount = 1,
+                        .pMemoryBarriers = &memoryBarrier,
+                    };
+                    commandBuffer.pipelineBarrier2(dependencyInfo);
+                } else {
+                    commandBuffer.pipelineBarrier(drawParams->srcStageMask, drawParams->dstStageMask, {}, {vk::MemoryBarrier{
+                        .srcAccessMask = vk::AccessFlagBits::eMemoryWrite,
+                        .dstAccessMask = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite
+                    }}, {}, {});
+                }
+            }
 
             commandBuffer.dispatch(drawParams->dimensions[0], drawParams->dimensions[1], drawParams->dimensions[2]);
         });
