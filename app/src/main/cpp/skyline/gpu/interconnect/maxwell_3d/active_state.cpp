@@ -22,7 +22,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
 
     VertexBufferState::VertexBufferState(dirty::Handle dirtyHandle, DirtyManager &manager, const EngineRegisters &engine, u32 index) : engine{manager, dirtyHandle, engine}, index{index} {}
 
-    void VertexBufferState::Flush(InterconnectContext &ctx, StateUpdateBuilder &builder, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
+    void VertexBufferState::Flush(InterconnectContext &ctx, StateUpdateBuilder &builder, StageMask &srcStageMask, StageMask &dstStageMask) {
         size_t size{engine->vertexStreamLimit - engine->vertexStream.location + 1};
 
         if (engine->vertexStream.format.enable && engine->vertexStream.location != 0 && size) {
@@ -50,7 +50,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
             builder.SetVertexBuffer(index, {ctx.gpu.megaBufferAllocator.Allocate(ctx.executor.cycle, 0).buffer}, ctx.gpu.traits.supportsExtendedDynamicState, engine->vertexStream.format.stride);
     }
 
-    bool VertexBufferState::Refresh(InterconnectContext &ctx, StateUpdateBuilder &builder, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
+    bool VertexBufferState::Refresh(InterconnectContext &ctx, StateUpdateBuilder &builder, StageMask &srcStageMask, StageMask &dstStageMask) {
         if (*view)
             view->GetBuffer()->PopulateReadBarrier(vk::PipelineStageFlagBits::eVertexInput, srcStageMask, dstStageMask);
 
@@ -122,7 +122,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
 
     IndexBufferState::IndexBufferState(dirty::Handle dirtyHandle, DirtyManager &manager, const EngineRegisters &engine) : engine{manager, dirtyHandle, engine} {}
 
-    void IndexBufferState::Flush(InterconnectContext &ctx, StateUpdateBuilder &builder, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask, bool quadConversion, bool estimateSize, u32 firstIndex, u32 elementCount) {
+    void IndexBufferState::Flush(InterconnectContext &ctx, StateUpdateBuilder &builder, StageMask &srcStageMask, StageMask &dstStageMask, bool quadConversion, bool estimateSize, u32 firstIndex, u32 elementCount) {
         didEstimateSize = estimateSize;
         usedElementCount = elementCount;
         usedFirstIndex = firstIndex;
@@ -157,7 +157,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
             builder.SetIndexBuffer(*view, indexType);
     }
 
-    bool IndexBufferState::Refresh(InterconnectContext &ctx, StateUpdateBuilder &builder, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask, bool quadConversion, bool estimateSize, u32 firstIndex, u32 elementCount) {
+    bool IndexBufferState::Refresh(InterconnectContext &ctx, StateUpdateBuilder &builder, StageMask &srcStageMask, StageMask &dstStageMask, bool quadConversion, bool estimateSize, u32 firstIndex, u32 elementCount) {
         if (*view)
             view->GetBuffer()->PopulateReadBarrier(vk::PipelineStageFlagBits::eVertexInput, srcStageMask, dstStageMask);
 
@@ -195,7 +195,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
 
     TransformFeedbackBufferState::TransformFeedbackBufferState(dirty::Handle dirtyHandle, DirtyManager &manager, const EngineRegisters &engine, u32 index) : engine{manager, dirtyHandle, engine}, index{index} {}
 
-    void TransformFeedbackBufferState::Flush(InterconnectContext &ctx, StateUpdateBuilder &builder, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
+    void TransformFeedbackBufferState::Flush(InterconnectContext &ctx, StateUpdateBuilder &builder, StageMask &srcStageMask, StageMask &dstStageMask) {
         if (engine->streamOutEnable) {
             if (engine->streamOutBuffer.size) {
                 view.Update(ctx, engine->streamOutBuffer.address + engine->streamOutBuffer.loadWritePointerStartOffset, engine->streamOutBuffer.size);
@@ -221,7 +221,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
         }
     }
 
-    bool TransformFeedbackBufferState::Refresh(InterconnectContext &ctx, StateUpdateBuilder &builder, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
+    bool TransformFeedbackBufferState::Refresh(InterconnectContext &ctx, StateUpdateBuilder &builder, StageMask &srcStageMask, StageMask &dstStageMask) {
         if (*view && view->GetBuffer()->SequencedCpuBackingWritesBlocked()) {
             srcStageMask |= vk::PipelineStageFlagBits::eAllCommands;
             dstStageMask |=  vk::PipelineStageFlagBits::eTransformFeedbackEXT;
@@ -434,7 +434,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
 
     void ActiveState::Update(InterconnectContext &ctx, Textures &textures, ConstantBufferSet &constantBuffers, StateUpdateBuilder &builder,
                              bool indexed, engine::DrawTopology topology, bool estimateIndexBufferSize, u32 drawFirstIndex, u32 drawElementCount,
-                             vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
+                             StageMask &srcStageMask, StageMask &dstStageMask) {
         TRACE_EVENT("gpu", "ActiveState::Update");
         if (topology != directState.inputAssembly.GetPrimitiveTopology()) {
             directState.inputAssembly.SetPrimitiveTopology(topology);

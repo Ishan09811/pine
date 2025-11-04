@@ -1048,11 +1048,11 @@ namespace skyline::gpu {
         return lastRenderPassUsage;
     }
 
-    vk::PipelineStageFlags Texture::GetReadStageMask() {
+    StageMask Texture::GetReadStageMask() {
         return readStageMask;
     }
 
-    void Texture::PopulateReadBarrier(vk::PipelineStageFlagBits dstStage, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
+    void Texture::PopulateReadBarrier(vk::PipelineStageFlagBits dstStage, StageMask &srcStageMask, StageMask &dstStageMask) {
         if (!guest)
             return;
 

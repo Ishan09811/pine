@@ -4,6 +4,7 @@
 
 #include <gpu/interconnect/command_executor.h>
 #include <gpu/interconnect/common/state_updater.h>
+#include <gpu/stage_mask.h>
 #include <soc/gm20b/channel.h>
 #include "pipeline_state.h"
 #include "kepler_compute.h"
@@ -39,7 +40,7 @@ namespace skyline::gpu::interconnect::kepler_compute {
         samplers.Update(ctx, qmd.samplerIndex == soc::gm20b::engine::kepler_compute::QMD::SamplerIndex::ViaHeaderIndex);
         auto *pipeline{pipelineState.Update(ctx, builder, textures, constantBuffers.boundConstantBuffers, qmd)};
 
-        vk::PipelineStageFlags srcStageMask{}, dstStageMask{};
+        StageMask srcStageMask{}, dstStageMask{};
         auto *descUpdateInfo{pipeline->SyncDescriptors(ctx, constantBuffers.boundConstantBuffers, samplers, textures, srcStageMask, dstStageMask)};
         builder.SetPipeline(*pipeline->compiledPipeline.pipeline, vk::PipelineBindPoint::eCompute);
 
@@ -60,7 +61,7 @@ namespace skyline::gpu::interconnect::kepler_compute {
         struct DrawParams {
             StateUpdater stateUpdater;
             std::array<u32, 3> dimensions;
-            vk::PipelineStageFlags srcStageMask, dstStageMask;
+            StageMask srcStageMask, dstStageMask;
         };
         auto *drawParams{ctx.executor.allocator->EmplaceUntracked<DrawParams>(DrawParams{stateUpdater, {qmd.ctaRasterWidth, qmd.ctaRasterHeight, qmd.ctaRasterDepth}, srcStageMask, dstStageMask})};
 

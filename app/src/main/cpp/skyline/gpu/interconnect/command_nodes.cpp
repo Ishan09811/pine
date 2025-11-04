@@ -34,7 +34,7 @@ namespace skyline::gpu::interconnect::node {
             });
 
             if (auto usage{view->texture->GetLastRenderPassUsage()}; usage != texture::RenderPassUsage::None) {
-                vk::PipelineStageFlags attachmentDstStageMask{};
+                StageMask attachmentDstStageMask{};
                 if (view->format->vkAspect & vk::ImageAspectFlagBits::eColor)
                     attachmentDstStageMask |= vk::PipelineStageFlagBits::eColorAttachmentOutput;
                 else if (view->format->vkAspect & (vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil))
@@ -168,7 +168,7 @@ namespace skyline::gpu::interconnect::node {
         });
     }
 
-    void RenderPassNode::UpdateDependency(vk::PipelineStageFlags srcStageMask, vk::PipelineStageFlags dstStageMask) {
+    void RenderPassNode::UpdateDependency(StageMask srcStageMask, StageMask dstStageMask) {
         dependencySrcStageMask |= srcStageMask;
         dependencyDstStageMask |= dstStageMask;
     }

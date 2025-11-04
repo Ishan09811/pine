@@ -8,6 +8,7 @@
 #include <common/spin_lock.h>
 #include <common/trap_manager.h>
 #include <gpu/tag_allocator.h>
+#include <gpu/stage_mask.h>
 #include "usage_tracker.h"
 #include "megabuffer.h"
 #include "memory_manager.h"
@@ -424,7 +425,7 @@ namespace skyline::gpu {
         /**
          * @brief Populates the input src and dst stage masks with appropriate read barrier parameters for the current buffer state
          */
-        void PopulateReadBarrier(vk::PipelineStageFlagBits dstStage, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask);
+        void PopulateReadBarrier(vk::PipelineStageFlagBits dstStage, StageMask &srcStageMask, StageMask &dstStageMask);
     };
 
     /**

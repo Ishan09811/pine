@@ -10,6 +10,7 @@
 #include "common/trap_manager.h"
 #include <gpu/tag_allocator.h>
 #include <gpu/memory_manager.h>
+#include <gpu/stage_mask.h>
 #include <vulkan/vulkan_format_traits.hpp>
 #include <gpu/usage_tracker.h>
 
@@ -414,8 +415,8 @@ namespace skyline::gpu {
         u32 lastRenderPassIndex{}; //!< The index of the last render pass that used this texture
         texture::RenderPassUsage lastRenderPassUsage{texture::RenderPassUsage::None}; //!< The type of usage in the last render pass
         bool everUsedAsRt{}; //!< If this texture has ever been used as a rendertarget
-        vk::PipelineStageFlags pendingStageMask{}; //!< List of pipeline stages that are yet to be flushed for reads since the last time this texture was used an an RT
-        vk::PipelineStageFlags readStageMask{}; //!< Set of pipeline stages that this texture has been read in since it was last used as an RT
+        StageMask pendingStageMask{}; //!< List of pipeline stages that are yet to be flushed for reads since the last time this texture was used an an RT
+        StageMask readStageMask{}; //!< Set of pipeline stages that this texture has been read in since it was last used as an RT
 
         friend TextureManager;
         friend TextureView;
@@ -632,11 +633,11 @@ namespace skyline::gpu {
         /**
          * @return The set of stages this texture has been read in since it was last used as an RT
          */
-        vk::PipelineStageFlags GetReadStageMask();
+        StageMask GetReadStageMask();
 
         /**
          * @brief Populates the input src and dst stage masks with appropriate read barrier parameters for the current texture state
          */
-        void PopulateReadBarrier(vk::PipelineStageFlagBits dstStage, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask);
+        void PopulateReadBarrier(vk::PipelineStageFlagBits dstStage, StageMask &srcStageMask, StageMask &dstStageMask);
     };
 }
