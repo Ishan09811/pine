@@ -33,10 +33,25 @@ namespace skyline::gpu::interconnect {
             dstBuf.GetBuffer()->BlockAllCpuBackingWrites();
 
             executor.AddOutsideRpCommand([srcBuf, dstBuf](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &gpu) {
-                commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eTransfer, {}, vk::MemoryBarrier{
-                    .srcAccessMask = vk::AccessFlagBits::eMemoryRead,
-                    .dstAccessMask = vk::AccessFlagBits::eTransferRead | vk::AccessFlagBits::eTransferWrite
-                }, {}, {});
+                if (gpu.traits.supportsSynchronization2) {
+                    vk::MemoryBarrier2 memoryBarrier{
+                        .srcStageMask = vk::PipelineStageFlagBits2::eAllCommands,
+                        .srcAccessMask = vk::AccessFlagBits2::eMemoryRead,
+                        .dstStageMask = vk::PipelineStageFlagBits2::eTransfer,
+                        .dstAccessMask = vk::AccessFlagBits2::eTransferRead | vk::AccessFlagBits2::eTransferWrite,
+                    };
+
+                    vk::DependencyInfo dependencyInfo{
+                        .memoryBarrierCount = 1,
+                        .pMemoryBarriers = &memoryBarrier,
+                    };
+                    commandBuffer.pipelineBarrier2(dependencyInfo);
+                } else {
+                    commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eTransfer, {}, vk::MemoryBarrier{
+                        .srcAccessMask = vk::AccessFlagBits::eMemoryRead,
+                        .dstAccessMask = vk::AccessFlagBits::eTransferRead | vk::AccessFlagBits::eTransferWrite
+                    }, {}, {});
+                }
                 auto srcBufBinding{srcBuf.GetBinding(gpu)};
                 auto dstBufBinding{dstBuf.GetBinding(gpu)};
                 vk::BufferCopy copyRegion{
