@@ -404,13 +404,87 @@ namespace skyline::gpu {
 
     void Texture::CopyFromStagingBuffer(const vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<memory::StagingBuffer> &stagingBuffer) {
         auto image{GetBacking()};
-        if (layout == vk::ImageLayout::eUndefined)
-            commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eHost, vk::PipelineStageFlagBits::eTransfer, {}, {}, {}, vk::ImageMemoryBarrier{
+        if (layout == vk::ImageLayout::eUndefined) {
+            if (gpu.traits.supportsSynchronization2) {
+                vk::ImageMemoryBarrier2 imageBarrier{
+                    .srcStageMask = vk::PipelineStageFlagBits2::eHost,
+                    .srcAccessMask = vk::AccessFlagBits2::eMemoryRead,
+                    .dstStageMask = vk::PipelineStageFlagBits2::eTransfer,
+                    .dstAccessMask = vk::AccessFlagBits2::eTransferWrite,
+                    .oldLayout = std::exchange(layout, vk::ImageLayout::eGeneral),
+                    .newLayout = vk::ImageLayout::eGeneral,
+                    .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                    .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                    .image = image,
+                    .subresourceRange = {
+                        .aspectMask = format->vkAspect,
+                        .levelCount = levelCount,
+                        .layerCount = layerCount,
+                    },
+                };
+
+                vk::DependencyInfo dependencyInfo{
+                    .dependencyFlags = {}, 
+                    .imageMemoryBarrierCount = 1,
+                    .pImageMemoryBarriers = &imageBarrier,
+                };
+
+                commandBuffer.pipelineBarrier2(dependencyInfo);
+            } else {     
+                commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eHost, vk::PipelineStageFlagBits::eTransfer, {}, {}, {}, vk::ImageMemoryBarrier{
+                    .image = image,
+                    .srcAccessMask = vk::AccessFlagBits::eMemoryRead,
+                    .dstAccessMask = vk::AccessFlagBits::eTransferWrite,
+                    .oldLayout = std::exchange(layout, vk::ImageLayout::eGeneral),
+                    .newLayout = vk::ImageLayout::eGeneral,
+                    .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                    .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                    .subresourceRange = {
+                        .aspectMask = format->vkAspect,
+                        .levelCount = levelCount,
+                        .layerCount = layerCount,
+                    },
+                });
+            }
+        }
+
+        auto bufferImageCopies{GetBufferImageCopies()};
+        commandBuffer.copyBufferToImage(stagingBuffer->vkBuffer, image, layout, vk::ArrayProxy(static_cast<u32>(bufferImageCopies.size()), bufferImageCopies.data()));
+    }
+
+    void Texture::CopyIntoStagingBuffer(const vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<memory::StagingBuffer> &stagingBuffer) {
+        auto image{GetBacking()};
+        if (gpu.traits.supportsSynchronization2) {
+            vk::ImageMemoryBarrier2 preCopyBarrier{
+                .srcStageMask = vk::PipelineStageFlagBits2::eBottomOfPipe,
+                .srcAccessMask = vk::AccessFlagBits2::eMemoryWrite,
+                .dstStageMask = vk::PipelineStageFlagBits2::eTransfer,
+                .dstAccessMask = vk::AccessFlagBits2::eTransferRead,
+                .oldLayout = layout,
+                .newLayout = layout,
+                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                 .image = image,
-                .srcAccessMask = vk::AccessFlagBits::eMemoryRead,
-                .dstAccessMask = vk::AccessFlagBits::eTransferWrite,
-                .oldLayout = std::exchange(layout, vk::ImageLayout::eGeneral),
-                .newLayout = vk::ImageLayout::eGeneral,
+                .subresourceRange = {
+                    .aspectMask = format->vkAspect,
+                    .levelCount = levelCount,
+                    .layerCount = layerCount,
+                },
+            };
+
+            vk::DependencyInfo preCopyDep{
+                .imageMemoryBarrierCount = 1,
+                .pImageMemoryBarriers = &preCopyBarrier,
+            };
+
+            commandBuffer.pipelineBarrier2(preCopyDep);
+        } else {
+            commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eBottomOfPipe, vk::PipelineStageFlagBits::eTransfer, {}, {}, {}, vk::ImageMemoryBarrier{
+                .image = image,
+                .srcAccessMask = vk::AccessFlagBits::eMemoryWrite,
+                .dstAccessMask = vk::AccessFlagBits::eTransferRead,
+                .oldLayout = layout,
+                .newLayout = layout,
                 .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                 .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
                 .subresourceRange = {
@@ -419,40 +493,41 @@ namespace skyline::gpu {
                     .layerCount = layerCount,
                 },
             });
-
-        auto bufferImageCopies{GetBufferImageCopies()};
-        commandBuffer.copyBufferToImage(stagingBuffer->vkBuffer, image, layout, vk::ArrayProxy(static_cast<u32>(bufferImageCopies.size()), bufferImageCopies.data()));
-    }
-
-    void Texture::CopyIntoStagingBuffer(const vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<memory::StagingBuffer> &stagingBuffer) {
-        auto image{GetBacking()};
-        commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eBottomOfPipe, vk::PipelineStageFlagBits::eTransfer, {}, {}, {}, vk::ImageMemoryBarrier{
-            .image = image,
-            .srcAccessMask = vk::AccessFlagBits::eMemoryWrite,
-            .dstAccessMask = vk::AccessFlagBits::eTransferRead,
-            .oldLayout = layout,
-            .newLayout = layout,
-            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .subresourceRange = {
-                .aspectMask = format->vkAspect,
-                .levelCount = levelCount,
-                .layerCount = layerCount,
-            },
-        });
+        }
 
         auto bufferImageCopies{GetBufferImageCopies()};
         commandBuffer.copyImageToBuffer(image, layout, stagingBuffer->vkBuffer, vk::ArrayProxy(static_cast<u32>(bufferImageCopies.size()), bufferImageCopies.data()));
 
-        commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eHost, {}, {}, vk::BufferMemoryBarrier{
-            .srcAccessMask = vk::AccessFlagBits::eTransferWrite,
-            .dstAccessMask = vk::AccessFlagBits::eHostRead,
-            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-            .buffer = stagingBuffer->vkBuffer,
-            .offset = 0,
-            .size = stagingBuffer->size(),
-        }, {});
+        if (gpu.traits.supportsSynchronization2) {
+            vk::BufferMemoryBarrier2 postCopyBarrier{
+                .srcStageMask = vk::PipelineStageFlagBits2::eTransfer,
+                .srcAccessMask = vk::AccessFlagBits2::eTransferWrite,
+                .dstStageMask = vk::PipelineStageFlagBits2::eHost,
+                .dstAccessMask = vk::AccessFlagBits2::eHostRead,
+                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .buffer = stagingBuffer->vkBuffer,
+                .offset = 0,
+                .size = stagingBuffer->size(),
+            };
+
+            vk::DependencyInfo postCopyDep{
+                .bufferMemoryBarrierCount = 1,
+                .pBufferMemoryBarriers = &postCopyBarrier,
+            };
+
+            commandBuffer.pipelineBarrier2(postCopyDep);
+        } else {
+            commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eHost, {}, {}, vk::BufferMemoryBarrier{
+                .srcAccessMask = vk::AccessFlagBits::eTransferWrite,
+                .dstAccessMask = vk::AccessFlagBits::eHostRead,
+                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+                .buffer = stagingBuffer->vkBuffer,
+                .offset = 0,
+                .size = stagingBuffer->size(),
+            }, {});
+        }
     }
 
     void Texture::CopyToGuest(u8 *hostBuffer) {
@@ -705,6 +780,8 @@ namespace skyline::gpu {
 
         if (layout != pLayout) {
             auto lCycle{gpu.scheduler.Submit([&](vk::raii::CommandBuffer &commandBuffer) {
+                if (gpu.traits.supportsSynchronization2) {
+                    
                 commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eBottomOfPipe, {}, {}, {}, vk::ImageMemoryBarrier{
                     .image = GetBacking(),
                     .srcAccessMask = vk::AccessFlagBits::eNoneKHR,
