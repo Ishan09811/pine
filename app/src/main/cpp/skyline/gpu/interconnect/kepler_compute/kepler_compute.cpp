@@ -74,7 +74,7 @@ namespace skyline::gpu::interconnect::kepler_compute {
                 if (gpu.traits.supportsSynchronization2) {
                     vk::MemoryBarrier2 memoryBarrier{
                         .srcStageMask = drawParams->srcStageMask,
-                        .srcAccessMask = vk::AccessFlagBits::eMemoryWrite,
+                        .srcAccessMask = vk::AccessFlagBits2::eMemoryWrite,
                         .dstStageMask = drawParams->dstStageMask,
                         .dstAccessMask = vk::AccessFlagBits2::eMemoryRead | vk::AccessFlagBits2::eMemoryWrite,
                     };
