@@ -237,10 +237,26 @@ namespace skyline::gpu::interconnect::node {
         }
 
         if (dependencyDstStageMask && dependencySrcStageMask) {
-            commandBuffer.pipelineBarrier(dependencySrcStageMask, dependencyDstStageMask, {}, {vk::MemoryBarrier{
-                .srcAccessMask = vk::AccessFlagBits::eMemoryWrite,
-                .dstAccessMask = vk::AccessFlagBits::eMemoryWrite | vk::AccessFlagBits::eMemoryRead,
-            }}, {}, {});
+            if (gpu.traits.supportsSynchronization2) {
+                vk::MemoryBarrier2 memoryBarrier{
+                    .srcStageMask = dependencySrcStageMask,
+                    .srcAccessMask = vk::AccessFlagBits2::eMemoryWrite,
+                    .dstStageMask = dependencyDstStageMask,
+                    .dstAccessMask = vk::AccessFlagBits2::eMemoryWrite | vk::AccessFlagBits2::eMemoryRead,
+                };
+
+                vk::DependencyInfo dependencyInfo{
+                    .memoryBarrierCount = 1,
+                    .pMemoryBarriers = &memoryBarrier,
+                };
+
+                commandBuffer.pipelineBarrier2(dependencyInfo);
+            } else {
+                commandBuffer.pipelineBarrier(dependencySrcStageMask, dependencyDstStageMask, {}, {vk::MemoryBarrier{                 
+                    .srcAccessMask = vk::AccessFlagBits::eMemoryWrite,                 
+                    .dstAccessMask = vk::AccessFlagBits::eMemoryWrite | vk::AccessFlagBits::eMemoryRead,             
+                }}, {}, {});
+            }
         }
 
         auto renderPass{gpu.renderPassCache.GetRenderPass(vk::RenderPassCreateInfo{
