@@ -130,7 +130,7 @@ namespace skyline::gpu::interconnect {
                 },
 
                 [&](CheckpointNode &node) {
-                    RecordFullBarrier(slot->commandBuffer);
+                    RecordFullBarrier(slot->commandBuffer, gpu);
 
                     TRACE_EVENT_INSTANT("gpu", "CheckpointNode", "id", node.id, [&](perfetto::EventContext ctx) {
                         ctx.event()->add_flow_ids(node.id);
@@ -144,7 +144,7 @@ namespace skyline::gpu::interconnect {
 
                     slot->commandBuffer.copyBuffer(node.binding.buffer, gpu.debugTracingBuffer.vkBuffer, copy);
 
-                    RecordFullBarrier(slot->commandBuffer);
+                    RecordFullBarrier(slot->commandBuffer, gpu);
                 },
 
                 [&](RenderPassNode &node) {
@@ -538,8 +538,8 @@ namespace skyline::gpu::interconnect {
     }
 
     void CommandExecutor::AddFullBarrier() {
-        AddOutsideRpCommand([](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &) {
-            RecordFullBarrier(commandBuffer);
+        AddOutsideRpCommand([](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &gpu) {
+            RecordFullBarrier(commandBuffer, gpu);
         });
     }
 
@@ -635,7 +635,7 @@ namespace skyline::gpu::interconnect {
             slot->WaitReady();
 
             // We need this barrier here to ensure that resources are in the state we expect them to be in, we shouldn't overwrite resources while prior commands might still be using them or read from them while they might be modified by prior commands
-            RecordFullBarrier(slot->commandBuffer);
+            RecordFullBarrier(slot->commandBuffer, slot->gpu);
 
             boost::container::small_vector<FenceCycle *, 8> chainedCycles;
             for (const auto &texture : ranges::views::concat(attachedTextures, preserveAttachedTextures)) {
@@ -651,7 +651,7 @@ namespace skyline::gpu::interconnect {
             }
 
             // Wait on texture syncs to finish before beginning the cmdbuf
-            RecordFullBarrier(slot->commandBuffer);
+            RecordFullBarrier(slot->commandBuffer, slot->gpu);
         }
 
         for (const auto &attachedBuffer : ranges::views::concat(attachedBuffers, preserveAttachedBuffers)) {
