@@ -1112,8 +1112,8 @@ namespace skyline::gpu {
         const StageMask &dstStageMask,
         AccessMask srcAccessMask,
         AccessMask dstAccessMask,
-        vk::ImageLayout &oldLayout,
-        vk::ImageLayout newLayout,
+        const vk::ImageLayout &oldLayout,
+        const vk::ImageLayout newLayout,
         vk::ImageSubresourceRange subresource,
         bool useSync2)
     {
