@@ -28,7 +28,7 @@ namespace skyline::gpu::interconnect {
             dstBuf.GetBuffer()->BlockAllCpuBackingWrites();
 
             auto srcGpuAllocation{gpu.megaBufferAllocator.Push(executor.cycle, src)};
-            executor.AddOutsideRpCommand([srcGpuAllocation, dstBuf, src](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &pGpu) {
+            executor.AddOutsideRpCommand([this, srcGpuAllocation, dstBuf, src](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &pGpu) {
                 auto dstBufBinding{dstBuf.GetBinding(pGpu)};
                 vk::BufferCopy copyRegion{
                     .size = src.size_bytes(),
