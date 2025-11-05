@@ -16,14 +16,10 @@ struct StageMask {
     constexpr StageMask(vk::PipelineStageFlags flags)
         : mask(static_cast<uint64_t>(static_cast<VkPipelineStageFlags>(flags))) {}
 
-    constexpr StageMask(vk::PipelineStageFlags2 flags)
-        : mask(static_cast<uint64_t>(flags)) {}
 
     constexpr StageMask(vk::PipelineStageFlagBits bit)
         : mask(static_cast<uint64_t>(static_cast<VkPipelineStageFlagBits>(bit))) {}
 
-    constexpr StageMask(vk::PipelineStageFlagBits2 bit)
-        : mask(static_cast<uint64_t>(bit)) {}
 
     constexpr operator vk::PipelineStageFlags() const {
         return static_cast<vk::PipelineStageFlags>(
@@ -67,8 +63,8 @@ struct AccessMask {
     constexpr AccessMask(vk::AccessFlags flags)
         : mask(static_cast<uint64_t>(static_cast<VkAccessFlags>(flags))) {}
 
-    constexpr AccessMask(vk::AccessFlags2 flags)
-        : mask(static_cast<uint64_t>(static_cast<VkAccessFlags2>(flags))) {}
+    constexpr AccessMask(vk::AccessFlagBits bit)
+        : mask(static_cast<uint64_t>(vk::AccessFlags(bit))) {}
 
     constexpr operator vk::AccessFlags() const {
         return static_cast<vk::AccessFlags>(
