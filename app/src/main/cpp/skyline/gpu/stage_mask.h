@@ -64,7 +64,7 @@ struct AccessMask {
         : mask(static_cast<uint64_t>(static_cast<VkAccessFlags>(flags))) {}
 
     constexpr AccessMask(vk::AccessFlagBits bit)
-        : mask(static_cast<uint64_t>(vk::AccessFlags(bit))) {}
+        : mask(static_cast<uint64_t>(static_cast<VkFlags>(vk::AccessFlags(bit)))) {}
 
     constexpr operator vk::AccessFlags() const {
         return static_cast<vk::AccessFlags>(
