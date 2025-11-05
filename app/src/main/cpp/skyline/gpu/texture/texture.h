@@ -455,7 +455,7 @@ namespace skyline::gpu {
          */
         void FreeGuest();
 
-        void InsertImageBarrier(const vk::raii::CommandBuffer &cmd, const vk::Image &image, StageMask &srcStageMask, StageMask &dstStageMask, AccessMask srcAccessMask, AccessMask dstAccessMask, vk::ImageLayout &oldLayout, vk::ImageLayout newLayout, vk::ImageSubresourceRange subresource, bool useSync2);
+        void InsertImageBarrier(const vk::raii::CommandBuffer &cmd, const vk::Image &image, const StageMask &srcStageMask, const StageMask &dstStageMask, AccessMask srcAccessMask, AccessMask dstAccessMask, vk::ImageLayout &oldLayout, vk::ImageLayout newLayout, vk::ImageSubresourceRange subresource, bool useSync2);
 
         /**
          * @return A vector of all the buffer image copies that need to be done for every aspect of every level of every layer of the texture
