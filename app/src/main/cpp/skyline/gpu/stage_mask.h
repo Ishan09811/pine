@@ -13,6 +13,8 @@ struct StageMask {
 
     constexpr StageMask() = default;
 
+    constexpr StageMask(uint64_t value) : mask(value) {}
+
     constexpr StageMask(vk::PipelineStageFlags flags)
         : mask(static_cast<uint64_t>(flags)) {}
     constexpr StageMask(vk::PipelineStageFlags2 flags)
@@ -45,6 +47,7 @@ struct StageMask {
     }
 };
 
+
 /**
  * @brief A wrapper for vk::AccessFlags / vk::AccessFlags2
  *        that allows code to work with both legacy and Synchronization2.
@@ -53,6 +56,8 @@ struct AccessMask {
     uint64_t mask{0};
 
     constexpr AccessMask() = default;
+
+    constexpr AccessMask(uint64_t value) : mask(value) {}
 
     constexpr AccessMask(vk::AccessFlags flags)
         : mask(static_cast<uint64_t>(flags)) {}
