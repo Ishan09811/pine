@@ -1108,8 +1108,8 @@ namespace skyline::gpu {
     void Texture::InsertImageBarrier(
         const vk::raii::CommandBuffer &cmd,
         const vk::Image &image,
-        StageMask &srcStageMask,
-        StageMask &dstStageMask,
+        const StageMask &srcStageMask,
+        const StageMask &dstStageMask,
         AccessMask srcAccessMask,
         AccessMask dstAccessMask,
         vk::ImageLayout &oldLayout,
