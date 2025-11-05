@@ -635,7 +635,7 @@ namespace skyline::gpu::interconnect {
             slot->WaitReady();
 
             // We need this barrier here to ensure that resources are in the state we expect them to be in, we shouldn't overwrite resources while prior commands might still be using them or read from them while they might be modified by prior commands
-            RecordFullBarrier(slot->commandBuffer, slot->gpu);
+            RecordFullBarrier(slot->commandBuffer, gpu);
 
             boost::container::small_vector<FenceCycle *, 8> chainedCycles;
             for (const auto &texture : ranges::views::concat(attachedTextures, preserveAttachedTextures)) {
@@ -651,7 +651,7 @@ namespace skyline::gpu::interconnect {
             }
 
             // Wait on texture syncs to finish before beginning the cmdbuf
-            RecordFullBarrier(slot->commandBuffer, slot->gpu);
+            RecordFullBarrier(slot->commandBuffer, gpu);
         }
 
         for (const auto &attachedBuffer : ranges::views::concat(attachedBuffers, preserveAttachedBuffers)) {
