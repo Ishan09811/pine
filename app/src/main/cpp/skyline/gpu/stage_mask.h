@@ -9,7 +9,7 @@ namespace skyline::gpu {
  *        that allows code to work with both legacy and Synchronization2.
  */
 struct StageMask {
-    uint64_t mask = 0;
+    uint64_t mask = -1;
 
     constexpr StageMask() = default;
 
@@ -46,6 +46,9 @@ struct StageMask {
         return *this;
     }
 
+    constexpr explicit operator bool() const noexcept { return mask != -1; }
+
+
 private:
     constexpr StageMask(uint64_t m) : mask(m) {}
 };
@@ -55,7 +58,7 @@ private:
  *        that allows code to work with both legacy and Synchronization2.
  */
 struct AccessMask {
-    uint64_t mask{0};
+    uint64_t mask = -1;
 
     constexpr AccessMask() = default;
     constexpr explicit AccessMask(uint64_t value) : mask(value) {}
