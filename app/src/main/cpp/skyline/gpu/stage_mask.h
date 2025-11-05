@@ -12,6 +12,7 @@ struct StageMask {
     uint64_t mask{0};
 
     constexpr StageMask() = default;
+    constexpr explicit StageMask(uint64_t value) : mask(value) {}
 
     constexpr StageMask(vk::PipelineStageFlags flags)
         : mask(static_cast<uint64_t>(static_cast<VkPipelineStageFlags>(flags))) {}
@@ -23,6 +24,7 @@ struct StageMask {
         return static_cast<vk::PipelineStageFlags>(
             static_cast<VkPipelineStageFlags>(mask));
     }
+
     constexpr operator vk::PipelineStageFlags2() const {
         return static_cast<vk::PipelineStageFlags2>(
             static_cast<VkPipelineStageFlags2>(mask));
@@ -32,12 +34,17 @@ struct StageMask {
         mask |= rhs.mask;
         return *this;
     }
+
     constexpr StageMask operator|(StageMask rhs) const {
-        return StageMask{mask | rhs.mask};
+        return StageMask(mask | rhs.mask);
     }
+
     constexpr StageMask operator&(StageMask rhs) const {
-        return StageMask{mask & rhs.mask};
+        return StageMask(mask & rhs.mask);
     }
+
+    constexpr bool operator==(const StageMask& rhs) const { return mask == rhs.mask; }
+    constexpr bool operator!=(const StageMask& rhs) const { return mask != rhs.mask; }
 };
 
 /**
@@ -48,6 +55,7 @@ struct AccessMask {
     uint64_t mask{0};
 
     constexpr AccessMask() = default;
+    constexpr explicit AccessMask(uint64_t value) : mask(value) {}
 
     constexpr AccessMask(vk::AccessFlags flags)
         : mask(static_cast<uint64_t>(static_cast<VkAccessFlags>(flags))) {}
@@ -59,6 +67,7 @@ struct AccessMask {
         return static_cast<vk::AccessFlags>(
             static_cast<VkAccessFlags>(mask));
     }
+
     constexpr operator vk::AccessFlags2() const {
         return static_cast<vk::AccessFlags2>(
             static_cast<VkAccessFlags2>(mask));
@@ -68,12 +77,17 @@ struct AccessMask {
         mask |= rhs.mask;
         return *this;
     }
+
     constexpr AccessMask operator|(AccessMask rhs) const {
-        return AccessMask{mask | rhs.mask};
+        return AccessMask(mask | rhs.mask);
     }
+
     constexpr AccessMask operator&(AccessMask rhs) const {
-        return AccessMask{mask & rhs.mask};
+        return AccessMask(mask & rhs.mask);
     }
+
+    constexpr bool operator==(const AccessMask& rhs) const { return mask == rhs.mask; }
+    constexpr bool operator!=(const AccessMask& rhs) const { return mask != rhs.mask; }
 };
 
 } // namespace skyline::gpu
