@@ -14,7 +14,7 @@
 #include <nce.h>
 
 namespace skyline::gpu::interconnect {
-    static void RecordFullBarrier(vk::raii::CommandBuffer &commandBuffer) {
+    static void RecordFullBarrier(vk::raii::CommandBuffer &commandBuffer, GPU &gpu) {
         if (gpu.traits.supportsSynchronization2) {
             vk::MemoryBarrier2 memoryBarrier{
                 .srcStageMask = vk::PipelineStageFlagBits2::eAllCommands,
