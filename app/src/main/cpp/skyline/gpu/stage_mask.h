@@ -45,4 +45,45 @@ struct StageMask {
     }
 };
 
+/**
+ * @brief A wrapper for vk::AccessFlags / vk::AccessFlags2
+ *        that allows code to work with both legacy and Synchronization2.
+ */
+struct AccessMask {
+    uint64_t mask{0};
+
+    constexpr AccessMask() = default;
+
+    constexpr AccessMask(vk::AccessFlags flags)
+        : mask(static_cast<uint64_t>(flags)) {}
+    constexpr AccessMask(vk::AccessFlags2 flags)
+        : mask(static_cast<uint64_t>(flags)) {}
+
+    constexpr operator vk::AccessFlags() const {
+        return static_cast<vk::AccessFlags>(mask);
+    }
+    constexpr operator vk::AccessFlags2() const {
+        return static_cast<vk::AccessFlags2>(mask);
+    }
+
+    constexpr AccessMask& operator|=(AccessMask rhs) {
+        mask |= rhs.mask;
+        return *this;
+    }
+    constexpr AccessMask operator|(AccessMask rhs) const {
+        return AccessMask{mask | rhs.mask};
+    }
+
+    constexpr bool operator==(const AccessMask& rhs) const {
+        return mask == rhs.mask;
+    }
+    constexpr bool operator!=(const AccessMask& rhs) const {
+        return mask != rhs.mask;
+    }
+
+    constexpr AccessMask operator&(AccessMask rhs) const {
+        return AccessMask{mask & rhs.mask};
+    }
+};
+
 } // namespace skyline::gpu
