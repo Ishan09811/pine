@@ -59,7 +59,7 @@ namespace skyline::gpu {
                 EXT_SET("VK_EXT_primitive_topology_list_restart", hasPrimitiveTopologyListRestartExt);
                 EXT_SET("VK_EXT_transform_feedback", hasTransformFeedbackExt);
                 EXT_SET_COND("VK_EXT_extended_dynamic_state", hasExtendedDynamicStateExt, !quirks.brokenDynamicStateVertexBindings);
-                EXT_SET("VK_EXT_robustness2", hasRobustness2Ext),
+                EXT_SET("VK_EXT_robustness2", hasRobustness2Ext);
                 EXT_SET("VK_KHR_synchronization2", hasSync2);
             }
 
