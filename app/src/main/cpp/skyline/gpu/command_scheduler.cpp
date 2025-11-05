@@ -2,7 +2,6 @@
 // Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
 
 #include <gpu.h>
-#include <gpu/stage_mask.h>
 #include <loader/loader.h>
 #include <vulkan/vulkan.hpp>
 #include "command_scheduler.h"
@@ -81,7 +80,7 @@ namespace skyline::gpu {
 
     void CommandScheduler::SubmitCommandBuffer(const vk::raii::CommandBuffer &commandBuffer, std::shared_ptr<FenceCycle> cycle, span<vk::Semaphore> waitSemaphores, span<vk::Semaphore> signalSemaphores) {
         boost::container::small_vector<vk::Semaphore, 3> fullWaitSemaphores{waitSemaphores.begin(), waitSemaphores.end()};
-        boost::container::small_vector<StageMask, 3> fullWaitStages{waitSemaphores.size(), vk::PipelineStageFlagBits::eAllCommands};
+        boost::container::small_vector<vk::PipelineStageFlags, 3> fullWaitStages{waitSemaphores.size(), vk::PipelineStageFlagBits::eAllCommands};
 
         if (cycle->semaphoreSubmitWait) {
             fullWaitSemaphores.push_back(cycle->semaphore);
