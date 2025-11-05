@@ -76,9 +76,9 @@ namespace skyline::gpu::interconnect::maxwell3d {
 
                     if (gpu.traits.supportsSynchronization2) {
                         vk::MemoryBarrier2 memoryBarrier{
-                            .srcStageMask = vk::PipelineStageFlagBits::eTransfer,
-                            .srcAccessMask = vk::AccessFlagBits::eTransferWrite,
-                            .dstStageMask = vk::PipelineStageFlagBits::eAllCommands,
+                            .srcStageMask = vk::PipelineStageFlagBits2::eTransfer,
+                            .srcAccessMask = vk::AccessFlagBits2::eTransferWrite,
+                            .dstStageMask = vk::PipelineStageFlagBits2::eAllCommands,
                             .dstAccessMask = vk::AccessFlagBits2::eMemoryWrite | vk::AccessFlagBits2::eMemoryRead,
                         };
 
