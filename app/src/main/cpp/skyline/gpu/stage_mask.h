@@ -13,18 +13,19 @@ struct StageMask {
 
     constexpr StageMask() = default;
 
-    constexpr StageMask(uint64_t value) : mask(value) {}
-
     constexpr StageMask(vk::PipelineStageFlags flags)
-        : mask(static_cast<uint64_t>(flags)) {}
+        : mask(static_cast<uint64_t>(static_cast<VkPipelineStageFlags>(flags))) {}
+
     constexpr StageMask(vk::PipelineStageFlags2 flags)
-        : mask(static_cast<uint64_t>(flags)) {}
+        : mask(static_cast<uint64_t>(static_cast<VkPipelineStageFlags2>(flags))) {}
 
     constexpr operator vk::PipelineStageFlags() const {
-        return static_cast<vk::PipelineStageFlags>(mask);
+        return static_cast<vk::PipelineStageFlags>(
+            static_cast<VkPipelineStageFlags>(mask));
     }
     constexpr operator vk::PipelineStageFlags2() const {
-        return static_cast<vk::PipelineStageFlags2>(mask);
+        return static_cast<vk::PipelineStageFlags2>(
+            static_cast<VkPipelineStageFlags2>(mask));
     }
 
     constexpr StageMask& operator|=(StageMask rhs) {
@@ -34,19 +35,10 @@ struct StageMask {
     constexpr StageMask operator|(StageMask rhs) const {
         return StageMask{mask | rhs.mask};
     }
-
-    constexpr bool operator==(const StageMask& rhs) const {
-        return mask == rhs.mask;
-    }
-    constexpr bool operator!=(const StageMask& rhs) const {
-        return mask != rhs.mask;
-    }
-
     constexpr StageMask operator&(StageMask rhs) const {
         return StageMask{mask & rhs.mask};
     }
 };
-
 
 /**
  * @brief A wrapper for vk::AccessFlags / vk::AccessFlags2
@@ -57,18 +49,19 @@ struct AccessMask {
 
     constexpr AccessMask() = default;
 
-    constexpr AccessMask(uint64_t value) : mask(value) {}
-
     constexpr AccessMask(vk::AccessFlags flags)
-        : mask(static_cast<uint64_t>(flags)) {}
+        : mask(static_cast<uint64_t>(static_cast<VkAccessFlags>(flags))) {}
+
     constexpr AccessMask(vk::AccessFlags2 flags)
-        : mask(static_cast<uint64_t>(flags)) {}
+        : mask(static_cast<uint64_t>(static_cast<VkAccessFlags2>(flags))) {}
 
     constexpr operator vk::AccessFlags() const {
-        return static_cast<vk::AccessFlags>(mask);
+        return static_cast<vk::AccessFlags>(
+            static_cast<VkAccessFlags>(mask));
     }
     constexpr operator vk::AccessFlags2() const {
-        return static_cast<vk::AccessFlags2>(mask);
+        return static_cast<vk::AccessFlags2>(
+            static_cast<VkAccessFlags2>(mask));
     }
 
     constexpr AccessMask& operator|=(AccessMask rhs) {
@@ -78,14 +71,6 @@ struct AccessMask {
     constexpr AccessMask operator|(AccessMask rhs) const {
         return AccessMask{mask | rhs.mask};
     }
-
-    constexpr bool operator==(const AccessMask& rhs) const {
-        return mask == rhs.mask;
-    }
-    constexpr bool operator!=(const AccessMask& rhs) const {
-        return mask != rhs.mask;
-    }
-
     constexpr AccessMask operator&(AccessMask rhs) const {
         return AccessMask{mask & rhs.mask};
     }
