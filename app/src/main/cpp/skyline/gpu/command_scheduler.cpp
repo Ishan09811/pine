@@ -78,33 +78,100 @@ namespace skyline::gpu {
         return {pool->buffers.emplace_back(gpu.vkDevice, commandBuffer, pool->vkCommandPool)};
     }
 
-    void CommandScheduler::SubmitCommandBuffer(const vk::raii::CommandBuffer &commandBuffer, std::shared_ptr<FenceCycle> cycle, span<vk::Semaphore> waitSemaphores, span<vk::Semaphore> signalSemaphores) {
-        boost::container::small_vector<vk::Semaphore, 3> fullWaitSemaphores{waitSemaphores.begin(), waitSemaphores.end()};
-        boost::container::small_vector<vk::PipelineStageFlags, 3> fullWaitStages{waitSemaphores.size(), vk::PipelineStageFlagBits::eAllCommands};
+    void CommandScheduler::SubmitCommandBuffer(
+        const vk::raii::CommandBuffer &commandBuffer,
+        std::shared_ptr<FenceCycle> cycle,
+        span<vk::Semaphore> waitSemaphores,
+        span<vk::Semaphore> signalSemaphores
+    ) {
+        if (gpu.traits.supportsSynchronization2) {
+            boost::container::small_vector<vk::SemaphoreSubmitInfo, 4> waitInfos;
+            waitInfos.reserve(waitSemaphores.size() + 1);
 
-        if (cycle->semaphoreSubmitWait) {
-            fullWaitSemaphores.push_back(cycle->semaphore);
-            // We don't need a full barrier since this is only done to ensure the semaphore is unsignalled
-            fullWaitStages.push_back(vk::PipelineStageFlagBits::eTopOfPipe);
-        }
+            for (auto &sem : waitSemaphores) {
+                waitInfos.push_back(vk::SemaphoreSubmitInfo{
+                    .semaphore = sem,
+                    .value = 0,
+                    .stageMask = vk::PipelineStageFlagBits2::eAllCommands,
+                    .deviceIndex = 0,
+                });
+            }
 
-        boost::container::small_vector<vk::Semaphore, 2> fullSignalSemaphores{signalSemaphores.begin(), signalSemaphores.end()};
-        fullSignalSemaphores.push_back(cycle->semaphore);
+            if (cycle->semaphoreSubmitWait) {
+                waitInfos.push_back(vk::SemaphoreSubmitInfo{
+                    .semaphore = cycle->semaphore,
+                    .value = 0,
+                    .stageMask = vk::PipelineStageFlagBits2::eTopOfPipe,
+                    .deviceIndex = 0,
+                });
+            }
 
-        {
+            boost::container::small_vector<vk::SemaphoreSubmitInfo, 3> signalInfos;
+            signalInfos.reserve(signalSemaphores.size() + 1);
+
+            for (auto &sem : signalSemaphores) {
+                signalInfos.push_back(vk::SemaphoreSubmitInfo{
+                    .semaphore = sem,
+                    .value = 0,
+                    .stageMask = vk::PipelineStageFlagBits2::eAllCommands,
+                    .deviceIndex = 0,
+                });
+            }
+
+            signalInfos.push_back(vk::SemaphoreSubmitInfo{
+                .semaphore = cycle->semaphore,
+                .value = 0,
+                .stageMask = vk::PipelineStageFlagBits2::eAllCommands,
+                .deviceIndex = 0,
+            });
+
+            vk::CommandBufferSubmitInfo cmdBufferInfo{
+                .commandBuffer = *commandBuffer,
+                .deviceMask = 0,
+            };
+
+            vk::SubmitInfo2 submitInfo{
+                .waitSemaphoreInfoCount = static_cast<uint32_t>(waitInfos.size()),
+                .pWaitSemaphoreInfos = waitInfos.data(),
+                .commandBufferInfoCount = 1,
+                .pCommandBufferInfos = &cmdBufferInfo,
+                .signalSemaphoreInfoCount = static_cast<uint32_t>(signalInfos.size()),
+                .pSignalSemaphoreInfos = signalInfos.data(),
+            };
+
             try {
                 std::scoped_lock lock{gpu.queueMutex};
-                gpu.vkQueue.submit(vk::SubmitInfo{
-                    .commandBufferCount = 1,
-                    .pCommandBuffers = &*commandBuffer,
-                    .waitSemaphoreCount = static_cast<u32>(fullWaitSemaphores.size()),
-                    .pWaitSemaphores = fullWaitSemaphores.data(),
-                    .pWaitDstStageMask = fullWaitStages.data(),
-                    .signalSemaphoreCount = static_cast<u32>(fullSignalSemaphores.size()),
-                    .pSignalSemaphores = fullSignalSemaphores.data(),
-                }, cycle->fence);
-            } catch (const vk::DeviceLostError &e) {
-                // Wait 5 seconds to give traces etc. time to settle
+                gpu.vkQueue.submit2(submitInfo, cycle->fence);
+            } catch (const vk::DeviceLostError &) {
+                std::this_thread::sleep_for(std::chrono::seconds(5));
+                throw exception("Vulkan device lost!");
+            }
+        } else {
+            boost::container::small_vector<vk::Semaphore, 3> fullWaitSemaphores{waitSemaphores.begin(), waitSemaphores.end()};
+            boost::container::small_vector<vk::PipelineStageFlags, 3> fullWaitStages{waitSemaphores.size(), vk::PipelineStageFlagBits::eAllCommands};
+
+            if (cycle->semaphoreSubmitWait) {
+                fullWaitSemaphores.push_back(cycle->semaphore);
+                fullWaitStages.push_back(vk::PipelineStageFlagBits::eTopOfPipe);
+            }
+
+            boost::container::small_vector<vk::Semaphore, 2> fullSignalSemaphores{signalSemaphores.begin(), signalSemaphores.end()};
+            fullSignalSemaphores.push_back(cycle->semaphore);
+
+            vk::SubmitInfo submitInfo{
+                .commandBufferCount = 1,
+                .pCommandBuffers = &*commandBuffer,
+                .waitSemaphoreCount = static_cast<uint32_t>(fullWaitSemaphores.size()),
+                .pWaitSemaphores = fullWaitSemaphores.data(),
+                .pWaitDstStageMask = fullWaitStages.data(),
+                .signalSemaphoreCount = static_cast<uint32_t>(fullSignalSemaphores.size()),
+                .pSignalSemaphores = fullSignalSemaphores.data(),
+            };
+
+            try {
+                std::scoped_lock lock{gpu.queueMutex};
+                gpu.vkQueue.submit(submitInfo, cycle->fence);
+            } catch (const vk::DeviceLostError &) {
                 std::this_thread::sleep_for(std::chrono::seconds(5));
                 throw exception("Vulkan device lost!");
             }
