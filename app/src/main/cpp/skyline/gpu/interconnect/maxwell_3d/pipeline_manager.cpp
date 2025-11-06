@@ -731,7 +731,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
         return descriptorInfo.totalCombinedImageSamplerCount;
     }
 
-    DescriptorUpdateInfo *Pipeline::SyncDescriptors(InterconnectContext &ctx, ConstantBufferSet &constantBuffers, Samplers &samplers, Textures &textures, span<TextureView *> sampledImages, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
+    DescriptorUpdateInfo *Pipeline::SyncDescriptors(InterconnectContext &ctx, ConstantBufferSet &constantBuffers, Samplers &samplers, Textures &textures, span<TextureView *> sampledImages, StageMask &srcStageMask, StageMask &dstStageMask) {
         SyncCachedStorageBufferViews(ctx.executor.executionTag);
 
         u32 writeIdx{};
@@ -849,7 +849,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
         });
     }
 
-    DescriptorUpdateInfo *Pipeline::SyncDescriptorsQuickBind(InterconnectContext &ctx, ConstantBufferSet &constantBuffers, Samplers &samplers, Textures &textures, ConstantBuffers::QuickBind quickBind, span<TextureView *> sampledImages, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
+    DescriptorUpdateInfo *Pipeline::SyncDescriptorsQuickBind(InterconnectContext &ctx, ConstantBufferSet &constantBuffers, Samplers &samplers, Textures &textures, ConstantBuffers::QuickBind quickBind, span<TextureView *> sampledImages, StageMask &srcStageMask, StageMask &dstStageMask) {
         SyncCachedStorageBufferViews(ctx.executor.executionTag);
 
         size_t stageIndex{static_cast<size_t>(quickBind.stage)};

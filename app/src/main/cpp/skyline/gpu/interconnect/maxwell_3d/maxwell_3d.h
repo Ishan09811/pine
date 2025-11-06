@@ -77,7 +77,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
          */
         void PrepareDraw(StateUpdateBuilder &builder,
                          engine::DrawTopology topology, bool indexed, bool estimateIndexBufferSize, u32 firstIndex, u32 count,
-                         vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask);
+                         StageMask &srcStageMask, StageMask &dstStageMask);
 
       public:
         DirectPipelineState &directState;

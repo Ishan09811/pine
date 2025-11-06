@@ -11,6 +11,7 @@
 #include <gpu/interconnect/common/samplers.h>
 #include <gpu/interconnect/common/textures.h>
 #include <gpu/interconnect/common/pipeline_state_accessor.h>
+#include <gpu/stage_mask.h>
 #include "common.h"
 #include "packed_pipeline_state.h"
 #include "constant_buffers.h"
@@ -250,13 +251,13 @@ namespace skyline::gpu::interconnect::maxwell3d {
          * @brief Creates a descriptor set update from the current GPU state
          * @param sampledImages A span of size `GetTotalSampledImageCount()` in which texture view pointers for each sampled image will be written
          */
-        DescriptorUpdateInfo *SyncDescriptors(InterconnectContext &ctx, ConstantBufferSet &constantBuffers, Samplers &samplers, Textures &textures, span<TextureView *> sampledImages, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask);
+        DescriptorUpdateInfo *SyncDescriptors(InterconnectContext &ctx, ConstantBufferSet &constantBuffers, Samplers &samplers, Textures &textures, span<TextureView *> sampledImages, StageMask &srcStageMask, StageMask &dstStageMask);
 
         /**
          * @brief Creates a partial descriptor set update from the current GPU state for only the subset of descriptors changed by the quick bind constant buffer
          * @param sampledImages A span of size `GetTotalSampledImageCount()` in which texture view pointers for each sampled image will be written
          */
-        DescriptorUpdateInfo *SyncDescriptorsQuickBind(InterconnectContext &ctx, ConstantBufferSet &constantBuffers, Samplers &samplers, Textures &textures, ConstantBuffers::QuickBind quickBind, span<TextureView *> sampledImages, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask);
+        DescriptorUpdateInfo *SyncDescriptorsQuickBind(InterconnectContext &ctx, ConstantBufferSet &constantBuffers, Samplers &samplers, Textures &textures, ConstantBuffers::QuickBind quickBind, span<TextureView *> sampledImages, StageMask &srcStageMask, StageMask &dstStageMask);
     };
 
     /**

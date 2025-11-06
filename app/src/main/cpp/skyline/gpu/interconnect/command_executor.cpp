@@ -14,13 +14,28 @@
 #include <nce.h>
 
 namespace skyline::gpu::interconnect {
-    static void RecordFullBarrier(vk::raii::CommandBuffer &commandBuffer) {
-        commandBuffer.pipelineBarrier(
-            vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eAllCommands, {}, vk::MemoryBarrier{
-                .srcAccessMask = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite,
-                .dstAccessMask = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite,
-            }, {}, {}
-        );
+    static void RecordFullBarrier(vk::raii::CommandBuffer &commandBuffer, GPU &gpu) {
+        if (gpu.traits.supportsSynchronization2) {
+            vk::MemoryBarrier2 memoryBarrier{
+                .srcStageMask = vk::PipelineStageFlagBits2::eAllCommands,
+                .srcAccessMask = vk::AccessFlagBits2::eMemoryWrite | vk::AccessFlagBits2::eMemoryRead,
+                .dstStageMask = vk::PipelineStageFlagBits2::eAllCommands,
+                .dstAccessMask = vk::AccessFlagBits2::eMemoryWrite | vk::AccessFlagBits2::eMemoryRead,
+            };
+
+            vk::DependencyInfo dependencyInfo{
+                .memoryBarrierCount = 1,
+                .pMemoryBarriers = &memoryBarrier,
+            };
+            commandBuffer.pipelineBarrier2(dependencyInfo);
+        } else {
+            commandBuffer.pipelineBarrier(
+                vk::PipelineStageFlagBits::eAllCommands, vk::PipelineStageFlagBits::eAllCommands, {}, vk::MemoryBarrier{
+                    .srcAccessMask = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite,
+                    .dstAccessMask = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite,
+                }, {}, {}
+            );
+        }
     }
 
     CommandRecordThread::CommandRecordThread(const DeviceState &state)
@@ -115,7 +130,7 @@ namespace skyline::gpu::interconnect {
                 },
 
                 [&](CheckpointNode &node) {
-                    RecordFullBarrier(slot->commandBuffer);
+                    RecordFullBarrier(slot->commandBuffer, gpu);
 
                     TRACE_EVENT_INSTANT("gpu", "CheckpointNode", "id", node.id, [&](perfetto::EventContext ctx) {
                         ctx.event()->add_flow_ids(node.id);
@@ -129,7 +144,7 @@ namespace skyline::gpu::interconnect {
 
                     slot->commandBuffer.copyBuffer(node.binding.buffer, gpu.debugTracingBuffer.vkBuffer, copy);
 
-                    RecordFullBarrier(slot->commandBuffer);
+                    RecordFullBarrier(slot->commandBuffer, gpu);
                 },
 
                 [&](RenderPassNode &node) {
@@ -347,7 +362,7 @@ namespace skyline::gpu::interconnect {
         return (!a && !b) || (a && b && b->GetView() == a);
     }
 
-    bool CommandExecutor::CreateRenderPassWithSubpass(vk::Rect2D renderArea, span<TextureView *> sampledImages, span<TextureView *> inputAttachments, span<TextureView *> colorAttachments, TextureView *depthStencilAttachment, bool noSubpassCreation, vk::PipelineStageFlags srcStageMask, vk::PipelineStageFlags dstStageMask) {
+    bool CommandExecutor::CreateRenderPassWithSubpass(vk::Rect2D renderArea, span<TextureView *> sampledImages, span<TextureView *> inputAttachments, span<TextureView *> colorAttachments, TextureView *depthStencilAttachment, bool noSubpassCreation, StageMask srcStageMask, StageMask dstStageMask) {
         auto addSubpass{[&] {
             renderPass->AddSubpass(inputAttachments, colorAttachments, depthStencilAttachment, gpu);
             lastSubpassColorAttachments.clear();
@@ -488,7 +503,7 @@ namespace skyline::gpu::interconnect {
         cycle->AttachObject(dependency);
     }
 
-    void CommandExecutor::AddSubpass(std::function<void(vk::raii::CommandBuffer &, const std::shared_ptr<FenceCycle> &, GPU &, vk::RenderPass, u32)> &&function, vk::Rect2D renderArea, span<TextureView *> sampledImages, span<TextureView *> inputAttachments, span<TextureView *> colorAttachments, TextureView *depthStencilAttachment, bool noSubpassCreation, vk::PipelineStageFlags srcStageMask, vk::PipelineStageFlags dstStageMask) {
+    void CommandExecutor::AddSubpass(std::function<void(vk::raii::CommandBuffer &, const std::shared_ptr<FenceCycle> &, GPU &, vk::RenderPass, u32)> &&function, vk::Rect2D renderArea, span<TextureView *> sampledImages, span<TextureView *> inputAttachments, span<TextureView *> colorAttachments, TextureView *depthStencilAttachment, bool noSubpassCreation, StageMask srcStageMask, StageMask dstStageMask) {
         bool gotoNext{CreateRenderPassWithSubpass(renderArea, sampledImages, inputAttachments, colorAttachments, depthStencilAttachment ? &*depthStencilAttachment : nullptr, noSubpassCreation, srcStageMask, dstStageMask)};
         if (gotoNext)
             slot->nodes.emplace_back(std::in_place_type_t<node::NextSubpassFunctionNode>(), std::forward<decltype(function)>(function));
@@ -523,8 +538,8 @@ namespace skyline::gpu::interconnect {
     }
 
     void CommandExecutor::AddFullBarrier() {
-        AddOutsideRpCommand([](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &) {
-            RecordFullBarrier(commandBuffer);
+        AddOutsideRpCommand([](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &gpu) {
+            RecordFullBarrier(commandBuffer, gpu);
         });
     }
 
@@ -620,7 +635,7 @@ namespace skyline::gpu::interconnect {
             slot->WaitReady();
 
             // We need this barrier here to ensure that resources are in the state we expect them to be in, we shouldn't overwrite resources while prior commands might still be using them or read from them while they might be modified by prior commands
-            RecordFullBarrier(slot->commandBuffer);
+            RecordFullBarrier(slot->commandBuffer, gpu);
 
             boost::container::small_vector<FenceCycle *, 8> chainedCycles;
             for (const auto &texture : ranges::views::concat(attachedTextures, preserveAttachedTextures)) {
@@ -636,7 +651,7 @@ namespace skyline::gpu::interconnect {
             }
 
             // Wait on texture syncs to finish before beginning the cmdbuf
-            RecordFullBarrier(slot->commandBuffer);
+            RecordFullBarrier(slot->commandBuffer, gpu);
         }
 
         for (const auto &attachedBuffer : ranges::views::concat(attachedBuffers, preserveAttachedBuffers)) {

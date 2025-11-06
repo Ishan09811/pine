@@ -5,6 +5,7 @@
 #include <gpu/interconnect/command_executor.h>
 #include <gpu/interconnect/conversion/quads.h>
 #include <gpu/interconnect/common/state_updater.h>
+#include <gpu/stage_mask.h>
 #include <soc/gm20b/channel.h>
 #include <unistd.h>
 #include "common/utils.h"
@@ -135,7 +136,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
 
      void Maxwell3D::PrepareDraw(StateUpdateBuilder &builder,
                                  engine::DrawTopology topology, bool indexed, bool estimateIndexBufferSize, u32 firstIndex, u32 count,
-                                 vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
+                                 StageMask &srcStageMask, StageMask &dstStageMask) {
          Pipeline *oldPipeline{activeState.GetPipeline()};
          samplers.Update(ctx, samplerBinding.value == engine::SamplerBinding::Value::ViaHeaderBinding);
          activeState.Update(ctx, textures, constantBuffers.boundConstantBuffers,
@@ -299,7 +300,8 @@ namespace skyline::gpu::interconnect::maxwell3d {
         TRACE_EVENT("gpu", "Draw", "indexed", indexed, "count", count, "instanceCount", instanceCount);
 
         StateUpdateBuilder builder{*ctx.executor.allocator};
-        vk::PipelineStageFlags srcStageMask{}, dstStageMask{};
+        
+        StageMask srcStageMask{}, dstStageMask{};
 
         PrepareDraw(builder, topology, indexed, false, first, count, srcStageMask, dstStageMask);
 
@@ -363,7 +365,7 @@ namespace skyline::gpu::interconnect::maxwell3d {
         TRACE_EVENT("gpu", "Indirect Draw", "buffer", reinterpret_cast<uintptr_t>(indirectBuffer.data()));
 
         StateUpdateBuilder builder{*ctx.executor.allocator};
-        vk::PipelineStageFlags srcStageMask{}, dstStageMask{};
+        StageMask srcStageMask{}, dstStageMask{};
 
         PrepareDraw(builder, topology, indexed, true, 0, 0, srcStageMask, dstStageMask);
 

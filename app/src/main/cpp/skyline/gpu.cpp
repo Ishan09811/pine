@@ -241,7 +241,8 @@ namespace skyline::gpu {
             vk::PhysicalDeviceTransformFeedbackFeaturesEXT,
             vk::PhysicalDeviceIndexTypeUint8FeaturesEXT,
             vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT,
-            vk::PhysicalDeviceRobustness2FeaturesEXT>()};
+            vk::PhysicalDeviceRobustness2FeaturesEXT,
+            vk::PhysicalDeviceSynchronization2Features>()};
         decltype(deviceFeatures2) enabledFeatures2{}; // We only want to enable features we required due to potential overhead from unused features
 
         #define FEAT_REQ(structName, feature)                                            \

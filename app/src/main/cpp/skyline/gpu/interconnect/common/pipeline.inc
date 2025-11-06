@@ -4,6 +4,7 @@
 #pragma once
 
 #include <gpu/interconnect/command_executor.h>
+#include <gpu/stage_mask.h>
 #include "samplers.h"
 #include <unistd.h>
 #include "textures.h"
@@ -22,7 +23,7 @@ namespace skyline::gpu::interconnect {
                                                          span<const u32, Shader::Info::MAX_CBUFS> cbufSizes,
                                                          BufferView view, size_t idx,
                                                          vk::PipelineStageFlagBits dstStage,
-                                                         vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
+                                                         StageMask &srcStageMask, StageMask &dstStageMask) {
         if (!view) // Return a dummy buffer if the constant buffer isn't bound
             return BufferBinding{ctx.gpu.megaBufferAllocator.Allocate(ctx.executor.cycle, getpagesize()).buffer, 0, static_cast<vk::DeviceSize>(getpagesize())};
 
@@ -41,7 +42,7 @@ namespace skyline::gpu::interconnect {
     static DynamicBufferBinding GetStorageBufferBinding(InterconnectContext &ctx, const auto &desc,
                                                         ConstantBuffer &cbuf, CachedMappedBufferView &cachedView,
                                                         vk::PipelineStageFlagBits dstStage,
-                                                        vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
+                                                        StageMask &srcStageMask, StageMask &dstStageMask) {
         struct SsboDescriptor {
             u64 address;
             u32 size;
@@ -101,7 +102,7 @@ namespace skyline::gpu::interconnect {
                                                                                Samplers &samplers, Textures &textures,
                                                                                BindlessHandle handle,
                                                                                vk::PipelineStageFlagBits dstStage,
-                                                                               vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
+                                                                               StageMask &srcStageMask, StageMask &dstStageMask) {
         auto sampler{samplers.GetSampler(ctx, handle.samplerIndex, handle.textureIndex)};
         auto texture{textures.GetTexture(ctx, handle.textureIndex, desc.type)};
         ctx.executor.AttachTexture(texture);

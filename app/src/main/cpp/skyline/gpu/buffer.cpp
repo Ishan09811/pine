@@ -608,7 +608,7 @@ namespace skyline::gpu {
         return mirror;
     }
 
-    void Buffer::PopulateReadBarrier(vk::PipelineStageFlagBits dstStage, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask) {
+    void Buffer::PopulateReadBarrier(vk::PipelineStageFlagBits dstStage, StageMask &srcStageMask, StageMask &dstStageMask) {
         if (currentExecutionGpuDirty) {
             srcStageMask |= vk::PipelineStageFlagBits::eAllCommands;
             dstStageMask |= dstStage;

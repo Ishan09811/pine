@@ -4,6 +4,7 @@
 #pragma once
 
 #include <gpu.h>
+#include <gpu/stage_mask.h>
 
 namespace skyline::gpu::interconnect::node {
     /**
@@ -48,8 +49,8 @@ namespace skyline::gpu::interconnect::node {
       public:
         std::vector<vk::SubpassDescription> subpassDescriptions;
         std::vector<vk::SubpassDependency> subpassDependencies;
-        vk::PipelineStageFlags dependencySrcStageMask;
-        vk::PipelineStageFlags dependencyDstStageMask;
+        StageMask dependencySrcStageMask;
+        StageMask dependencyDstStageMask;
 
         vk::Rect2D renderArea;
         std::vector<vk::ClearValue> clearValues;
@@ -70,7 +71,7 @@ namespace skyline::gpu::interconnect::node {
         /**
          * @brief Updates the dependency barrier for the renderpass
          */
-        void UpdateDependency(vk::PipelineStageFlags srcStageMask, vk::PipelineStageFlags dstStageMask);
+        void UpdateDependency(StageMask srcStageMask, StageMask dstStageMask);
 
         /**
          * @brief Clears a color attachment in the current subpass with VK_ATTACHMENT_LOAD_OP_CLEAR

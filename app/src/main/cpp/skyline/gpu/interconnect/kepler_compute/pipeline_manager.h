@@ -7,6 +7,7 @@
 #include <shader_compiler/frontend/ir/program.h>
 #include <gpu/interconnect/common/samplers.h>
 #include <gpu/interconnect/common/textures.h>
+#include <gpu/stage_mask.h>
 #include "packed_pipeline_state.h"
 #include "constant_buffers.h"
 
@@ -55,7 +56,7 @@ namespace skyline::gpu::interconnect::kepler_compute {
         /**
          * @brief Creates a descriptor set update from the current GPU state
          */
-        DescriptorUpdateInfo *SyncDescriptors(InterconnectContext &ctx, ConstantBufferSet &constantBuffers, Samplers &samplers, Textures &textures, vk::PipelineStageFlags &srcStageMask, vk::PipelineStageFlags &dstStageMask);
+        DescriptorUpdateInfo *SyncDescriptors(InterconnectContext &ctx, ConstantBufferSet &constantBuffers, Samplers &samplers, Textures &textures, StageMask &srcStageMask, StageMask &dstStageMask);
     };
 
     class PipelineManager {

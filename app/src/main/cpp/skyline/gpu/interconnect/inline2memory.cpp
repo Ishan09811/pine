@@ -28,7 +28,7 @@ namespace skyline::gpu::interconnect {
             dstBuf.GetBuffer()->BlockAllCpuBackingWrites();
 
             auto srcGpuAllocation{gpu.megaBufferAllocator.Push(executor.cycle, src)};
-            executor.AddOutsideRpCommand([srcGpuAllocation, dstBuf, src](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &pGpu) {
+            executor.AddOutsideRpCommand([this, srcGpuAllocation, dstBuf, src](vk::raii::CommandBuffer &commandBuffer, const std::shared_ptr<FenceCycle> &, GPU &pGpu) {
                 auto dstBufBinding{dstBuf.GetBinding(pGpu)};
                 vk::BufferCopy copyRegion{
                     .size = src.size_bytes(),
@@ -36,10 +36,25 @@ namespace skyline::gpu::interconnect {
                     .dstOffset = dstBufBinding.offset,
                 };
                 commandBuffer.copyBuffer(srcGpuAllocation.buffer, dstBufBinding.buffer, copyRegion);
-                commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eAllCommands, {}, vk::MemoryBarrier{
-                    .srcAccessMask = vk::AccessFlagBits::eTransferWrite,
-                    .dstAccessMask = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite
-                }, {}, {});
+                if (gpu.traits.supportsSynchronization2) {
+                    vk::MemoryBarrier2 memoryBarrier{
+                        .srcStageMask = vk::PipelineStageFlagBits2::eTransfer,
+                        .srcAccessMask = vk::AccessFlagBits2::eTransferWrite,
+                        .dstStageMask = vk::PipelineStageFlagBits2::eAllCommands,
+                        .dstAccessMask = vk::AccessFlagBits2::eMemoryWrite | vk::AccessFlagBits2::eMemoryRead,
+                    };
+
+                    vk::DependencyInfo dependencyInfo{
+                        .memoryBarrierCount = 1,
+                        .pMemoryBarriers = &memoryBarrier,
+                    };
+                    commandBuffer.pipelineBarrier2(dependencyInfo);
+                } else {
+                    commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eAllCommands, {}, vk::MemoryBarrier{
+                        .srcAccessMask = vk::AccessFlagBits::eTransferWrite,
+                        .dstAccessMask = vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite
+                    }, {}, {});
+                }
             });
         });
     }
