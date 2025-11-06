@@ -66,7 +66,7 @@ target_compile_options(mbedcrypto PRIVATE -Wno-everything)
 set(OPUS_INSTALL_CMAKE_CONFIG_MODULE OFF CACHE BOOL "Install Opus CMake package config module" FORCE)
 include_directories(SYSTEM "libraries/opus/include")
 add_subdirectory("libraries/opus")
-target_compile_definitions(opus PRIVATE OPUS_WILL_BE_SLOW=1) # libopus will warn when built without optimizations
+target_compile_definitions(opus PRIVATE OPUS_WILL_BE_SLOW=1 OPUS_FAST_MATH=1) # libopus will warn when built without optimizations
 
 # Cubeb
 set(USE_OPENSL ON)
