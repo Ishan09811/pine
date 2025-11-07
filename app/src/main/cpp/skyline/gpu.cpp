@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 // Copyright © 2021 Skyline Team and Contributors (https://github.com/skyline-emu/)
 
-#include <dlfcn.h>
-#include <adrenotools/driver.h>
 #include <os.h>
 #include <jvm.h>
 #include <common/settings.h>
@@ -225,7 +223,7 @@ namespace skyline::gpu {
                                          const vk::raii::PhysicalDevice &physicalDevice,
                                          decltype(vk::DeviceQueueCreateInfo::queueCount) &vkQueueFamilyIndex,
                                          TraitManager &traits,
-                                         adrenotools_gpu_mapping *mapping) {
+                                         void *adrenotoolsImportHandle) {
         auto deviceFeatures2{physicalDevice.getFeatures2<
             vk::PhysicalDeviceFeatures2,
             vk::PhysicalDeviceCustomBorderColorFeaturesEXT,
@@ -342,70 +340,15 @@ namespace skyline::gpu {
         });
     }
 
-    static PFN_vkGetInstanceProcAddr LoadVulkanDriver(const DeviceState &state, adrenotools_gpu_mapping *mapping) {
-        void *libvulkanHandle{};
-        void *userMappingHandle = nullptr; // New void* pointer for user mapping handle
 
-        // If the user has selected a custom driver, try to load it
-        if (!(*state.settings->gpuDriver).empty()) {
-            libvulkanHandle = adrenotools_open_libvulkan(
-                RTLD_NOW,
-                ADRENOTOOLS_DRIVER_FILE_REDIRECT | ADRENOTOOLS_DRIVER_CUSTOM | ADRENOTOOLS_DRIVER_GPU_MAPPING_IMPORT,
-                nullptr, // We require Android 10 so don't need to supply
-                state.os->nativeLibraryPath.c_str(),
-                (state.os->privateAppFilesPath + "gpu_drivers/" + *state.settings->gpuDriver + "/").c_str(),
-                (*state.settings->gpuDriverLibraryName).c_str(),
-                (state.os->publicAppFilesPath + "gpu/vk_file_redirect/").c_str(),
-                reinterpret_cast<void**>(&userMappingHandle) // Use reinterpret_cast to pass as void**
-            );
-
-            // Cast the userMappingHandle back to adrenotools_gpu_mapping*
-            if (libvulkanHandle) {
-                mapping = reinterpret_cast<adrenotools_gpu_mapping*>(userMappingHandle);
-            }
-
-            if (!libvulkanHandle) {
-                char *error = dlerror();
-                LOGW("Failed to load custom Vulkan driver {}/{}: {}", *state.settings->gpuDriver, *state.settings->gpuDriverLibraryName, error ? error : "");
-            }
-        }
-
-        if (!libvulkanHandle) {
-            libvulkanHandle = adrenotools_open_libvulkan(
-                RTLD_NOW,
-                ADRENOTOOLS_DRIVER_FILE_REDIRECT | ADRENOTOOLS_DRIVER_GPU_MAPPING_IMPORT,
-                nullptr, // We require Android 10 so don't need to supply
-                state.os->nativeLibraryPath.c_str(),
-                nullptr,
-                nullptr,
-                (state.os->publicAppFilesPath + "gpu/vk_file_redirect/").c_str(),
-                reinterpret_cast<void**>(&userMappingHandle) // Use reinterpret_cast for user mapping handle
-            );
-
-            // Cast the userMappingHandle back to adrenotools_gpu_mapping*
-            if (libvulkanHandle) {
-                mapping = reinterpret_cast<adrenotools_gpu_mapping*>(userMappingHandle);
-            }
-
-            if (!libvulkanHandle) {
-                char *error = dlerror();
-                LOGW("Failed to load builtin Vulkan driver: {}", error ? error : "");
-            }
-
-            if (!libvulkanHandle)
-                libvulkanHandle = dlopen("libvulkan.so", RTLD_NOW);
-        }
-        return reinterpret_cast<PFN_vkGetInstanceProcAddr>(dlsym(libvulkanHandle, "vkGetInstanceProcAddr"));
-    }
-
-
-    GPU::GPU(const DeviceState &state)
+    GPU::GPU(const DeviceState &state, PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr, void *adrenotoolsImportHandle)
         : state(state),
-          vkContext(LoadVulkanDriver(state, &adrenotoolsImportMapping)),
+          vkContext(vkGetInstanceProcAddr),
+          adrenotoolsImportHandle{adrenotoolsImportHandle},
           vkInstance(CreateInstance(state, vkContext)),
           vkDebugReportCallback(CreateDebugReportCallback(this, vkInstance)),
           vkPhysicalDevice(CreatePhysicalDevice(vkInstance)),
-          vkDevice(CreateDevice(vkContext, vkPhysicalDevice, vkQueueFamilyIndex, traits, &adrenotoolsImportMapping)),
+          vkDevice(CreateDevice(vkContext, vkPhysicalDevice, vkQueueFamilyIndex, traits, &adrenotoolsImportHandle)),
           vkQueue(vkDevice, vkQueueFamilyIndex, 0),
           memory(*this),
           scheduler(state, *this),

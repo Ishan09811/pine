@@ -35,7 +35,7 @@ namespace skyline::gpu {
         friend BufferManager;
 
       public:
-        adrenotools_gpu_mapping adrenotoolsImportMapping{}; //!< Persistent struct to store active adrenotools mapping import info
+        void *adrenotoolsImportHandle; //!< Handle used to store active adrenotools mapping import info
         vk::raii::Context vkContext;
         vk::raii::Instance vkInstance;
         vk::raii::DebugReportCallbackEXT vkDebugReportCallback; //!< An RAII Vulkan debug report manager which calls into 'GPU::DebugCallback'
@@ -71,7 +71,7 @@ namespace skyline::gpu {
         static constexpr size_t DebugTracingBufferSize{0x80000}; //!< 512KiB
         memory::Buffer debugTracingBuffer; //!< General use buffer for debug tracing, first 4 bytes are allocated for checkpoints
 
-        GPU(const DeviceState &state);
+        GPU(const DeviceState &state, PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr, void *adrenotoolsImportHandle);
 
         /**
          * @brief Should be called after loader population to initialize the per-title caches

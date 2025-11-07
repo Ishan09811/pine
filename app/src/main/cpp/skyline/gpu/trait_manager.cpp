@@ -299,7 +299,7 @@ namespace skyline::gpu {
         );
     }
 
-    void TraitManager::ApplyDriverPatches(const vk::raii::Context &context, adrenotools_gpu_mapping *mapping) {
+    void TraitManager::ApplyDriverPatches(const vk::raii::Context &context, void *adrenotoolsImportHandle) {
         // Create an instance without validation layers in order to get pointers to the functions we need to patch from the driver
         vk::ApplicationInfo applicationInfo{
             .apiVersion = VK_API_VERSION_1_0,
@@ -325,7 +325,7 @@ namespace skyline::gpu {
             bcnSupport.set();
         }
 
-        if (adrenotools_validate_gpu_mapping(mapping)) {
+        if (adrenotools_validate_gpu_mapping(adrenotoolsImportHandle)) {
             LOGI("Applied GPU memory import patch");
             supportsAdrenoDirectMemoryImport = true;
         }
