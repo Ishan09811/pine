@@ -61,10 +61,10 @@ namespace skyline {
         return {reinterpret_cast<PFN_vkGetInstanceProcAddr>(dlsym(libvulkanHandle, "vkGetInstanceProcAddr")), importHandle};
     }
 
-    DeviceState::DeviceState(kernel::OS *os, std::shared_ptr<JvmManager> jvmManager, std::shared_ptr<Settings> settings)
-        : os(os), jvm(std::move(jvmManager)), settings(std::move(settings)) {
-        // We assign these later as they use the state in their constructor and we don't want null pointers
+    DeviceState::DeviceState(kernel::OS *tOs, std::shared_ptr<JvmManager> jvmManager, std::shared_ptr<Settings> tSettings)
+        : os(tOs), jvm(std::move(jvmManager)), settings(std::move(tSettings)) {          
         auto [vkGetInstanceProcAddr, adrenotoolsImportHandle]{LoadVulkanDriver(*os, *settings)};
+        // We assign these later as they use the state in their constructor and we don't want null pointers
         gpu = std::make_shared<gpu::GPU>(*this, vkGetInstanceProcAddr, adrenotoolsImportHandle);
         soc = std::make_shared<soc::SOC>(*this);
         audio = std::make_shared<audio::Audio>(*this);
@@ -74,5 +74,5 @@ namespace skyline {
     DeviceState::~DeviceState() {
         if (process)
             process->ClearHandleTable();
-    }
+  }
 }
