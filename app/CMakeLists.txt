@@ -34,6 +34,10 @@ set(LZ4_BUILD_LEGACY_LZ4C OFF CACHE BOOL "Build lz4c progam with legacy argument
 add_subdirectory("libraries/lz4/build/cmake")
 include_directories(SYSTEM "libraries/lz4/lib")
 
+# xxHash
+add_subdirectory("libraries/xxhash/build/cmake")
+include_directories(SYSTEM "libraries/xxhash")
+
 # Vulkan + Vulkan-Hpp
 add_compile_definitions(VK_USE_PLATFORM_ANDROID_KHR) # We want all the Android-specific structures to be defined
 add_compile_definitions(VULKAN_HPP_NO_SPACESHIP_OPERATOR) # libcxx doesn't implement operator<=> for std::array which breaks this
