@@ -449,7 +449,7 @@ namespace skyline::gpu {
             return (*gpu.vkDevice).createShaderModule(createInfo, nullptr, *gpu.vkDevice.getDispatcher());
         };
         
-        if (*gpu.getState().settings->useAsyncShaders) {
+        if (*state.settings->useAsyncShaders) {
             auto future = pool.submit_task(compileShader);
             return future.get();
         } else {
