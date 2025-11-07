@@ -35,7 +35,6 @@ add_subdirectory("libraries/lz4/build/cmake")
 include_directories(SYSTEM "libraries/lz4/lib")
 
 # xxHash
-set(DISPATCH OFF CACHE BOOL "Disable xxHash x86 dispatch" FORCE)
 add_subdirectory("libraries/xxhash/build/cmake")
 include_directories(SYSTEM "libraries/xxhash")
 
