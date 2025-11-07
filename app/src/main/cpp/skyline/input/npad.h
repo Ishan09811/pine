@@ -115,5 +115,10 @@ namespace skyline::input {
          * @brief Disables any activate mappings from guest controllers -> players till Activate has been called
          */
         void Deactivate();
+
+        /**
+         * @brief Disables specific npad
+         */
+        void Disconnect(NpadId id);
     };
 }

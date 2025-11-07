@@ -99,4 +99,12 @@ namespace skyline::input {
                 controller.device = nullptr;
         }
     }
+
+    void NpadManager::Disconnect(NpadId id) {
+        std::scoped_lock guard{mutex};
+        if (!IsNpadIdValid(id))
+            return;
+
+        at(id).Disconnect();
+    }
 }
