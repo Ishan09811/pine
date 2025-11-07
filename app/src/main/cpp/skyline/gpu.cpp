@@ -279,7 +279,7 @@ namespace skyline::gpu {
             vk::PhysicalDeviceSubgroupProperties>()};
 
         traits = TraitManager{deviceFeatures2, enabledFeatures2, deviceExtensions, enabledExtensions, deviceProperties2, physicalDevice};
-        traits.ApplyDriverPatches(context, mapping);
+        traits.ApplyDriverPatches(context, adrenotoolsImportHandle);
 
         std::vector<const char *> pEnabledExtensions;
         pEnabledExtensions.reserve(enabledExtensions.size());
