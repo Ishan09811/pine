@@ -80,7 +80,7 @@ namespace skyline::gpu {
         return binary;
     }
 
-    ShaderManager::ShaderManager(const DeviceState &state, GPU &gpu, std::string_view replacementDir, std::string_view dumpDir) : gpu{gpu}, dumpPath{dumpDir}, pool{1U} {
+    ShaderManager::ShaderManager(const DeviceState &state, GPU &gpu, std::string_view replacementDir, std::string_view dumpDir) : gpu{gpu}, dumpPath{dumpDir}, pool{1U}, state{state} {
         LoadShaderReplacements(replacementDir);
 
         if constexpr (DumpShaders) {
