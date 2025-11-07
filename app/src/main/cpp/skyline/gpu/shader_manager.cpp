@@ -80,7 +80,7 @@ namespace skyline::gpu {
         return binary;
     }
 
-    ShaderManager::ShaderManager(const DeviceState &state, GPU &gpu, std::string_view replacementDir, std::string_view dumpDir) : gpu{gpu}, dumpPath{dumpDir} {
+    ShaderManager::ShaderManager(const DeviceState &state, GPU &gpu, std::string_view replacementDir, std::string_view dumpDir) : gpu{gpu}, dumpPath{dumpDir}, pool{1U}, state{state} {
         LoadShaderReplacements(replacementDir);
 
         if constexpr (DumpShaders) {
@@ -449,8 +449,8 @@ namespace skyline::gpu {
             return (*gpu.vkDevice).createShaderModule(createInfo, nullptr, *gpu.vkDevice.getDispatcher());
         };
         
-        if (*gpu.getState().settings->useAsyncShaders) {
-            auto future = std::async(std::launch::async, compileShader);
+        if (*state.settings->useAsyncShaders) {
+            auto future = pool.submit_task(compileShader);
             return future.get();
         } else {
             return compileShader();
