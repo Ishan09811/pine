@@ -5,6 +5,7 @@
 
 #include <unordered_map>
 #include <vulkan/vulkan.hpp>
+#include <BS_thread_pool.hpp>
 #include <shader_compiler/object_pool.h>
 #include <shader_compiler/frontend/maxwell/control_flow.h>
 #include <shader_compiler/frontend/ir/value.h>
@@ -31,6 +32,7 @@ namespace skyline::gpu {
         std::unordered_map<u64, std::vector<u8>> guestShaderReplacements; //!< Map of guest shader hash -> replacement guest shader binary, populated at init time and must not be modified after
         std::unordered_map<u64, std::vector<u8>> hostShaderReplacements; //!< ^^ same as above but for host
 
+        BS::thread_pool<BS::tp::none> pool;
         std::mutex poolMutex;
         std::filesystem::path dumpPath;
         std::mutex dumpMutex;
