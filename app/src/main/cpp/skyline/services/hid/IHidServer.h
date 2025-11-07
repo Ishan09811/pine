@@ -117,6 +117,12 @@ namespace skyline::service::hid {
         Result AcquireNpadStyleSetUpdateEventHandle(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response);
 
         /**
+         * @brief Disconnects a specific Npad
+           @url https://switchbrew.org/wiki/HID_services#DisconnectNpad
+        */
+        Result DisconnectNpad(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response);
+
+        /**
          * @brief Requests the LED pattern which represents a particular Player
          */
         Result GetPlayerLedPattern(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response);
@@ -250,6 +256,7 @@ namespace skyline::service::hid {
             SFUNC(0x67, IHidServer, ActivateNpad),
             SFUNC(0x68, IHidServer, DeactivateNpad),
             SFUNC(0x6A, IHidServer, AcquireNpadStyleSetUpdateEventHandle),
+            SFUNC(0x6B, IHidServer, DisconnectNpad),
             SFUNC(0x6C, IHidServer, GetPlayerLedPattern),
             SFUNC(0x6D, IHidServer, ActivateNpadWithRevision),
             SFUNC(0x78, IHidServer, SetNpadJoyHoldType),

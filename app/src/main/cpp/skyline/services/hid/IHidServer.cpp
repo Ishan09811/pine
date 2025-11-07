@@ -102,6 +102,12 @@ namespace skyline::service::hid {
         return {};
     }
 
+    Result IHidServer::DisconnectNpad(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
+        auto id{request.Pop<NpadId>()};
+        state.input->npad.Disconnect(id);
+        return {};
+    }
+
     Result IHidServer::AcquireNpadStyleSetUpdateEventHandle(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
         auto id{request.Pop<NpadId>()};
         auto handle{state.process->InsertItem(state.input->npad.at(id).updateEvent)};
