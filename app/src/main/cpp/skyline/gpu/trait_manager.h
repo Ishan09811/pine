@@ -128,7 +128,7 @@ namespace skyline::gpu {
         /**
          * @brief Applies driver specific binary patches to the driver (e.g. BCeNabler)
          */
-        void ApplyDriverPatches(const vk::raii::Context &context, adrenotools_gpu_mapping *mapping);
+        void ApplyDriverPatches(const vk::raii::Context &context, void *adrenotoolsImportHandle);
 
         /**
          * @return A summary of all the GPU traits as a human-readable string
