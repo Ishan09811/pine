@@ -959,6 +959,7 @@ namespace skyline::kernel::svc {
             // 6.0.0+
             TotalMemoryAvailableWithoutSystemResource = 21,
             TotalMemoryUsageWithoutSystemResource = 22,
+            AliasRegionExtraSize = 28,
         };
 
         InfoState info{static_cast<u32>(ctx.w1)};
@@ -1052,6 +1053,10 @@ namespace skyline::kernel::svc {
 
             case InfoState::UserExceptionContextAddr:
                 out = reinterpret_cast<u64>(state.process->tlsExceptionContext);
+                break;
+
+            case InfoState::AliasRegionExtraSize:
+                out = 0; // Stubbed
                 break;
 
             default:
