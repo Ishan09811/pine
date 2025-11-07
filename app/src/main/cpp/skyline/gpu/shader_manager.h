@@ -23,6 +23,7 @@ namespace skyline::gpu {
      */
     class ShaderManager {
       private:
+        const DeviceState &state;
         GPU &gpu;
         Shader::HostTranslateInfo hostTranslateInfo;
         Shader::Profile profile;
