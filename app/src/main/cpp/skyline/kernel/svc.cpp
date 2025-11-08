@@ -231,7 +231,7 @@ namespace skyline::kernel::svc {
 
             memInfo = {
                 .address = addressSpaceEnd,
-                .size = 0 - addressSpaceEnd,
+                .size = (reinterpret_cast<u64>(address) < addressSpaceEnd) ? (addressSpaceEnd - reinterpret_cast<u64>(address)) : 0,
                 .type = static_cast<u32>(memory::MemoryType::Reserved),
             };
 
