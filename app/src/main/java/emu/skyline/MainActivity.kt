@@ -260,11 +260,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun getAppItems() = mutableListOf<AppViewItem>().apply {
         val contents = ContentsHelper(this@MainActivity)
-        val updates = mutableListOf<BaseAppItem>()
-        val dlcs = mutableListOf<BaseAppItem>()
-        
         appEntries?.let { entries ->
             sortGameList(entries.toList()).forEach { entry ->
+                val updates = mutableListOf<BaseAppItem>()
+                val dlcs = mutableListOf<BaseAppItem>()
                 contents.loadContents().filter { appEntry ->
                     (appEntry as AppEntry).parentTitleId == entry.titleId
                 }.forEach { appEntry ->
