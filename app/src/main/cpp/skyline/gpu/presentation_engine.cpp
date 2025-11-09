@@ -138,13 +138,25 @@ namespace skyline::gpu {
         frameIndex = (frameIndex + 1) % swapchainImageCount;
 
         std::pair<vk::Result, u32> nextImage;
-        while (nextImage = vkSwapchain->acquireNextImage(std::numeric_limits<u64>::max(), *acquireSemaphore, {}), nextImage.first != vk::Result::eSuccess) [[unlikely]] {
+        
+        while (true) [[unlikely]] {
+            auto resultValue = vkSwapchain->acquireNextImage(
+                std::numeric_limits<u64>::max(),
+                *acquireSemaphore,
+                {}
+            );
+
+            nextImage = { resultValue.result, resultValue.value };
+
+            if (nextImage.first == vk::Result::eSuccess)
+                break;
+
             if (nextImage.first == vk::Result::eSuboptimalKHR)
                 surfaceCondition.wait(lock, [this]() { return vkSurface.has_value(); });
             else
                 throw exception("vkAcquireNextImageKHR returned an unhandled result '{}'", vk::to_string(nextImage.first));
         }
-
+        
         auto &nextImageTexture{images.at(nextImage.second)};
         auto &presentSemaphore{presentSemaphores[nextImage.second]};
 
