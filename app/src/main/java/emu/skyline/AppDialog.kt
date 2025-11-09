@@ -46,6 +46,7 @@ import emu.skyline.settings.SettingsActivity
 import emu.skyline.settings.EmulationSettings
 import emu.skyline.utils.CacheManagementUtils
 import emu.skyline.utils.SaveManagementUtils
+import emu.skyline.utils.SearchLocationHelper
 import emu.skyline.utils.serializable
 import emu.skyline.utils.ContentsHelper
 import emu.skyline.model.TaskViewModel
@@ -90,6 +91,7 @@ class AppDialog : BottomSheetDialogFragment() {
     private lateinit var contentPickerLauncher: ActivityResultLauncher<Intent>
 
     private val taskViewModel : TaskViewModel by activityViewModels()
+    private val mainViewModel : MainViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
@@ -262,6 +264,7 @@ class AppDialog : BottomSheetDialogFragment() {
                     File((selectedContent as AppEntry).uri.path).delete()
                     contentList.remove(selectedContent)
                     contents.saveContents(contentList)
+                    mainViewModel.loadRoms(requireContext(), false, SearchLocationHelper.getSearchLocations(requireContext()), EmulationSettings.global.systemLanguage)
                     Snackbar.make(binding.root, "Successfully removed ${contentNames[selectedItemIndex].toString()}", Snackbar.LENGTH_SHORT).show()
                     binding.deleteContents.isEnabled = !contents.loadContents().filter { appEntry ->
                        (appEntry as AppEntry).parentTitleId == item.titleId
@@ -316,6 +319,7 @@ class AppDialog : BottomSheetDialogFragment() {
             if (!isDuplicate && newContent.result == LoaderResult.Success && newContent.appEntry.romType == expectedContentType && newContent.appEntry.parentTitleId == item.titleId) {
                 currentContents.add(newContent.appEntry)
                 contents.saveContents(currentContents)
+                mainViewModel.loadRoms(requireContext(), false, SearchLocationHelper.getSearchLocations(requireContext()), EmulationSettings.global.systemLanguage)
                 return LoaderResult.Success
             } else if (!isDuplicate) File(newContent.appEntry.uri.path).delete()
             if (isDuplicate) return LoaderResult.Success // if it is duplicate then we indicate that it is reimported successfully
