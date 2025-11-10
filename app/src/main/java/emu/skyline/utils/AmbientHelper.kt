@@ -1,6 +1,7 @@
 
 package emu.skyline.utils
 
+import android.view.View
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
@@ -9,6 +10,7 @@ import android.os.Looper
 import android.view.SurfaceView
 import android.view.PixelCopy
 import androidx.palette.graphics.Palette
+import android.graphics.drawable.GradientDrawable
 
 class AmbientHelper(private val surfaceView: SurfaceView) {
 
@@ -66,5 +68,26 @@ class AmbientHelper(private val surfaceView: SurfaceView) {
                 callback.onError("Failed to generate palette from bitmap.")
             }
         }
+    }
+
+    fun applyAmbientGlow(vibrantColor: Int, mutedColor: Int, dominantColor: Int, overlay: View) {
+        val gradient = GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(
+                adjustAlpha(vibrantColor, 0.5f),
+                adjustAlpha(dominantColor, 0.6f),
+                adjustAlpha(mutedColor, 0.8f)
+            )
+        )
+        gradient.cornerRadius = 0f
+        overlay.background = gradient
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = (Color.alpha(color) * factor).toInt()
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
     }
 }
