@@ -602,7 +602,11 @@ namespace skyline::gpu {
     Texture::Texture(GPU &pGpu, GuestTexture pGuest)
         : gpu(pGpu),
           guest(std::move(pGuest)),
-          dimensions(guest->dimensions),
+          dimensions({
+              std::max(1u, static_cast<u32>(guest->dimensions.width  * 0.5f)),
+              std::max(1u, static_cast<u32>(guest->dimensions.height * 0.5f)),
+              guest->dimensions.depth
+          }),
           format(ConvertHostCompatibleFormat(guest->format, gpu.traits)),
           layout(vk::ImageLayout::eUndefined),
           tiling(vk::ImageTiling::eOptimal), // Force Optimal due to not adhering to host subresource layout during Linear synchronization
