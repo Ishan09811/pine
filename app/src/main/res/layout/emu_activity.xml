@@ -20,6 +20,12 @@
         android:layout_height="match_parent"
         android:background="@android:color/black">
 
+        <View
+            android:id="@+id/ambient_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/black" />
+
         <emu.skyline.views.FixedRatioSurfaceView
             android:id="@+id/game_view"
             android:layout_width="match_parent"
