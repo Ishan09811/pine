@@ -33,10 +33,12 @@ import android.util.Rational
 import android.util.TypedValue
 import android.view.*
 import android.view.ViewTreeObserver
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Toast
 import android.widget.PopupMenu
 import android.widget.TextView
-import android.animation.ObjectAnimator
+import android.animation.ArgbEvaluator
+import android.animation.ValueAnimator
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -575,26 +577,40 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
     private fun startAmbientEffectUpdates() {
         ambientJob = CoroutineScope(Dispatchers.Main).launch {
-            var previousColor = Color.BLACK
+            var previousVibrant = Color.BLACK
+            var previousMuted = Color.BLACK
+            var previousDominant = Color.BLACK
+            
             while (isActive) {
                 ambientHelper.captureAmbientEffect(object : AmbientHelper.AmbientCallback {
                     override fun onColorsExtracted(vibrantColor: Int, mutedColor: Int, dominantColor: Int) {
-                        val animator = ObjectAnimator.ofArgb(
-                            binding.gameViewContainer,
-                            "backgroundColor",
-                            previousColor,
-                            dominantColor
-                        )
-                        animator.duration = 300 // Smooth transition duration
+                        val animator = ValueAnimator.ofFloat(0f, 1f)
+                        animator.duration = 500
+                        animator.interpolator = AccelerateDecelerateInterpolator()
+
+                        val startVibrant = previousVibrant
+                        val startMuted = previousMuted
+                        val startDominant = previousDominant
+
+                        animator.addUpdateListener {
+                            val t = it.animatedFraction
+                            val currentVibrant = ArgbEvaluator().evaluate(t, startVibrant, vibrantColor) as Int
+                            val currentMuted = ArgbEvaluator().evaluate(t, startMuted, mutedColor) as Int
+                            val currentDominant = ArgbEvaluator().evaluate(t, startDominant, dominantColor) as Int
+                            ambientHelper.applyAmbientGlow(currentVibrant, currentMuted, currentDominant, binding.ambientOverlay as View)
+                        }
+                        
                         animator.start()
-                        previousColor = dominantColor
+                        previousVibrant = vibrantColor
+                        previousMuted = mutedColor
+                        previousDominant = dominantColor
                     }
 
                     override fun onError(error: String) {
                         Log.e("AmbientHelper", error)
                     }
                 })
-                delay(50)
+                delay(250)
             }
         }
     }
