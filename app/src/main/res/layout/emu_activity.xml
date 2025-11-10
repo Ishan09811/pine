@@ -17,7 +17,8 @@
     <FrameLayout
         android:id="@+id/game_view_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@android:color/black">
 
         <emu.skyline.views.FixedRatioSurfaceView
             android:id="@+id/game_view"
