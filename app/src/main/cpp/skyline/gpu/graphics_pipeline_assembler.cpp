@@ -124,6 +124,15 @@ namespace skyline::gpu {
         viewportState.pViewports = viewports.data();
         viewportState.pScissors = scissors.data();
 
+        for (auto &vp : viewports) {
+            vp.width  *= 0.5f;
+            vp.height *= 0.5f;
+        }
+        for (auto &sc : scissors) {
+            sc.extent.width  = static_cast<uint32_t>(std::round(sc.extent.width  * 0.5f));
+            sc.extent.height = static_cast<uint32_t>(std::round(sc.extent.height * 0.5f));
+        }
+
         colorBlendState.pAttachments = colorBlendAttachments.data();
 
         dynamicState.pDynamicStates = dynamicStates.data();
