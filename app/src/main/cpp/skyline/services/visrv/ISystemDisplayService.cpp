@@ -16,7 +16,7 @@ namespace skyline::service::visrv {
         struct DisplayMode {
             u32 width;
             u32 height;
-            float refresh_rate;
+            f32 refresh_rate;
             u32 unknown;
         } mode{};
         
