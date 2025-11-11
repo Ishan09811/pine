@@ -28,4 +28,8 @@ namespace skyline::service::visrv {
     Result IManagerDisplayService::AddToLayerStack(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
         return {};
     }
+
+    Result IManagerDisplayService::SetLayerVisibility(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
+        return {};
+    }
 }

@@ -9,4 +9,8 @@ namespace skyline::service::visrv {
     Result ISystemDisplayService::SetLayerZ(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
         return {};
     }
+
+    Result ISystemDisplayService::GetDisplayMode(type:KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
+        return {};
+    }
 }

@@ -19,8 +19,11 @@ namespace skyline::service::visrv {
          */
         Result SetLayerZ(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response);
 
+        Result GetDisplayMode(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response);
+
       SERVICE_DECL(
           SFUNC(0x89D, ISystemDisplayService, SetLayerZ),
+          SFUNC(0xC80, ISystemDisplayService, GetDisplayMode),
           SFUNC_BASE(0x908, ISystemDisplayService, IDisplayService, CreateStrayLayer)
       )
     };
