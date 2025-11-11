@@ -11,6 +11,8 @@ namespace skyline::service::visrv {
     }
 
     Result ISystemDisplayService::GetDisplayMode(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
+        u64 display_id = request.Pop<u64>();
+        
         struct DisplayMode {
             u32 width;
             u32 height;
