@@ -11,6 +11,20 @@ namespace skyline::service::visrv {
     }
 
     Result ISystemDisplayService::GetDisplayMode(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
+        struct DisplayMode {
+            u32 width;
+            u32 height;
+            float refresh_rate;
+            u32 unknown;
+        } mode{};
+        
+        mode.width = 1280;
+        mode.height = 720;
+        mode.refresh_rate = 60.0f;
+        mode.unknown = 0;
+
+        request.outputBuf.at(0).as<DisplayMode>() = mode;
+        response.Push<u64>(1);
         return {};
     }
 }
