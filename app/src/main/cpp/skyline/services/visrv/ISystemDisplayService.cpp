@@ -10,7 +10,7 @@ namespace skyline::service::visrv {
         return {};
     }
 
-    Result ISystemDisplayService::GetDisplayMode(type:KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
+    Result ISystemDisplayService::GetDisplayMode(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
         return {};
     }
 }
