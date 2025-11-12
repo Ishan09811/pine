@@ -6,7 +6,7 @@
 #include <jni.h>
 #include <android/looper.h>
 #include <common/trace.h>
-#include <common/circular_queue.h>
+#include <common/spsc_circular_queue.h>
 #include <kernel/types/KEvent.h>
 #include <services/hosbinder/GraphicBufferProducer.h>
 #include "texture/texture.h"
@@ -76,7 +76,7 @@ namespace skyline::gpu {
         };
 
         static constexpr size_t PresentQueueFrameCount{5}; //!< The amount of frames the presentation queue can hold
-        CircularQueue<PresentableFrame> presentQueue{PresentQueueFrameCount}; //!< A circular queue containing all the frames that we can present
+        SpscCircularQueue<PresentableFrame> presentQueue{PresentQueueFrameCount}; //!< A circular queue containing all the frames that we can present
         std::thread presentationThread; //!< A thread for asynchronously presenting queued frames after their corresponded fences are signalled
         size_t nextFrameId{1}; //!< The frame ID to use for the next frame
 
