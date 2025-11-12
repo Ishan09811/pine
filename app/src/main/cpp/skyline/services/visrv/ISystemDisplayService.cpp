@@ -9,4 +9,23 @@ namespace skyline::service::visrv {
     Result ISystemDisplayService::SetLayerZ(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
         return {};
     }
+
+    Result ISystemDisplayService::GetDisplayMode(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response) {
+        u64 display_id = request.Pop<u64>();
+        
+        struct DisplayMode {
+            u32 width;
+            u32 height;
+            float refresh_rate;
+            u32 unknown;
+        } mode{};
+        
+        mode.width = 1280;
+        mode.height = 720;
+        mode.refresh_rate = 60.0f;
+        mode.unknown = 0;
+
+        response.Push(mode);
+        return {};
+    }
 }

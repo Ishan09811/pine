@@ -29,11 +29,14 @@ namespace skyline::service::visrv {
          */
         Result AddToLayerStack(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response);
 
+        Result SetLayerVisibility(type::KSession &session, ipc::IpcRequest &request, ipc::IpcResponse &response);
+
       SERVICE_DECL(
           SFUNC(0x7DA, IManagerDisplayService, CreateManagedLayer),
           SFUNC(0x7DB, IManagerDisplayService, DestroyManagedLayer),
           SFUNC_BASE(0x7DC, IManagerDisplayService, IDisplayService, CreateStrayLayer),
-          SFUNC(0x1770, IManagerDisplayService, AddToLayerStack)
+          SFUNC(0x1770, IManagerDisplayService, AddToLayerStack),
+          SFUNC(0x1772, IManagerDisplayService, SetLayerVisibility)
       )
     };
 }
