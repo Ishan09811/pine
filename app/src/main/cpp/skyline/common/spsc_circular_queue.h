@@ -12,7 +12,7 @@
 
 namespace skyline {
     template <typename Type>
-    class CircularQueue {
+    class SpscCircularQueue {
       private:
         std::vector<std::byte> buffer;
         const size_t capacity; 
@@ -24,15 +24,15 @@ namespace skyline {
         }
 
       public:
-        explicit CircularQueue(size_t size)
+        explicit SpscCircularQueue(size_t size)
           : buffer((size + 1) * sizeof(Type)), capacity(size + 1) {}
 
-        CircularQueue(const CircularQueue&) = delete;
-        CircularQueue& operator=(const CircularQueue&) = delete;
-        CircularQueue(CircularQueue&&) = delete;
-        CircularQueue& operator=(CircularQueue&&) = delete;
+        SpscCircularQueue(const CircularQueue&) = delete;
+        SpscCircularQueue& operator=(const CircularQueue&) = delete;
+        SpscCircularQueue(CircularQueue&&) = delete;
+        SpscCircularQueue& operator=(CircularQueue&&) = delete;
 
-       ~CircularQueue() {
+       ~SpscCircularQueue() {
             while (!Empty()) {
                 auto* p = ptr(head.load());
                 std::destroy_at(p);
