@@ -27,10 +27,10 @@ namespace skyline {
         explicit SpscCircularQueue(size_t size)
           : buffer((size + 1) * sizeof(Type)), capacity(size + 1) {}
 
-        SpscCircularQueue(const CircularQueue&) = delete;
-        SpscCircularQueue& operator=(const CircularQueue&) = delete;
-        SpscCircularQueue(CircularQueue&&) = delete;
-        SpscCircularQueue& operator=(CircularQueue&&) = delete;
+        SpscCircularQueue(const SpscCircularQueue&) = delete;
+        SpscCircularQueue& operator=(const SpscCircularQueue&) = delete;
+        SpscCircularQueue(SpscCircularQueue&&) = delete;
+        SpscCircularQueue& operator=(SpscCircularQueue&&) = delete;
 
        ~SpscCircularQueue() {
             while (!Empty()) {
