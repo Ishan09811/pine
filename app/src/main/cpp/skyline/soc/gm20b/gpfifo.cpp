@@ -378,7 +378,7 @@ namespace skyline::soc::gm20b {
             auto lastProcess = std::chrono::steady_clock::now();
             static u64 totalLatency = 0;
             static u32 entryCount = 0;
-            gpEntries.Process([this, &channelLocked, &lastProcess](GpEntry gpEntry) {
+            gpEntries.Process([this, &channelLocked, &lastProcess, &totalLatency, &entryCount](GpEntry gpEntry) {
                 using namespace std::chrono;
 
                 auto now = steady_clock::now();
