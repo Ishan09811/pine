@@ -375,8 +375,25 @@ namespace skyline::soc::gm20b {
         try {
             bool channelLocked{};
 
-            gpEntries.Process([this, &channelLocked](GpEntry gpEntry) {
-                LOGD("Processing pushbuffer: 0x{:X}, Size: 0x{:X}", gpEntry.Address(), +gpEntry.size);
+            auto lastProcess = std::chrono::steady_clock::now();
+            static u64 totalLatency = 0;
+            static u32 entryCount = 0;
+            gpEntries.Process([this, &channelLocked, &lastProcess](GpEntry gpEntry) {
+                using namespace std::chrono;
+
+                auto now = steady_clock::now();
+                auto dt = duration_cast<microseconds>(now - lastProcess).count();
+                lastProcess = now;
+                totalLatency += dt;
+                entryCount++;
+
+                if (entryCount % 1000 == 0) {
+                    LOGI("GPFIFO avg latency: {} µs", totalLatency / entryCount);
+                    totalLatency = 0;
+                    entryCount = 0;
+                }
+
+                LOGD("GPFIFO latency since last entry: {} µs (0x{:X}, size: 0x{:X})", dt, gpEntry.Address(), +gpEntry.size);
 
                 if (!channelLocked) {
                     channelCtx.Lock();
