@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <common/circular_queue.h>
+#include <common/spsc_circular_queue.h>
 #include <soc/gm20b/macro/macro_state.h>
 #include "engines/gpfifo.h"
 
@@ -106,7 +106,7 @@ namespace skyline::soc::gm20b {
         const DeviceState &state;
         ChannelContext &channelCtx;
         engine::GPFIFO gpfifoEngine; //!< The engine for processing GPFIFO method calls
-        CircularQueue<GpEntry> gpEntries;
+        SpscCircularQueue<GpEntry> gpEntries;
         std::vector<u32> pushBufferData; //!< Persistent vector storing pushbuffer data to avoid constant reallocations
         bool skipDirtyFlushes{}; //!< If GPU flushing should be skipped when fetching pushbuffer contents
 
