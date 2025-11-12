@@ -16,7 +16,7 @@ namespace skyline::service::visrv {
         struct DisplayMode {
             u32 width;
             u32 height;
-            f32 refresh_rate;
+            float refresh_rate;
             u32 unknown;
         } mode{};
         
@@ -25,7 +25,10 @@ namespace skyline::service::visrv {
         mode.refresh_rate = 60.0f;
         mode.unknown = 0;
 
-        request.outputBuf.at(0).as<DisplayMode>() = mode;
+        auto &span = request.outputBuf.at(0);
+        LOGI("GetDisplayMode: primary output span size = 0x{:x} ({})", span.size(), span.size());
+
+        std::memcpy(span.data(), &mode, sizeof(DisplayMode));
         response.Push<u64>(1);
         return {};
     }
