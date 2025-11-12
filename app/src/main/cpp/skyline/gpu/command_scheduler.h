@@ -4,7 +4,7 @@
 #pragma once
 
 #include <common/thread_local.h>
-#include <common/circular_queue.h>
+#include <common/spsc_circular_queue.h>
 #include "fence_cycle.h"
 
 namespace skyline::gpu {
@@ -44,7 +44,7 @@ namespace skyline::gpu {
         ThreadLocal<CommandPool> pool;
 
         static constexpr size_t FenceCycleWaitCount{256}; //!< The amount of fence cycles the cycle queue can hold
-        CircularQueue<std::shared_ptr<FenceCycle>> cycleQueue{FenceCycleWaitCount}; //!< A circular queue containing all the active cycles that can be waited on
+        SpscCircularQueue<std::shared_ptr<FenceCycle>> cycleQueue{FenceCycleWaitCount}; //!< A circular queue containing all the active cycles that can be waited on
         std::thread waiterThread; //!< A thread that waits on and signals FenceCycle(s) then clears any associated resources
 
         void WaiterThread();
