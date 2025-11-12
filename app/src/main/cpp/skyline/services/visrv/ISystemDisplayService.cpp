@@ -25,11 +25,7 @@ namespace skyline::service::visrv {
         mode.refresh_rate = 60.0f;
         mode.unknown = 0;
 
-        auto &span = request.outputBuf.at(0);
-        LOGI("GetDisplayMode: primary output span size = 0x{:x} ({})", span.size(), span.size());
-
-        std::memcpy(span.data(), &mode, sizeof(DisplayMode));
-        response.Push<u64>(1);
+        response.Push(mode);
         return {};
     }
 }
