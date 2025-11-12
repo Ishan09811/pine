@@ -11,6 +11,7 @@
 #include <gpu/stage_mask.h>
 #include "command_nodes.h"
 #include "common/spin_lock.h"
+#include "common/spsc_circular_queue.h"
 
 namespace skyline::gpu::interconnect {
     constexpr bool EnableGpuCheckpoints{false}; //!< Whether to enable GPU debugging checkpoints (WILL DECREASE PERF SIGNIFICANTLY)
@@ -71,8 +72,8 @@ namespace skyline::gpu::interconnect {
       private:
         static constexpr size_t GrowThresholdNs{constant::NsInMillisecond / 50}; //!< The wait time threshold at which the slot count will be increased
         const DeviceState &state;
-        CircularQueue<Slot *> incoming; //!< Slots pending recording
-        CircularQueue<Slot *> outgoing; //!< Slots that have been submitted, may still be active on the GPU
+        SpscCircularQueue<Slot *> incoming; //!< Slots pending recording
+        SpscCircularQueue<Slot *> outgoing; //!< Slots that have been submitted, may still be active on the GPU
         std::list<Slot> slots;
         std::atomic<bool> idle;
 
