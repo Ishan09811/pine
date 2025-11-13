@@ -428,15 +428,16 @@ namespace skyline::soc::gm20b {
     }
 
     void ChannelGpfifo::Push(span<GpEntry> entries) {
-        gpEntries.Append(entries);
-    }
-
-    void ChannelGpfifo::Push(GpEntry entry) {
         auto now = std::chrono::steady_clock::now();
         static auto lastPush = now;
         auto dt = std::chrono::duration_cast<std::chrono::microseconds>(now - lastPush).count();
         lastPush = now;
-        LOGI("GPFIFO push interval: {} µs", dt);      
+
+        LOGI("GPFIFO span push interval: {} µs ({} entries)", dt, entries.size());
+        gpEntries.Append(entries);
+    }
+
+    void ChannelGpfifo::Push(GpEntry entry) {
         gpEntries.Push(entry);
     }
 
