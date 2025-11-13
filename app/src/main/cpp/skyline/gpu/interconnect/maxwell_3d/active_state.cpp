@@ -251,8 +251,15 @@ namespace skyline::gpu::interconnect::maxwell3d {
     static vk::Viewport ConvertViewport(const engine::Viewport &viewport, const engine::ViewportClip &viewportClip, const engine::WindowOrigin &windowOrigin, bool viewportScaleOffsetEnable) {
         vk::Viewport vkViewport{};
 
-        vkViewport.x = viewport.offsetX - viewport.scaleX; // Counteract the addition of the half of the width (o_x) to the host translation
-        vkViewport.width = viewport.scaleX * 2.0f; // Counteract the division of the width (p_x) by 2 for the host scale
+        float scaleX = viewport.scaleX;
+        if (scaleX < 0.0f) {
+            vkViewport.x = viewport.offsetX + scaleX;
+            scaleX = -scaleX;
+        } else {
+            vkViewport.x = viewport.offsetX - scaleX;
+        }
+
+        vkViewport.width = scaleX * 2.0f; // Counteract the division of the width (p_x) by 2 for the host scale
         vkViewport.y = viewport.offsetY - viewport.scaleY; // Counteract the addition of the half of the height (p_y/2 is center) to the host translation (o_y)
         vkViewport.height = viewport.scaleY * 2.0f; // Counteract the division of the height (p_y) by 2 for the host scale
 
