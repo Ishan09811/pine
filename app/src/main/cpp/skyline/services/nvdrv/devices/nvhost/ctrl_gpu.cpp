@@ -48,7 +48,7 @@ namespace skyline::service::nvdrv::device::nvhost {
             mask = 0x3;
 
         if (!inlineBuffer.empty())
-            inlineBuffer.as<u32>() = mask;
+            inlineBuffer.as<u32>() = *mask;
 
         return PosixResult::Success;
     }
