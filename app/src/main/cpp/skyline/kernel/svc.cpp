@@ -109,11 +109,14 @@ namespace skyline::kernel::svc {
         memory::MemoryAttribute value{static_cast<u8>(ctx.w3)};
 
         auto maskedValue{mask.value | value.value};
-        if (maskedValue != mask.value || !mask.isUncached || mask.isDeviceShared || mask.isBorrowed || mask.isIpcLocked) [[unlikely]] {
+        if (maskedValue != mask.value || mask.isBorrowed || mask.isIpcLocked) [[unlikely]] {
             ctx.w0 = result::InvalidCombination;
             LOGW("'mask' invalid: 0x{:X}, 0x{:X}", mask.value, value.value);
             return;
         }
+
+        if (!mask.isUncached || mask.isDeviceShared)
+            LOGW("cached, device shared attribute used (0x{:X})", mask.value);
 
         auto chunk{state.process->memory.GetChunk(address).value()};
 
