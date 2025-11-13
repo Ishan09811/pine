@@ -107,6 +107,7 @@ namespace skyline::service::nvdrv::device::nvhost {
 
                 AddSyncpointWaitCmd(span(pushBufferMemory).subspan(pushBufferMemoryOffset, SyncpointWaitCmdLen), fence);
                 channelCtx->gpfifo.Push(soc::gm20b::GpEntry(pushBufferAddr + pushBufferMemoryOffset * sizeof(u32), SyncpointWaitCmdLen));
+                channelCtx->gpfifo.Push(gpEntries.subspan(0, numEntries));
 
                 // Increment offset
                 pushBufferMemoryOffset += SyncpointWaitCmdLen;
@@ -127,8 +128,6 @@ namespace skyline::service::nvdrv::device::nvhost {
 
             AddSyncpointIncrCmd(span(pushBufferMemory).subspan(pushBufferMemoryOffset, SyncpointIncrCmdLen), fence, !flags.suppressWfi);
             channelCtx->gpfifo.Push(soc::gm20b::GpEntry(pushBufferAddr + pushBufferMemoryOffset * sizeof(u32), SyncpointIncrCmdLen));
-            channelCtx->gpfifo.Push(gpEntries.subspan(0, numEntries));
-
             // Increment offset
             pushBufferMemoryOffset += SyncpointIncrCmdLen;
         }
