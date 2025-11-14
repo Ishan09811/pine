@@ -64,7 +64,9 @@ enum class LoaderResult(val value : Int) {
     MissingHeaderKey(2),
     MissingTitleKey(3),
     MissingTitleKek(4),
-    MissingKeyArea(5);
+    MissingKeyArea(5),
+    ErrorSparseNCA(6),
+    ErrorCompressedNCA(7);
 
     companion object {
         fun get(value : Int) = values().first { value == it.value }
