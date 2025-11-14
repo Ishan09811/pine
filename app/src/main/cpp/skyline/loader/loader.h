@@ -43,7 +43,6 @@ namespace skyline::loader {
         MissingKeyArea,
 
         ErrorSparseNCA,
-        ErrorCompressedNCA,
     };
 
     /**
