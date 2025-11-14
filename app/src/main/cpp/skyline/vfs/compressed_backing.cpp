@@ -8,8 +8,16 @@ namespace skyline::vfs {
     CompressedBacking::CompressedBacking(std::shared_ptr<Backing> raw) : Backing(Mode::Read), compressedBacking(std::move(raw)) {
         hdr = compressedBacking->Read<Header>(0);
 
-        if (hdr.magic != util::MakeMagic<u32>("LZ4B"))
-            throw exception("Invalid compressed backing");
+        if (hdr.magic != util::MakeMagic<u32>("LZ4B")) {
+            char got[5] = {
+                char((hdr.magic >>  0) & 0xFF),
+                char((hdr.magic >>  8) & 0xFF),
+                char((hdr.magic >> 16) & 0xFF),
+                char((hdr.magic >> 24) & 0xFF),
+                0
+            };
+            throw exception("CompressedBacking: Unsupported format '{}', expected 'LZ4B'", got);
+        }
 
         hdr.blockOffsets.resize(hdr.blockCount + 1);
         compressedBacking->Read(span<u32>(hdr.blockOffsets), sizeof(Header));
