@@ -35,7 +35,7 @@ enum class RomType(val value: Int) {
     DLC(130);
 
     companion object {
-        fun getType(value: Int) = values().firstOrNull { it.value == value } ?: throw IllegalArgumentException("Invalid type: $value")
+        fun getType(value: Int) = values().firstOrNull { it.value == value } ?: Unknown
     }
 }
 
