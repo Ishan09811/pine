@@ -249,9 +249,5 @@ namespace skyline::vfs {
         if (sectionHeader.raw.sparseInfo.bucket.tableOffset != 0 &&
             sectionHeader.raw.sparseInfo.bucket.tableSize != 0)
             throw loader_exception(LoaderResult::ErrorSparseNCA);
-
-        /*if (sectionHeader.raw.compressionInfo.bucket.tableOffset != 0 &&
-            sectionHeader.raw.compressionInfo.bucket.tableSize != 0)
-            throw loader_exception(LoaderResult::ErrorCompressedNCA);*/
     }
 }
