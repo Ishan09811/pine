@@ -79,7 +79,7 @@ extern "C" JNIEXPORT jint JNICALL Java_emu_skyline_loader_RomFile_populate(JNIEn
         auto contentMetaType{loader->cnmt->GetContentMetaType()};
         env->SetIntField(thiz, romType, static_cast<skyline::u8>(contentMetaType));
 
-        if (contentMetaType != skyline::vfs::ContentMetaType::Application)
+        if (contentMetaType != skyline::vfs::ContentMetaType::Application && !loader->cnmt->GetParentTitleId().empty())
             env->SetObjectField(thiz, parentTitleId, env->NewStringUTF(loader->cnmt->GetParentTitleId().c_str()));
     }
 
