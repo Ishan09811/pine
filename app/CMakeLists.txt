@@ -252,6 +252,7 @@ add_library(skyline SHARED
         ${source_DIR}/skyline/hle/symbol_hooks.cpp
         ${source_DIR}/skyline/vfs/partition_filesystem.cpp
         ${source_DIR}/skyline/vfs/ctr_encrypted_backing.cpp
+        ${source_DIR}/skyline/vfs/compressed_backing.cpp
         ${source_DIR}/skyline/vfs/rom_filesystem.cpp
         ${source_DIR}/skyline/vfs/os_filesystem.cpp
         ${source_DIR}/skyline/vfs/os_backing.cpp
