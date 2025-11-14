@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: GPL-3.0
+// Copyright © 2025 Pine (https://github.com/Ishan09811/pine)
+
+#include "backing.h"
+
 class CompressedBacking : public Backing {
 public:
     CompressedBacking(std::shared_ptr<Backing> rawCompressedData);
