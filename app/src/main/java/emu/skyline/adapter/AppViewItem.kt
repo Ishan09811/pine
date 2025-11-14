@@ -95,7 +95,7 @@ class AppViewItem(var layoutType : LayoutType, private val item : BaseAppItem, p
     override fun bind(holder : GenericViewHolder<LayoutBinding<*>>, position : Int) {
         val binding = holder.binding
         binding.textTitle.text = item.title
-        binding.textVersion.text = (item as AppItem).getVersion() ?: item.loaderResultString(binding.root.context)
+        binding.textVersion.text = ((item as AppItem).getVersion()?.takeIf { it.isNotEmpty() } ?: item.loaderResultString(binding.root.context))
         binding.textAuthor.text = item.author
         // Make text views selected for marquee to work
         binding.textTitle.isSelected = true
