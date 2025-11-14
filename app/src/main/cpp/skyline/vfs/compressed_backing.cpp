@@ -6,7 +6,13 @@
 
 namespace skyline::vfs {
     CompressedBacking::CompressedBacking(std::shared_ptr<Backing> raw) : Backing(mode = {true, false, false}), compressedBacking(std::move(raw)) {
-        hdr = compressedBacking->Read<Header>(0);
+        HeaderOnDisk od = compressedBacking->Read<HeaderOnDisk>(0);
+
+        hdr.magic = od.magic;
+        hdr.blockSize = od.blockSize;
+        hdr.uncompressedSize = od.uncompressedSize;
+        hdr.compressedSize = od.compressedSize;
+        hdr.blockCount = od.blockCount;
 
         if (hdr.magic != util::MakeMagic<u32>("LZ4B")) {
             char got[5] = {
@@ -19,10 +25,15 @@ namespace skyline::vfs {
             throw exception("CompressedBacking: Unsupported format '{}', expected 'LZ4B'", got);
         }
 
-        hdr.blockOffsets.resize(hdr.blockCount + 1);
-        compressedBacking->Read(span<u32>(hdr.blockOffsets), sizeof(Header));
+        if (hdr.blockCount == 0 || hdr.blockCount > 1'000'000)
+            throw exception("CompressedBacking: invalid blockCount: {}", hdr.blockCount);
+        if (hdr.blockSize == 0 || hdr.blockSize > (1 << 24))
+            throw exception("CompressedBacking: invalid blockSize: {}", hdr.blockSize);
 
-        size = hdr.uncompressedSize;
+        hdr.blockOffsets.resize(hdr.blockCount + 1);
+        compressedBacking->Read(span<u32>(hdr.blockOffsets), sizeof(HeaderOnDisk));
+
+        size = static_cast<size_t>(hdr.uncompressedSize);
     }
 
     size_t CompressedBacking::ReadImpl(span<u8> output, size_t offset) {
