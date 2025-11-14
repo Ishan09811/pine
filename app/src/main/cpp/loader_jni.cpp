@@ -44,9 +44,9 @@ extern "C" JNIEXPORT jint JNICALL Java_emu_skyline_loader_RomFile_populate(JNIEn
         }
     } catch (const skyline::loader::loader_exception &e) {
         return static_cast<jint>(e.error);
-    } catch (const std::exception &e) {
+    } /*catch (const std::exception &e) {
         return static_cast<jint>(skyline::loader::LoaderResult::ParsingError);
-    }
+    }*/
 
     jclass clazz{env->GetObjectClass(thiz)};
     jfieldID applicationNameField{env->GetFieldID(clazz, "applicationName", "Ljava/lang/String;")};
