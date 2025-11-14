@@ -5,7 +5,7 @@
 #include <lz4.h>
 
 namespace skyline::vfs {
-    CompressedBacking::CompressedBacking(std::shared_ptr<Backing> raw) : Backing(Mode::Read), compressedBacking(std::move(raw)) {
+    CompressedBacking::CompressedBacking(std::shared_ptr<Backing> raw) : Backing(mode = {true, false, false}), compressedBacking(std::move(raw)) {
         hdr = compressedBacking->Read<Header>(0);
 
         if (hdr.magic != util::MakeMagic<u32>("LZ4B")) {
