@@ -5,6 +5,7 @@
 #include <loader/loader.h>
 
 #include "ctr_encrypted_backing.h"
+#include "compressed_backing.h"
 #include "region_backing.h"
 #include "partition_filesystem.h"
 #include "nca.h"
@@ -157,13 +158,16 @@ namespace skyline::vfs {
         }
     }
 
-    std::shared_ptr<Backing> NCA::CreateBacking(const NCASectionHeader &sectionHeader, std::shared_ptr<Backing> rawBacking, size_t offset) {
+    std::shared_ptr<Backing> NCA::CreateBacking(const NCASectionHeader &sectionHeader, std::shared_ptr<Backing> rawBacking, size_t offset) {      
+        if (!encrypted && sectionHeader.raw.compressionInfo.bucket.tableOffset != 0)
+            return std::make_shared<CompressedBacking>(rawBacking);
+
         if (!encrypted)
             return rawBacking;
 
         switch (sectionHeader.raw.header.encryptionType) {
             case NcaSectionEncryptionType::None:
-                return rawBacking;
+                return sectionHeader.raw.compressionInfo.bucket.tableOffset != 0 ? std::make_shared<CompressedBacking>(rawBacking) : rawBacking;
             case NcaSectionEncryptionType::CTR:
             case NcaSectionEncryptionType::BKTR: {
                 auto key{!(rightsIdEmpty || useKeyArea) ? GetTitleKey() : GetKeyAreaKey(sectionHeader.raw.header.encryptionType)};
@@ -173,7 +177,7 @@ namespace skyline::vfs {
                     ctr[i] = sectionHeader.raw.sectionCtr[8 - i - 1];
                 }
 
-                return std::make_shared<CtrEncryptedBacking>(ctr, key, std::move(rawBacking), offset);
+                return sectionHeader.raw.compressionInfo.bucket.tableOffset != 0 ? std::make_shared<CtrEncryptedBacking>(ctr, key, std::move(std::make_shared<CompressedBacking>(rawBacking)), offset) : std::make_shared<CtrEncryptedBacking>(ctr, key, std::move(rawBacking), offset);
             }
             default:
                 return nullptr;
@@ -245,9 +249,5 @@ namespace skyline::vfs {
         if (sectionHeader.raw.sparseInfo.bucket.tableOffset != 0 &&
             sectionHeader.raw.sparseInfo.bucket.tableSize != 0)
             throw loader_exception(LoaderResult::ErrorSparseNCA);
-
-        if (sectionHeader.raw.compressionInfo.bucket.tableOffset != 0 &&
-            sectionHeader.raw.compressionInfo.bucket.tableSize != 0)
-            throw loader_exception(LoaderResult::ErrorCompressedNCA);
     }
 }

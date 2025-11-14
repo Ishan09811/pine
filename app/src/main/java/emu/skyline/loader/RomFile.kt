@@ -35,7 +35,7 @@ enum class RomType(val value: Int) {
     DLC(130);
 
     companion object {
-        fun getType(value: Int) = values().firstOrNull { it.value == value } ?: throw IllegalArgumentException("Invalid type: $value")
+        fun getType(value: Int) = values().firstOrNull { it.value == value } ?: Unknown
     }
 }
 
@@ -64,7 +64,9 @@ enum class LoaderResult(val value : Int) {
     MissingHeaderKey(2),
     MissingTitleKey(3),
     MissingTitleKek(4),
-    MissingKeyArea(5);
+    MissingKeyArea(5),
+    ErrorSparseNCA(6),
+    ErrorCompressedNCA(7);
 
     companion object {
         fun get(value : Int) = values().first { value == it.value }
