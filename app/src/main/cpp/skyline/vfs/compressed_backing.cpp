@@ -16,12 +16,14 @@ namespace skyline::vfs {
         hdr.compressedSize = od.compressedSize;
         hdr.blockCount = od.blockCount;
 
-        u8 rawMagic[4];
-        compressedBacking->Read(span<u8>(rawMagic, 4), 0);
+        uint8_t buf[64];
+        compressedBacking->Read(span<uint8_t>(buf), 0);
+
+        std::string hex;
+        for (int i = 0; i < 64; i++)
+            hex += fmt::format("{:02X} ", buf[i]);
       
         if (hdr.magic != util::MakeMagic<u32>("LZ4B")) {
-            char hex[32];
-            snprintf(hex, sizeof(hex), "%02X %02X %02X %02X", rawMagic[0], rawMagic[1], rawMagic[2], rawMagic[3]);
             throw exception("CompressedBacking: Unsupported format [{}], expected 'LZ4B'", hex);
         }
 
