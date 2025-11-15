@@ -147,7 +147,7 @@ namespace skyline::vfs {
             auto key{!(rightsIdEmpty || useKeyArea) ? GetTitleKey() : GetKeyAreaKey(sectionHeader.raw.header.encryptionType)};
             std::shared_ptr<Backing> bktrBacking;
 
-            if (sectionHeader.raw.compressionInfo.bucket.tableOffset != 0) {
+            if (sectionHeader.raw.compressionInfo.bucket.tableOffset != 0 && sectionHeader.raw.compressionInfo.bucket.tableSize != 0) {
                 bktrBacking = std::make_shared<CompressedBacking>(std::make_shared<RegionBacking>(backing, baseOffset, romFsSize));
             } else {
                 bktrBacking = std::make_shared<RegionBacking>(backing, baseOffset, romFsSize);
@@ -166,7 +166,8 @@ namespace skyline::vfs {
     }
 
     std::shared_ptr<Backing> NCA::CreateBacking(const NCASectionHeader &sectionHeader, std::shared_ptr<Backing> rawBacking, size_t offset) {      
-        if (!encrypted && sectionHeader.raw.compressionInfo.bucket.tableOffset != 0)
+        bool isCompressed = sectionHeader.raw.compressionInfo.bucket.tableOffset != 0 && sectionHeader.raw.compressionInfo.bucket.tableSize != 0
+        if (!encrypted && isCompressed)
             return std::make_shared<CompressedBacking>(rawBacking);
 
         if (!encrypted)
@@ -174,7 +175,7 @@ namespace skyline::vfs {
 
         switch (sectionHeader.raw.header.encryptionType) {
             case NcaSectionEncryptionType::None:
-                return sectionHeader.raw.compressionInfo.bucket.tableOffset != 0 ? std::make_shared<CompressedBacking>(rawBacking) : rawBacking;
+                return isCompressed ? std::make_shared<CompressedBacking>(rawBacking) : rawBacking;
             case NcaSectionEncryptionType::CTR:
             case NcaSectionEncryptionType::BKTR: {
                 auto key{!(rightsIdEmpty || useKeyArea) ? GetTitleKey() : GetKeyAreaKey(sectionHeader.raw.header.encryptionType)};
@@ -184,7 +185,7 @@ namespace skyline::vfs {
                     ctr[i] = sectionHeader.raw.sectionCtr[8 - i - 1];
                 }
 
-                return sectionHeader.raw.compressionInfo.bucket.tableOffset != 0 ? std::make_shared<CtrEncryptedBacking>(ctr, key, std::move(std::make_shared<CompressedBacking>(rawBacking)), offset) : std::make_shared<CtrEncryptedBacking>(ctr, key, std::move(rawBacking), offset);
+                return isCompressed ? std::make_shared<CtrEncryptedBacking>(ctr, key, std::move(std::make_shared<CompressedBacking>(rawBacking)), offset) : std::make_shared<CtrEncryptedBacking>(ctr, key, std::move(rawBacking), offset);
             }
             default:
                 return nullptr;
