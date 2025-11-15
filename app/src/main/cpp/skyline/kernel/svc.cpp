@@ -1056,7 +1056,7 @@ namespace skyline::kernel::svc {
                 break;
 
             case InfoState::AliasRegionExtraSize:
-                out = 0; // Stubbed
+                out = state.process->memory.addressSpace.size() >> 3;
                 break;
 
             default:
