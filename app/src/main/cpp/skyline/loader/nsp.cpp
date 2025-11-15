@@ -44,9 +44,9 @@ namespace skyline::loader {
                     publicNca = std::move(nca);
             } catch (const loader_exception &e) {
                 throw loader_exception(e.error);
-            } catch (const std::exception &e) {
+            } /*catch (const std::exception &e) {
                 continue;
-            }
+            }*/
         }
 
         if (programNca)
