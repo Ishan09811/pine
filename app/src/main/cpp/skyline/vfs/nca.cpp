@@ -145,7 +145,7 @@ namespace skyline::vfs {
             subsectionBuckets.back().entries.push_back({size, {0}, 0});
 
             auto key{!(rightsIdEmpty || useKeyArea) ? GetTitleKey() : GetKeyAreaKey(sectionHeader.raw.header.encryptionType)};
-            auto bktrBacking{sectionHeader.raw.compressionInfo.bucket.tableOffset != 0 ? std::make_shared<CompressedBacking>(std::make_shared<RegionBacking>(backing, baseOffset, romFsSize)) : std::make_shared<RegionBacking>(backing, baseOffset, romFsSize)};
+            std::shared_ptr<Backing> bktrBacking = sectionHeader.raw.compressionInfo.bucket.tableOffset != 0 ? std::make_shared<CompressedBacking>(std::make_shared<RegionBacking>(backing, baseOffset, romFsSize)) : std::make_shared<RegionBacking>(backing, baseOffset, romFsSize);
 
             auto bktr{std::make_shared<BKTR>(
                 bktrBaseRomfs, bktrBacking,
