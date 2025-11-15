@@ -139,8 +139,10 @@ namespace skyline::vfs {
         std::string first64;
         for (size_t i = 0; i < std::min<size_t>(64, probe.size()); ++i)
             first64 += fmt::format("{:02X} ", probe[i]);
-
-        std::string matchesStr = found.empty() ? std::string("None") : fmt::join(found, "\n");
+        
+        std::string matchesStr = found.empty()
+            ? "None"
+            : fmt::format("{}", fmt::join(found, "\n"));
 
         std::string msg = fmt::format(
             "CompressedBacking probe\n"
@@ -151,7 +153,7 @@ namespace skyline::vfs {
             matchesStr,
             first64
         );
-        throw exception(msg);
+        throw exception("{}", msg);
         
         auto decryptedBacking{CreateBacking(sectionHeader, std::make_shared<RegionBacking>(backing, romFsOffset, romFsSize), romFsOffset)};
 
