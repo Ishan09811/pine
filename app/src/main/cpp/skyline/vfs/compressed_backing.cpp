@@ -5,7 +5,7 @@
 #include <lz4.h>
 
 namespace skyline::vfs {
-    constexpr size_t HEADER_FIXED_SIZE = 4 + 4 + 8 + 8 + 4;
+    constexpr size_t HEADER_FIXED_SIZE = 0x20;
 
     CompressedBacking::CompressedBacking(std::shared_ptr<Backing> raw) : Backing(mode = {true, false, false}), compressedBacking(std::move(raw)) {
         HeaderOnDisk od = compressedBacking->Read<HeaderOnDisk>(0);
@@ -16,15 +16,13 @@ namespace skyline::vfs {
         hdr.compressedSize = od.compressedSize;
         hdr.blockCount = od.blockCount;
 
+        u8 rawMagic[4];
+        compressedBacking->Read(span<u8>(rawMagic, 4), 0);
+      
         if (hdr.magic != util::MakeMagic<u32>("LZ4B")) {
-            char got[5] = {
-                char((hdr.magic >>  0) & 0xFF),
-                char((hdr.magic >>  8) & 0xFF),
-                char((hdr.magic >> 16) & 0xFF),
-                char((hdr.magic >> 24) & 0xFF),
-                0
-            };
-            throw exception("CompressedBacking: Unsupported format '{}', expected 'LZ4B'", got);
+            char hex[32];
+            snprintf(hex, sizeof(hex), "%02X %02X %02X %02X", rawMagic[0], rawMagic[1], rawMagic[2], rawMagic[3]);
+            throw exception("CompressedBacking: Unsupported format [{}], expected 'LZ4B'", hex);
         }
 
         if (hdr.blockCount == 0 || hdr.blockCount > 1'000'000)
@@ -59,13 +57,13 @@ namespace skyline::vfs {
 
         while (remaining > 0 && blockIndex < hdr.blockCount) {
             // Load compressed block
-            u32 compStart = hdr.blockOffsets[blockIndex];
-            u32 compEnd = hdr.blockOffsets[blockIndex + 1];
+            u64 compStart = hdr.blockOffsets[blockIndex];
+            u64 compEnd = hdr.blockOffsets[blockIndex + 1];
             
             if (compEnd < compStart)
                 throw exception("LZ4B invalid block offset table");
             
-            u32 compSize  = compEnd - compStart;
+            size_t compSize = compEnd - compStart;
 
             std::vector<u8> compData(compSize);
             compressedBacking->Read(span<u8>(compData), compStart);
