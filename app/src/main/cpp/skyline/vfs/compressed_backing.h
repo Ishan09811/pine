@@ -20,9 +20,9 @@ namespace skyline::vfs {
         struct HeaderOnDisk {
             u32 magic;
             u32 headerSize;
-            u32 blockSize;
             u64 uncompressedSize;
             u64 compressedSize;
+            u32 blockSize;
             u32 blockCount;
         };
 
