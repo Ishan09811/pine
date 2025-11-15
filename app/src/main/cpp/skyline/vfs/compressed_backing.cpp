@@ -5,6 +5,8 @@
 #include <lz4.h>
 
 namespace skyline::vfs {
+    constexpr size_t HEADER_FIXED_SIZE = 4 + 4 + 8 + 8 + 4;
+
     CompressedBacking::CompressedBacking(std::shared_ptr<Backing> raw) : Backing(mode = {true, false, false}), compressedBacking(std::move(raw)) {
         HeaderOnDisk od = compressedBacking->Read<HeaderOnDisk>(0);
 
@@ -30,8 +32,12 @@ namespace skyline::vfs {
         if (hdr.blockSize == 0 || hdr.blockSize > (1 << 24))
             throw exception("CompressedBacking: invalid blockSize: {}", hdr.blockSize);
 
+        std::vector<u32> tempOffsets(hdr.blockCount + 1);
+        compressedBacking->Read(span<u32>(tempOffsets), sizeof(HEADER_FIXED_SIZE));
         hdr.blockOffsets.resize(hdr.blockCount + 1);
-        compressedBacking->Read(span<u32>(hdr.blockOffsets), sizeof(HeaderOnDisk));
+        for (size_t i = 0; i < hdr.blockCount + 1; i++) {
+            hdr.blockOffsets[i] = static_cast<u64>(tempOffsets[i]);
+        }
 
         size = static_cast<size_t>(hdr.uncompressedSize);
     }
@@ -54,7 +60,11 @@ namespace skyline::vfs {
         while (remaining > 0 && blockIndex < hdr.blockCount) {
             // Load compressed block
             u32 compStart = hdr.blockOffsets[blockIndex];
-            u32 compEnd   = hdr.blockOffsets[blockIndex + 1];
+            u32 compEnd = hdr.blockOffsets[blockIndex + 1];
+            
+            if (compEnd < compStart)
+                throw exception("LZ4B invalid block offset table");
+            
             u32 compSize  = compEnd - compStart;
 
             std::vector<u8> compData(compSize);
@@ -73,7 +83,11 @@ namespace skyline::vfs {
 
             // Copy the part we need
             size_t copyBegin = blockOffsetInside;
-            size_t copyLen   = std::min(remaining, decSize - copyBegin);
+            
+            if (decSize <= copyBegin)
+                return written;
+
+            size_t copyLen = std::min(remaining, decSize - copyBegin);
 
             memcpy(output.data() + written, blockBuffer.data() + copyBegin, copyLen);
 
