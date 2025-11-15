@@ -24,7 +24,7 @@ namespace skyline::vfs {
             hex += fmt::format("{:02X} ", buf[i]);
       
         if (hdr.magic != util::MakeMagic<u32>("LZ4B")) {
-            throw exception("CompressedBacking: Unsupported format [{}], expected 'LZ4B'", hex);
+            throw exception("CompressedBacking: Unsupported format [{}], magic=0x{:08X}, expected 'LZ4B'", hex, hdr.magic);
         }
 
         if (hdr.blockCount == 0 || hdr.blockCount > 1'000'000)
