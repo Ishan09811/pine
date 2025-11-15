@@ -31,7 +31,7 @@ namespace skyline::vfs {
             u64 uncompressedSize;
             u64 compressedSize;
             u32 blockCount;
-            std::vector<u32> blockOffsets;
+            std::vector<u64> blockOffsets;
         };
 
         Header hdr;
