@@ -166,7 +166,7 @@ namespace skyline::vfs {
     }
 
     std::shared_ptr<Backing> NCA::CreateBacking(const NCASectionHeader &sectionHeader, std::shared_ptr<Backing> rawBacking, size_t offset) {      
-        bool isCompressed = sectionHeader.raw.compressionInfo.bucket.tableOffset != 0 && sectionHeader.raw.compressionInfo.bucket.tableSize != 0
+        bool isCompressed = sectionHeader.raw.compressionInfo.bucket.tableOffset != 0 && sectionHeader.raw.compressionInfo.bucket.tableSize != 0;
         if (!encrypted && isCompressed)
             return std::make_shared<CompressedBacking>(rawBacking);
 
