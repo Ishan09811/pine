@@ -112,6 +112,47 @@ namespace skyline::vfs {
         ivfcOffset = sectionHeader.romfs.ivfc.levels[constant::IvfcMaxLevel - 1].offset;
         const std::size_t romFsOffset{baseOffset + ivfcOffset};
         const std::size_t romFsSize{sectionHeader.romfs.ivfc.levels[constant::IvfcMaxLevel - 1].size};
+
+        const size_t probeSize = static_cast<size_t>(std::min<u64>(romFsSize, 65536ULL));
+        std::vector<uint8_t> probe(probeSize);
+        backing->Read(span<uint8_t>(probe), baseOffset);
+
+        auto match4 = [&](size_t i, uint32_t magic) {
+            uint32_t got = static_cast<uint32_t>(probe[i]) |
+                           (static_cast<uint32_t>(probe[i+1]) << 8) |
+                           (static_cast<uint32_t>(probe[i+2]) << 16) |
+                           (static_cast<uint32_t>(probe[i+3]) << 24);
+            return got == magic;
+        };
+
+        const uint32_t MAGIC_LZ4B = util::MakeMagic<u32>("LZ4B");
+        const uint32_t MAGIC_ZSTD = 0xFD2FB528;
+
+        std::vector<std::string> found;
+        for (size_t i = 0; i + 4 <= probe.size(); ++i) {
+            if (match4(i, MAGIC_LZ4B))
+                found.push_back(fmt::format("LZ4B at parent offset 0x{:X} (baseOffset + 0x{:X})", baseOffset + i, i));
+            if (match4(i, MAGIC_ZSTD))
+                found.push_back(fmt::format("ZSTD at parent offset 0x{:X} (baseOffset + 0x{:X})", baseOffset + i, i));
+        }
+
+        std::string first64;
+        for (size_t i = 0; i < std::min<size_t>(64, probe.size()); ++i)
+            first64 += fmt::format("{:02X} ", probe[i]);
+
+        std::string matchesStr = found.empty() ? std::string("None") : fmt::join(found, "\n");
+
+        std::string msg = fmt::format(
+            "CompressedBacking probe\n"
+            "baseOffset=0x{:X}\nromFsOffset=0x{:X}\nivfcOffset=0x{:X}\nromFsSize=0x{:X}\n\n"
+            "Matches:\n{}\n\n"
+            "Parent @ baseOffset first64: {}\n\n",
+            baseOffset, romFsOffset, ivfcOffset, romFsSize,
+            matchesStr,
+            first64
+        );
+        throw exception(msg);
+        
         auto decryptedBacking{CreateBacking(sectionHeader, std::make_shared<RegionBacking>(backing, romFsOffset, romFsSize), romFsOffset)};
 
         if (sectionHeader.raw.header.encryptionType == NcaSectionEncryptionType::BKTR && bktrBaseRomfs && romFs) {
