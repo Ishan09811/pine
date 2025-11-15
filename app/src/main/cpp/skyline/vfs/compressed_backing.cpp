@@ -33,7 +33,7 @@ namespace skyline::vfs {
             throw exception("CompressedBacking: invalid blockSize: {}", hdr.blockSize);
 
         std::vector<u32> tempOffsets(hdr.blockCount + 1);
-        compressedBacking->Read(span<u32>(tempOffsets), sizeof(HEADER_FIXED_SIZE));
+        compressedBacking->Read(span<u32>(tempOffsets), HEADER_FIXED_SIZE);
         hdr.blockOffsets.resize(hdr.blockCount + 1);
         for (size_t i = 0; i < hdr.blockCount + 1; i++) {
             hdr.blockOffsets[i] = static_cast<u64>(tempOffsets[i]);
