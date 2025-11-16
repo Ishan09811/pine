@@ -210,10 +210,9 @@ namespace skyline::vfs {
                 }
 
                 auto encBacking = std::make_shared<CtrEncryptedBacking>(ctr, key, rawBacking, offset);
-
-                return isCompressed ?
-                    std::make_shared<CompressedBacking>(encBacking) :
-                    encBacking;
+                std::shared_ptr<Backing> result;
+                if (isCompressed) result = std::make_shared<CompressedBacking>(encBacking); else result = encBacking;
+                return result;
             }
             default:
                 return nullptr;
