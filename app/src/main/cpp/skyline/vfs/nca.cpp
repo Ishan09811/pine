@@ -116,22 +116,24 @@ namespace skyline::vfs {
         uint64_t tableOffset = sectionHeader.raw.compressionInfo.bucket.tableOffset;
         uint64_t tableSize   = sectionHeader.raw.compressionInfo.bucket.tableSize;
 
-        size_t dumpSize = std::min<uint64_t>(tableSize, 64);
-        std::vector<uint8_t> buf(dumpSize);
-        backing->Read(span<uint8_t>(buf), baseOffset + tableOffset);
+        if (tableOffset != 0 && tableSize != 0) {
+            size_t dumpSize = std::min<uint64_t>(tableSize, 64);
+            std::vector<uint8_t> buf(dumpSize);
+            backing->Read(span<uint8_t>(buf), baseOffset + tableOffset);
 
-        std::string hex1;
-        for (size_t i = 0; i < dumpSize; i++)
-            hex1 += fmt::format("{:02X} ", buf[i]);
+            std::string hex1;
+            for (size_t i = 0; i < dumpSize; i++)
+                hex1 += fmt::format("{:02X} ", buf[i]);
 
-        buf.assign(dumpSize, 0);
-        backing->Read(span<uint8_t>(buf), romFsOffset + tableOffset);
+            buf.assign(dumpSize, 0);
+            backing->Read(span<uint8_t>(buf), romFsOffset + tableOffset);
 
-        std::string hex2;
-        for (size_t i = 0; i < dumpSize; i++)
-            hex2 += fmt::format("{:02X} ", buf[i]);
-        
-        throw exception("Table @ baseOffset + tableOffset (0x{:X}) first64 = {}, romFsOffset + tableOffset (0x{:X}) first64 = {}", baseOffset + tableOffset, hex1, romFsOffset + tableOffset, hex2);
+            std::string hex2;
+            for (size_t i = 0; i < dumpSize; i++)
+                hex2 += fmt::format("{:02X} ", buf[i]);
+         
+            throw exception("Table @ baseOffset + tableOffset (0x{:X}) first64 = {}, romFsOffset + tableOffset (0x{:X}) first64 = {}", baseOffset + tableOffset, hex1, romFsOffset + tableOffset, hex2);
+        }
         
         auto decryptedBacking{CreateBacking(sectionHeader, std::make_shared<RegionBacking>(backing, romFsOffset, romFsSize), romFsOffset)};
 
