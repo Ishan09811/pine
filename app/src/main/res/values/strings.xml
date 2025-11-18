@@ -38,6 +38,9 @@
     <string name="invalid_file">Invalid file</string>
     <string name="missing_title_key">Missing title key</string>
     <string name="incomplete_prod_keys">Incomplete production keys</string>
+    <string name="error_sparse_nca">Error Sparse NCA</string>
+    <string name="error_compressed_nca">Error Compressed NCA</string>
+    <string name="error_compressed_nca_desc">compressed NCA is not supported</string>
     <!-- Picture-In-Picture -->
     <string name="pause">Pause</string>
     <string name="mute">Mute</string>

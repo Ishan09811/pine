@@ -36,6 +36,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.R as MaterialR
 import com.google.android.material.color.MaterialColors
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import emu.skyline.adapter.*
 import emu.skyline.di.getSettings
@@ -319,6 +320,13 @@ class MainActivity : AppCompatActivity() {
                 putExtra(AppItemTag, appItem)
                 putExtra(EmulationActivity.ReturnToMainTag, true)
             })
+        } else {
+        	 MaterialAlertDialogBuilder(this@MainActivity)
+                .setTitle(appItem.loaderResultString(this@MainActivity))
+                //TODO: .setMessage("") also show message for more details
+                .setPositiveButton(R.string.close, null)
+                .create()
+                .show()
         }
     }
 
