@@ -23,4 +23,8 @@ namespace skyline::soc::host1x {
                 break;
         }
     }
+
+    void NvDecClass::Execute() {
+        // TODO: Implement decoder
+    }
 }
