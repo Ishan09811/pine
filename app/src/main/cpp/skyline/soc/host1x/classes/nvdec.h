@@ -9,6 +9,14 @@ namespace skyline::soc::host1x {
     /**
      * @brief The NVDEC Host1x class implements hardware accelerated video decoding for the VP9/VP8/H264/VC1 codecs
      */
+     enum class VideoCodec : u64 {
+         None = 0x0,
+         H264 = 0x3,
+         VP8 = 0x5,
+         H265 = 0x7,
+         VP9 = 0x9,
+     };
+
     class NvDecClass {
       private:
         std::function<void()> opDoneCallback;
