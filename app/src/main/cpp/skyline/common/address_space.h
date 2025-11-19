@@ -178,6 +178,11 @@ namespace skyline {
             return obj;
         }
 
+        void ReadBlock(VaType virt, void* dest, size_t size, std::function<void(span<u8>)> cpuAccessCallback = {}) {
+            Read(reinterpret_cast<u8*>(dest), virt, size, cpuAccessCallback);
+        }
+
+
         /**
          * @brief Writes contents starting from the virtual address till the end of the span or an unmapped block has been hit or when `function` returns a non-nullopt value
          * @param function A function that is called on every block where it should return an end offset into the block when it wants to end reading or std::nullopt when it wants to continue reading
