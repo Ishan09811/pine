@@ -45,7 +45,7 @@ namespace skyline::soc::host1x {
     };
     static_assert(sizeof(ChannelCommandFifoMethodHeader) == sizeof(u32));
 
-    ChannelCommandFifo::ChannelCommandFifo(const DeviceState &state, SyncpointSet &syncpoints, Host1x &host1x) : state(state), gatherQueue(GatherQueueSize), host1XClass(syncpoints), nvDecClass(syncpoints, host1x), vicClass(syncpoints) {}
+    ChannelCommandFifo::ChannelCommandFifo(const DeviceState &state, SyncpointSet &syncpoints) : state(state), gatherQueue(GatherQueueSize), host1XClass(syncpoints), nvDecClass(syncpoints, state), vicClass(syncpoints) {}
 
     void ChannelCommandFifo::Send(ClassId targetClass, u32 method, u32 argument) {
         LOGV("Calling method in class: 0x{:X}, method: 0x{:X}, argument: 0x{:X}", targetClass, method, argument);
