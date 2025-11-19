@@ -7,7 +7,7 @@ namespace skyline::soc::host1x {
     #define NVDEC_INDEX(fieldName)                                                                \
         (offsetof(NvdecRegisters, fieldName) / sizeof(u64))
 
-    NvDecClass::NvDecClass(std::function<void()> opDoneCallback, DeviceState &state)
+    NvDecClass::NvDecClass(std::function<void()> opDoneCallback, const DeviceState &state)
         : opDoneCallback(std::move(opDoneCallback)), state(state) {}
 
     void NvDecClass::CallMethod(u32 method, u32 argument) {
