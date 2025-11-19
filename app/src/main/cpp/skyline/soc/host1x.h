@@ -17,7 +17,8 @@ namespace skyline::soc::host1x {
       public:
         SyncpointSet syncpoints;
         std::array<ChannelCommandFifo, ChannelCount> channels;
+        std::shared_ptr<AddressSpaceContext> asCtx;
 
-        Host1x(const DeviceState &state) : channels{util::MakeFilledArray<ChannelCommandFifo, ChannelCount>(state, syncpoints)} {}
+        Host1x(const DeviceState &state) : channels{util::MakeFilledArray<ChannelCommandFifo, ChannelCount>(state, syncpoints, this)} {}
     };
 }
