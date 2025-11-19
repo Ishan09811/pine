@@ -22,7 +22,7 @@ namespace skyline::soc::host1x {
         std::function<void()> opDoneCallback;
 
       public:
-        NvDecClass(std::function<void()> opDoneCallback);
+        NvDecClass(std::function<void()> opDoneCallback, Host1x &host1x);
 
         #pragma pack(push, 1)
         union NvdecRegisters {
