@@ -7,8 +7,8 @@ namespace skyline::soc::host1x {
     #define NVDEC_INDEX(fieldName)                                                                \
         (offsetof(NvdecRegisters, fieldName) / sizeof(u64))
 
-    NvDecClass::NvDecClass(std::function<void()> opDoneCallback, Host1x &host1x)
-        : opDoneCallback(std::move(opDoneCallback)), host1x(host1x) {}
+    NvDecClass::NvDecClass(std::function<void()> opDoneCallback, DeviceState &state)
+        : opDoneCallback(std::move(opDoneCallback)), state(state) {}
 
     void NvDecClass::CallMethod(u32 method, u32 argument) {
         LOGW("Unknown NVDEC class method called: 0x{:X} argument: 0x{:X}", method, argument);
