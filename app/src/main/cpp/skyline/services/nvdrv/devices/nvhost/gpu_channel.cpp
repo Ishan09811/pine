@@ -10,7 +10,7 @@ namespace skyline::service::nvdrv::device::nvhost {
         : NvDevice(state, driver, core, ctx),
           smExceptionBreakpointIntReportEvent(std::make_shared<type::KEvent>(state, false)),
           smExceptionBreakpointPauseReportEvent(std::make_shared<type::KEvent>(state, false)),
-          errorNotifierEvent(std::make_shared<type::KEvent>(state, false)) {
+          errorNotifierEvent(std::make_shared<type::KEvent>(state, false)), state(state) {
         channelSyncpoint = core.syncpointManager.AllocateSyncpoint(false);
     }
 
@@ -176,6 +176,7 @@ namespace skyline::service::nvdrv::device::nvhost {
         }
 
         channelCtx = std::make_unique<soc::gm20b::ChannelContext>(state, asCtx, numEntries);
+        state.soc.host1x.asCtx = asCtx; // is it should be set here?
 
         fence = core.syncpointManager.GetSyncpointFence(channelSyncpoint);
 
