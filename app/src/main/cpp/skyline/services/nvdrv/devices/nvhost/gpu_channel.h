@@ -33,6 +33,8 @@ namespace skyline::service::nvdrv::device::nvhost {
         size_t pushBufferMemoryOffset{}; //!< The current offset for which to write new pushbuffer method data into for post-increment and pre-wait
         std::vector<u32> pushBufferMemory; //!< Mapped into the guest GPU As and used to store method data for pre/post increment commands
 
+        const DeviceState &state;
+
         friend AsGpu;
 
       public:
