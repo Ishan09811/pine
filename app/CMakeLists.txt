@@ -19,8 +19,8 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Ofast")
 function(import_prebuilt name path)
     add_library(${name} SHARED IMPORTED)
     set_target_properties(${name} PROPERTIES
-        IMPORTED_LOCATION "${path}/lib/arm64-v8a/lib${name}.so"
-        INTERFACE_INCLUDE_DIRECTORIES "${path}/include"
+        IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/${path}/lib/arm64-v8a/lib${name}.so"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/${path}/include"
     )
 endfunction()
 
