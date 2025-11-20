@@ -81,13 +81,13 @@ add_subdirectory("libraries/opus")
 target_compile_definitions(opus PRIVATE OPUS_WILL_BE_SLOW=1 OPUS_FAST_MATH=1) # libopus will warn when built without optimizations
 
 # FFmpeg 
-import_prebuilt(avcodec libraries/ffmpeg/output)
-import_prebuilt(avdevice libraries/ffmpeg/output)
-import_prebuilt(avfilter libraries/ffmpeg/output)
-import_prebuilt(avformat libraries/ffmpeg/output)
-import_prebuilt(avutil libraries/ffmpeg/output)
-import_prebuilt(swresample libraries/ffmpeg/output)
-import_prebuilt(swscale libraries/ffmpeg/output)
+import_prebuilt(avcodec libraries/ffmpeg/output);
+import_prebuilt(avdevice libraries/ffmpeg/output);
+import_prebuilt(avfilter libraries/ffmpeg/output);
+import_prebuilt(avformat libraries/ffmpeg/output);
+import_prebuilt(avutil libraries/ffmpeg/output);
+import_prebuilt(swresample libraries/ffmpeg/output);
+import_prebuilt(swscale libraries/ffmpeg/output);
 
 # Cubeb
 set(USE_OPENSL ON)
