@@ -66,4 +66,4 @@
 	url = https://github.com/Cyan4973/xxHash
 [submodule "app/libraries/ffmpeg"]
 	path = app/libraries/ffmpeg
-	url = https://github.com/Javernaut/ffmpeg-android-maker
+	url = https://github.com/Ishan09811/ffmpeg-android-maker
