@@ -21,6 +21,7 @@ namespace skyline::soc::host1x {
       private:
         std::function<void()> opDoneCallback;
         const DeviceState &state;
+        void Execute();
 
       public:
         NvDecClass(std::function<void()> opDoneCallback, const DeviceState &state);
