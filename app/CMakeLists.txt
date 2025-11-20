@@ -16,6 +16,14 @@ set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto=full -fno-stack-protector -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "-Ofast")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Ofast")
 
+function(import_prebuilt name path)
+    add_library(${name} SHARED IMPORTED)
+    set_target_properties(${name} PROPERTIES
+        IMPORTED_LOCATION "${path}/lib/arm64-v8a/lib${name}.so"
+        INTERFACE_INCLUDE_DIRECTORIES "${path}/include"
+    )
+endfunction()
+
 # Skyline's Boost fork
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
@@ -71,6 +79,15 @@ set(OPUS_INSTALL_CMAKE_CONFIG_MODULE OFF CACHE BOOL "Install Opus CMake package 
 include_directories(SYSTEM "libraries/opus/include")
 add_subdirectory("libraries/opus")
 target_compile_definitions(opus PRIVATE OPUS_WILL_BE_SLOW=1 OPUS_FAST_MATH=1) # libopus will warn when built without optimizations
+
+# FFmpeg 
+import_prebuilt(avcodec libraries/ffmpeg/output)
+import_prebuilt(avdevice libraries/ffmpeg/output)
+import_prebuilt(avfilter libraries/ffmpeg/output)
+import_prebuilt(avformat libraries/ffmpeg/output)
+import_prebuilt(avutil libraries/ffmpeg/output)
+import_prebuilt(swresample libraries/ffmpeg/output)
+import_prebuilt(swscale libraries/ffmpeg/output)
 
 # Cubeb
 set(USE_OPENSL ON)
@@ -417,5 +434,5 @@ target_include_directories(skyline PRIVATE ${source_DIR}/skyline)
 # target_precompile_headers(skyline PRIVATE ${source_DIR}/skyline/common.h) # PCH will currently break Intellisense
 target_compile_options(skyline PRIVATE -Wall -Wno-unknown-attributes -Wno-c++20-extensions -Wno-c++17-extensions -Wno-c99-designator -Wno-reorder -Wno-missing-braces -Wno-unused-variable -Wno-unused-private-field -Wno-dangling-else -Wconversion -fsigned-bitfields)
 
-target_link_libraries(skyline PRIVATE shader_recompiler audio_core dynarmic)
+target_link_libraries(skyline PRIVATE shader_recompiler audio_core dynarmic avdevice avcodec avfilter avformat avutil swresample swscale)
 target_link_libraries_system(skyline android perfetto fmt lz4_static tzcode vkma mbedcrypto opus Boost::intrusive Boost::container Boost::preprocessor Boost::regex range-v3 adrenotools tsl::robin_map xxhash)
