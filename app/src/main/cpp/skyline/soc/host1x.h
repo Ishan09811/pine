@@ -5,6 +5,7 @@
 
 #include "host1x/syncpoint.h"
 #include "host1x/command_fifo.h"
+#include "gm20b/gmmu.h"
 
 namespace skyline::soc::host1x {
     constexpr static size_t ChannelCount{14}; //!< The number of channels within host1x
