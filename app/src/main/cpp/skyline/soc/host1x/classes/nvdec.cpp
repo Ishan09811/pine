@@ -15,7 +15,7 @@ namespace skyline::soc::host1x {
         registers.raw[method] = static_cast<u64>(argument) << 8;
 
         switch (method) {
-            case NVDEC_INDEX(set_codec_id):
+            case NVDEC_INDEX(setCodecId):
                 //TODO: Implement decoder
                 break;
             case NVDEC_INDEX(execute):
