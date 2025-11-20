@@ -23,7 +23,7 @@ namespace skyline::soc::host1x {
         const DeviceState &state;
 
       public:
-        NvDecClass(std::function<void()> opDoneCallback, DeviceState &state);
+        NvDecClass(std::function<void()> opDoneCallback, const DeviceState &state);
 
         #pragma pack(push, 1)
         union NvdecRegisters {
