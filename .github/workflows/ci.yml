@@ -73,7 +73,7 @@ jobs:
           CMAKE_C_COMPILER_LAUNCHER: "ccache"
           CMAKE_CXX_COMPILER_LAUNCHER: "ccache"
           CCACHE_COMPILERCHECK: "string:${{ env.NDK_VERSION }}"
-        run: ./gradlew --build-cache assembleFull${{ env.BUILD_TYPE }}
+        run: chmod +x ./app/libraries/ffmpeg/ffmpeg-android-maker.sh && ./app/libraries/ffmpeg/ffmpeg-android-maker.sh && ./gradlew --build-cache assembleFull${{ env.BUILD_TYPE }}
 
       - name: Rename APKs (Signed)
         if: env.IS_BUILD_SIGNED == 'true' && env.UPLOAD_ARTIFACTS == 'true'
