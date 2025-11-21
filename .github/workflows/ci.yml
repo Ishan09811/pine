@@ -65,7 +65,7 @@ jobs:
           echo "$KEYSTORE_ENCODED" | base64 --decode > ${{ github.workspace }}/app/ks.jks
           
       - name: Build FFmpeg
-        uses: Ishan09811/build-ffmpeg-android@v1.0.0
+        uses: Ishan09811/build-ffmpeg-android@v1.0.0-fix
         with:
             sdk-path: $ANDROID_HOME
             ndk-path: $ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
