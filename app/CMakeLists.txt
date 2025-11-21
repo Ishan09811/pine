@@ -20,7 +20,7 @@ function(import_prebuilt name path)
     add_library(${name} SHARED IMPORTED)
     set_target_properties(${name} PROPERTIES
         IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/${path}/lib/arm64-v8a/${name}.so"
-        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/${path}/include/arm64v8a/${name}"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/${path}/include/arm64-v8a/${name}"
     )
 endfunction()
 
