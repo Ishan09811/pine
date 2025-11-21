@@ -22,7 +22,7 @@ function(import_prebuilt name path)
         IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/${path}/lib/arm64-v8a/${name}.so" 
     )
     target_include_directories(${name} SYSTEM INTERFACE
-        "${CMAKE_CURRENT_SOURCE_DIR}/${path}/include/arm64-v8a/${name}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/${path}/include/arm64-v8a"
     )
 endfunction()
 
