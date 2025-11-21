@@ -314,6 +314,7 @@ namespace skyline::util {
      */
     template<size_t Offset, typename ValueType, typename PadType = u8>
     struct OffsetMember {
+      static constexpr size_t kOffset = Offset;
       private:
         PadType _pad_[Offset];
         ValueType value;
