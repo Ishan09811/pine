@@ -19,8 +19,8 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Ofast")
 function(import_prebuilt name path)
     add_library(${name} SHARED IMPORTED)
     set_target_properties(${name} PROPERTIES
-        IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/${path}/lib/arm64-v8a/lib${name}.so"
-        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/${path}/include"
+        IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/${path}/lib/arm64-v8a/${name}.so"
+        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/${path}/include/${name}"
     )
 endfunction()
 
@@ -81,13 +81,13 @@ add_subdirectory("libraries/opus")
 target_compile_definitions(opus PRIVATE OPUS_WILL_BE_SLOW=1 OPUS_FAST_MATH=1) # libopus will warn when built without optimizations
 
 # FFmpeg 
-import_prebuilt(avcodec libraries/ffmpeg/output)
-import_prebuilt(avdevice libraries/ffmpeg/output)
-import_prebuilt(avfilter libraries/ffmpeg/output)
-import_prebuilt(avformat libraries/ffmpeg/output)
-import_prebuilt(avutil libraries/ffmpeg/output)
-import_prebuilt(swresample libraries/ffmpeg/output)
-import_prebuilt(swscale libraries/ffmpeg/output)
+import_prebuilt(libavcodec libraries/ffmpeg/output)
+import_prebuilt(libavdevice libraries/ffmpeg/output)
+import_prebuilt(libavfilter libraries/ffmpeg/output)
+import_prebuilt(libavformat libraries/ffmpeg/output)
+import_prebuilt(libavutil libraries/ffmpeg/output)
+import_prebuilt(libswresample libraries/ffmpeg/output)
+import_prebuilt(libswscale libraries/ffmpeg/output)
 
 # Cubeb
 set(USE_OPENSL ON)
@@ -434,5 +434,5 @@ target_include_directories(skyline PRIVATE ${source_DIR}/skyline)
 # target_precompile_headers(skyline PRIVATE ${source_DIR}/skyline/common.h) # PCH will currently break Intellisense
 target_compile_options(skyline PRIVATE -Wall -Wno-unknown-attributes -Wno-c++20-extensions -Wno-c++17-extensions -Wno-c99-designator -Wno-reorder -Wno-missing-braces -Wno-unused-variable -Wno-unused-private-field -Wno-dangling-else -Wconversion -fsigned-bitfields)
 
-target_link_libraries(skyline PRIVATE shader_recompiler audio_core dynarmic avdevice avcodec avfilter avformat avutil swresample swscale)
+target_link_libraries(skyline PRIVATE shader_recompiler audio_core dynarmic libavdevice libavcodec libavfilter libavformat libavutil libswresample libswscale)
 target_link_libraries_system(skyline android perfetto fmt lz4_static tzcode vkma mbedcrypto opus Boost::intrusive Boost::container Boost::preprocessor Boost::regex range-v3 adrenotools tsl::robin_map xxhash)
