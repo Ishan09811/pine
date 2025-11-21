@@ -19,8 +19,10 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-Ofast")
 function(import_prebuilt name path)
     add_library(${name} SHARED IMPORTED)
     set_target_properties(${name} PROPERTIES
-        IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/${path}/lib/arm64-v8a/${name}.so"
-        INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/${path}/include/arm64-v8a/${name}"
+        IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/${path}/lib/arm64-v8a/${name}.so" 
+    )
+    target_include_directories(${name} SYSTEM INTERFACE
+        "${CMAKE_CURRENT_SOURCE_DIR}/${path}/include/arm64-v8a/${name}"
     )
 endfunction()
 
@@ -434,5 +436,5 @@ target_include_directories(skyline PRIVATE ${source_DIR}/skyline)
 # target_precompile_headers(skyline PRIVATE ${source_DIR}/skyline/common.h) # PCH will currently break Intellisense
 target_compile_options(skyline PRIVATE -Wall -Wno-unknown-attributes -Wno-c++20-extensions -Wno-c++17-extensions -Wno-c99-designator -Wno-reorder -Wno-missing-braces -Wno-unused-variable -Wno-unused-private-field -Wno-dangling-else -Wconversion -fsigned-bitfields)
 
-target_link_libraries(skyline PRIVATE shader_recompiler audio_core dynarmic libavdevice libavcodec libavfilter libavformat libavutil libswresample libswscale)
-target_link_libraries_system(skyline android perfetto fmt lz4_static tzcode vkma mbedcrypto opus Boost::intrusive Boost::container Boost::preprocessor Boost::regex range-v3 adrenotools tsl::robin_map xxhash)
+target_link_libraries(skyline PRIVATE shader_recompiler audio_core dynarmic)
+target_link_libraries_system(skyline android perfetto fmt lz4_static tzcode vkma mbedcrypto opus Boost::intrusive Boost::container Boost::preprocessor Boost::regex range-v3 adrenotools tsl::robin_map xxhash libavdevice libavcodec libavfilter libavformat libavutil libswresample libswscale)
