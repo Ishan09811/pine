@@ -65,7 +65,7 @@ jobs:
           echo "$KEYSTORE_ENCODED" | base64 --decode > ${{ github.workspace }}/app/ks.jks
           
       - name: Build FFmpeg
-        uses: Ishan09811/build-ffmpeg-android@v1.0.1-fix
+        uses: Ishan09811/build-ffmpeg-android@v1.0.1-fix2
         with:
             sdk-path: $ANDROID_HOME
             ndk-path: $ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
@@ -84,10 +84,6 @@ jobs:
           CMAKE_CXX_COMPILER_LAUNCHER: "ccache"
           CCACHE_COMPILERCHECK: "string:${{ env.NDK_VERSION }}"
         run: |
-          ls ./app/libraries/ffmpeg/output/include/arm64-v8a
-          ls ./app/libraries/ffmpeg
-          ls ./app/libraries/ffmpeg/output/lib/arm64-v8a/
-          ls ./app/libraries/ffmpeg/output/include
           ./gradlew --build-cache assembleFull${{ env.BUILD_TYPE }}
 
       - name: Rename APKs (Signed)
