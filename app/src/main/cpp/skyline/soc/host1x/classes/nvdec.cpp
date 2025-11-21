@@ -4,8 +4,7 @@
 #include "nvdec.h"
 
 namespace skyline::soc::host1x {
-    #define NVDEC_INDEX(fieldName)                                                                \
-        (offsetof(NvdecRegisters, fieldName) / sizeof(u64))
+    #define NVDEC_INDEX(fieldName) (decltype(registers.fieldName)::kOffset / sizeof(u64))
 
     NvDecClass::NvDecClass(std::function<void()> opDoneCallback, const DeviceState &state)
         : opDoneCallback(std::move(opDoneCallback)), state(state) {}
