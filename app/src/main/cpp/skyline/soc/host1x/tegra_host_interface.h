@@ -41,8 +41,8 @@ namespace skyline::soc::host1x {
         }
 
       public:
-        TegraHostInterface(SyncpointSet &syncpoints)
-            : deviceClass([&] { SubmitPendingIncrs(); }),
+        TegraHostInterface(SyncpointSet &syncpoints, const DeviceState &state)
+            : deviceClass([&] { SubmitPendingIncrs(); }, state),
               syncpoints(syncpoints) {}
 
         void CallMethod(u32 method, u32 argument)  {
