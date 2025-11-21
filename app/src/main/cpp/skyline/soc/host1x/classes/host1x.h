@@ -16,7 +16,7 @@ namespace skyline::soc::host1x {
         u32 syncpointPayload{}; //!< Holds the current payload for the 32-bit syncpoint comparison methods
 
       public:
-        Host1xClass(SyncpointSet &syncpoints);
+        Host1xClass(SyncpointSet &syncpoints, const DeviceState &state);
 
         void CallMethod(u32 method, u32 argument);
     };

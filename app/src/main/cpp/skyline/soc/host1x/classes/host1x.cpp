@@ -6,7 +6,7 @@
 #include "host1x.h"
 
 namespace skyline::soc::host1x {
-    Host1xClass::Host1xClass(SyncpointSet &syncpoints) : syncpoints(syncpoints) {}
+    Host1xClass::Host1xClass(SyncpointSet &syncpoints, const DeviceState &state) : syncpoints(syncpoints) {}
 
     void Host1xClass::CallMethod(u32 method, u32 argument) {
         constexpr static u32 LoadSyncpointPayload32MethodId{0x4E}; //!< See '14.3.2.12 32-Bit Sync Point Comparison Methods' in TRM

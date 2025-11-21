@@ -14,7 +14,7 @@ namespace skyline::soc::host1x {
         std::function<void()> opDoneCallback;
 
       public:
-        VicClass(std::function<void()> opDoneCallback);
+        VicClass(std::function<void()> opDoneCallback, const DeviceState &state);
 
         void CallMethod(u32 method, u32 argument);
     };

@@ -4,7 +4,7 @@
 #include "vic.h"
 
 namespace skyline::soc::host1x {
-    VicClass::VicClass(std::function<void()> opDoneCallback)
+    VicClass::VicClass(std::function<void()> opDoneCallback, const DeviceState &state)
         : opDoneCallback(std::move(opDoneCallback)) {}
 
     void VicClass::CallMethod(u32 method, u32 argument) {
