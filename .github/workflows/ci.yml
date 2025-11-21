@@ -63,6 +63,16 @@ jobs:
           KEYSTORE_ENCODED: ${{ secrets.KEYSTORE }}
         run: | 
           echo "$KEYSTORE_ENCODED" | base64 --decode > ${{ github.workspace }}/app/ks.jks
+          
+      - name: Build FFmpeg
+        uses: Ishan09811/build-ffmpeg-android@v1.0.0
+        with:
+            sdk-path: $ANDROID_HOME
+            ndk-path: $ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
+            android-api: 34
+            abis: arm64-v8a
+            output-dir: ./app/libraries/ffmpeg
+            extra-args: "--disable-doc --disable-programs --enable-libx264"
 
       - name: Android Assemble
         env:
@@ -74,10 +84,6 @@ jobs:
           CMAKE_CXX_COMPILER_LAUNCHER: "ccache"
           CCACHE_COMPILERCHECK: "string:${{ env.NDK_VERSION }}"
         run: |
-          export ANDROID_SDK_HOME=$ANDROID_HOME
-          export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
-          chmod +x ./app/libraries/ffmpeg/ffmpeg-android-maker.sh && ./app/libraries/ffmpeg/ffmpeg-android-maker.sh -android=34 -abis=arm64-v8a --disable-doc --disable-programs --enable-libx264
-          ls ./app/libraries/ffmpeg/output/lib/arm64-v8a/
           ./gradlew --build-cache assembleFull${{ env.BUILD_TYPE }}
 
       - name: Rename APKs (Signed)
