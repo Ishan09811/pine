@@ -85,7 +85,7 @@ jobs:
           CMAKE_CXX_COMPILER_LAUNCHER: "ccache"
           CCACHE_COMPILERCHECK: "string:${{ env.NDK_VERSION }}"
         run: |
-          ls ${{ github.workspace }}/app/
+          ls ./app/libraries/ffmpeg/output/lib/arm64-v8a/
           ./gradlew --build-cache assembleFull${{ env.BUILD_TYPE }}
 
       - name: Rename APKs (Signed)
