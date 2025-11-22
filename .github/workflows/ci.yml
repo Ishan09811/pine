@@ -63,6 +63,7 @@ jobs:
           KEYSTORE_ENCODED: ${{ secrets.KEYSTORE }}
         run: | 
           echo "$KEYSTORE_ENCODED" | base64 --decode > ${{ github.workspace }}/app/ks.jks
+          ls ${{ github.workspace }}/app/
           
       - name: Build FFmpeg
         uses: Ishan09811/build-ffmpeg-android@v1.0.1-fix2
@@ -84,6 +85,7 @@ jobs:
           CMAKE_CXX_COMPILER_LAUNCHER: "ccache"
           CCACHE_COMPILERCHECK: "string:${{ env.NDK_VERSION }}"
         run: |
+          ls ${{ github.workspace }}/app/
           ./gradlew --build-cache assembleFull${{ env.BUILD_TYPE }}
 
       - name: Rename APKs (Signed)
