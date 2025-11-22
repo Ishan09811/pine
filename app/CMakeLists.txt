@@ -90,6 +90,7 @@ import_prebuilt(libavformat libraries/ffmpeg/output)
 import_prebuilt(libavutil libraries/ffmpeg/output)
 import_prebuilt(libswresample libraries/ffmpeg/output)
 import_prebuilt(libswscale libraries/ffmpeg/output)
+import_prebuilt(libpostproc libraries/ffmpeg/output) # we even need it?
 
 # Cubeb
 set(USE_OPENSL ON)
