@@ -3,7 +3,7 @@
         <img height="60%" width="60%" src="https://raw.github.com/ishan09811/pine/branding/pine.png"><br>
     </a>
     <a href="https://discord.gg/" target="_blank">
-        <img src="https://img.shields.io/discord/1104386300750082081.svg?label=&logo=discord&logoColor=ffffff&color=5865F2&labelColor=404EED">
+        <img src="https://img.shields.io/discord/1441772386243317762.svg?label=&logo=discord&logoColor=ffffff&color=5865F2&labelColor=404EED">
     </a>
     <a href="https://github.com/ishan09811/pine/actions/workflows/ci.yml" target="_blank">
         <img src="https://github.com/ishan09811/pine/actions/workflows/ci.yml/badge.svg"><br>
