@@ -176,7 +176,6 @@ namespace skyline::service::nvdrv::device::nvhost {
         }
 
         channelCtx = std::make_unique<soc::gm20b::ChannelContext>(state, asCtx, numEntries);
-        state.soc->host1x.asCtx = asCtx; // is it should be set here?
 
         fence = core.syncpointManager.GetSyncpointFence(channelSyncpoint);
 
