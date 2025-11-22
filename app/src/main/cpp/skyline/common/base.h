@@ -22,6 +22,14 @@ namespace skyline {
 
     using KHandle = u32; //!< The type of a kernel handle
 
+    #define NON_COPYABLE(cls)                                                                     \
+        cls(const cls&) = delete;                                                                      \
+        cls& operator=(const cls&) = delete
+
+    #define NON_MOVEABLE(cls)                                                                     \
+       cls(cls&&) = delete;                                                                           \
+       cls& operator=(cls&&) = delete
+
     namespace constant {
         // Time
         constexpr i64 NsInMicrosecond{1000}; //!< The amount of nanoseconds in a microsecond
@@ -60,3 +68,4 @@ namespace skyline {
     struct VariantVisitor : Ts ... { using Ts::operator()...; };
     template<class... Ts> VariantVisitor(Ts...) -> VariantVisitor<Ts...>;
 }
+
