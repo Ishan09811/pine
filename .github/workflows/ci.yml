@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -34,7 +34,7 @@ jobs:
           max-size: 3Gi
 
       - name: Restore Gradle Cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.gradle/
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/build.gradle') }}-${{ hashFiles('app/**/*.xml') }}-${{ hashFiles('app/**.kt', 'app/**.java') }}
@@ -66,7 +66,7 @@ jobs:
           ls ${{ github.workspace }}/app/
           
       - name: Build FFmpeg
-        uses: Ishan09811/build-ffmpeg-android@v1.0.1-fix2
+        uses: Ishan09811/build-ffmpeg-android@v1.0.1-fix3
         with:
             sdk-path: $ANDROID_HOME
             ndk-path: $ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
