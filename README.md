@@ -21,7 +21,7 @@
 ---
 
 ### Contact
-You can contact the core developers of Pine at our **[Discord]()**. If you have any questions, feel free to ask. It's also a good place to just keep up with the emulator, as most talk regarding development goes on over there.
+You can contact the core developers of Pine at our **[Discord](https://discord.gg/ev8MfFYAj)**. If you have any questions, feel free to ask. It's also a good place to just keep up with the emulator, as most talk regarding development goes on over there.
 
 ---
 
