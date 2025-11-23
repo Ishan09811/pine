@@ -285,7 +285,7 @@ DeinterlaceFilter::DeinterlaceFilter(const Frame& frame) {
         return;
     }
 
-    m_initialized = true;
+    mInitialized = true;
 }
 
 bool DeinterlaceFilter::AddSourceFrame(const Frame& frame) {
@@ -326,7 +326,7 @@ void DecodeApi::Reset() {
     mDecoder.reset();
 }
 
-bool DecodeApi::Initialize(Tegra::Host1x::NvdecCommon::VideoCodec codec) {
+bool DecodeApi::Initialize(skyline::soc::host1x::VideoCodec codec) {
     this->Reset();
     mDecoder.emplace(codec);
     mDecoderContext.emplace(*mDecoder);
@@ -344,7 +344,7 @@ bool DecodeApi::Initialize(Tegra::Host1x::NvdecCommon::VideoCodec codec) {
     return true;
 }
 
-bool DecodeApi::SendPacket(std::span<const u8> packetData, size_t configurationSize) {
+bool DecodeApi::SendPacket(std::span<const uint8_t> packetData, size_t configurationSize) {
     FFmpeg::Packet packet(packetData);
     return mDecoderContext->SendPacket(packet);
 }
