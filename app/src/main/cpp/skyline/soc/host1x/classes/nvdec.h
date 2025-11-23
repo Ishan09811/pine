@@ -4,6 +4,7 @@
 #pragma once
 
 #include <common.h>
+#include "common/bit_field"
 #include "soc/host1x/classes/codecs/codec.h"
 
 namespace skyline::soc::host1x {
