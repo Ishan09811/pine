@@ -216,9 +216,9 @@ const std::vector<u8>& H264BitWriter::GetByteArray() const {
 }
 
 void H264BitWriter::WriteBits(i32 value, i32 bit_count) {
-    s32 value_pos = 0;
+    i32 value_pos = 0;
 
-    s32 remaining = bit_count;
+    i32 remaining = bit_count;
 
     while (remaining > 0) {
         i32 copy_size = remaining;
