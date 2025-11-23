@@ -7,9 +7,11 @@
 
 #include <span>
 #include <vector>
+#include "common.h"
 #include "common/base.h"
 #include "common/bit_field.h"
 #include "common/scratch_buffer.h"
+#include "soc/host1x/classes/nvdec_common.h"
 
 namespace skyline::soc::host1x {
 
@@ -48,10 +50,10 @@ private:
     [[nodiscard]] i32 GetFreeBufferBits();
     void Flush();
 
-    s32 buffer_size{8};
+    i32 buffer_size{8};
 
-    s32 buffer{};
-    s32 buffer_pos{};
+    i32 buffer{};
+    i32 buffer_pos{};
     std::vector<u8> byte_array;
 };
 
