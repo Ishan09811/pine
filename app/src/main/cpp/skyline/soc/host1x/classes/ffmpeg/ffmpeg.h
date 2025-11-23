@@ -7,6 +7,7 @@
 #include <vector>
 #include <queue>
 #include <common/base.h>
+#include "soc/host1x/classes/nvdec_common.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
