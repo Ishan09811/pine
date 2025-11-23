@@ -1,6 +1,6 @@
 
-#include "soc/host1x/codecs/codec.h"
-#include "soc/host1x/codecs/h264.h"
+#include "soc/host1x/classes/codecs/codec.h"
+#include "soc/host1x/classes/codecs/h264.h"
 
 namespace skyline::soc::host1x {
 
