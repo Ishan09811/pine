@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "common/utils.h"
 #include "common/bit_field.h"
 #include "common/base.h"
 
