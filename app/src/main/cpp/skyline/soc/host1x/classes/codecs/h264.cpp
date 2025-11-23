@@ -6,6 +6,7 @@
 #include <array>
 #include <bit>
 
+#include "soc.h"
 #include "common/scratch_buffer.h"
 #include "soc/host1x/classes/codecs/h264.h"
 
@@ -34,7 +35,7 @@ std::span<const u8> H264::ComposeFrame(const NvdecRegisters& state,
     deviceState.soc->smmu.ReadBlock(state.pictureInfoOffset, &context, sizeof(H264DecoderContext));
 
     const s64 frame_number = context.h264_parameter_set.frame_number.Value();
-    if (!is_first_frame && frame_number != 0) {
+    if (!isFirstFrame && frame_number != 0) {
         frame.resize_destructive(context.stream_len);
         deviceState.soc->smmu.ReadBlock(state.frameBitstreamOffset, frame.data(), frame.size());
         *outConfigurationSize = 0;
