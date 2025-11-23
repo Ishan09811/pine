@@ -29,7 +29,7 @@ namespace skyline::soc::host1x {
 
     void NvDecClass::Execute() {
         switch (codec->GetCurrentCodec()) {
-            case NvdecCommon::VideoCodec::H264:
+            case VideoCodec::H264:
                 codec->Decode();
                 break;
             default:
