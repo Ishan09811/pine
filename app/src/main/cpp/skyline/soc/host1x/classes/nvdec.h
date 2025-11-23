@@ -81,5 +81,6 @@ namespace skyline::soc::host1x {
         #pragma pack(pop)
 
         void CallMethod(u32 method, u32 argument);
+        [[nodiscard]] std::unique_ptr<FFmpeg::Frame> GetFrame();
     };
 }
