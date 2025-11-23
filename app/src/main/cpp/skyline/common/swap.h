@@ -48,8 +48,6 @@ namespace skyline {
     return f;
 }
 
-} // Namespace skyline
-
 template <typename T, typename F>
 struct swap_struct_t {
     using swapped_t = swap_struct_t;
@@ -453,35 +451,35 @@ bool operator==(const S& p, const swap_struct_t<T, F> v) {
 template <typename T>
 struct swap_64_t {
     static T swap(T x) {
-        return static_cast<T>(Common::swap64(x));
+        return static_cast<T>(swap64(x));
     }
 };
 
 template <typename T>
 struct swap_32_t {
     static T swap(T x) {
-        return static_cast<T>(Common::swap32(x));
+        return static_cast<T>(swap32(x));
     }
 };
 
 template <typename T>
 struct swap_16_t {
     static T swap(T x) {
-        return static_cast<T>(Common::swap16(x));
+        return static_cast<T>(swap16(x));
     }
 };
 
 template <typename T>
 struct swap_float_t {
     static T swap(T x) {
-        return static_cast<T>(Common::swapf(x));
+        return static_cast<T>(swapf(x));
     }
 };
 
 template <typename T>
 struct swap_double_t {
     static T swap(T x) {
-        return static_cast<T>(Common::swapd(x));
+        return static_cast<T>(swapd(x));
     }
 };
 
@@ -627,3 +625,4 @@ using enum_be = std::enable_if_t<std::is_enum_v<T>, typename AddEndian<T, BETag>
 
 using float_be = AddEndian<float, BETag>::type;
 using double_be = AddEndian<double, BETag>::type;
+} // namespace skyline
