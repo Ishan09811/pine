@@ -6,24 +6,24 @@ namespace FFmpeg {
 
 namespace {
 
-constexpr AVPixelFormat PreferredGpuFormat = AV_PIX_FMT_MEDIACODEC;
-constexpr AVPixelFormat PreferredCpuFormat = AV_PIX_FMT_YUV420P;
-constexpr std::array PreferredGpuDecoders = {
+constexpr AVPixelFormat PreferredGPUFormat = AV_PIX_FMT_MEDIACODEC;
+constexpr AVPixelFormat PreferredCPUFormat = AV_PIX_FMT_YUV420P;
+constexpr std::array PreferredGPUDecoders = {
     AV_HWDEVICE_TYPE_MEDIACODEC,
 };
 
-AVPixelFormat GetGpuFormat(AVCodecContext* codec_context, const AVPixelFormat* pix_fmts) {
-    for (const AVPixelFormat* p = pix_fmts; *p != AV_PIX_FMT_NONE; ++p) {
-        if (*p == codec_context->pix_fmt) {
-            return codec_context->pix_fmt;
+AVPixelFormat GetGpuFormat(AVCodecContext* codecContext, const AVPixelFormat* pixFmts) {
+    for (const AVPixelFormat* p = pixFmts; *p != AV_PIX_FMT_NONE; ++p) {
+        if (*p == codecContext->pix_fmt) {
+            return codecContext->pix_fmt;
         }
     }
 
     LOGI("Could not find compatible GPU AV format, falling back to CPU");
-    av_buffer_unref(&codec_context->hw_device_ctx);
+    av_buffer_unref(&codecContext->hw_device_ctx);
 
-    codec_context->pix_fmt = PreferredCpuFormat;
-    return codec_context->pix_fmt;
+    codecContext->pix_fmt = PreferredCPUFormat;
+    return codecContext->pix_fmt;
 }
 
 std::string AVError(int errnum) {
@@ -35,25 +35,25 @@ std::string AVError(int errnum) {
 } // namespace
 
 Packet::Packet(std::span<const u8> data) {
-    m_packet = av_packet_alloc();
-    m_packet->data = const_cast<u8*>(data.data());
-    m_packet->size = static_cast<s32>(data.size());
+    mPacket = av_packet_alloc();
+    mPacket->data = const_cast<u8*>(data.data());
+    mPacket->size = static_cast<s32>(data.size());
 }
 
 Packet::~Packet() {
-    av_packet_free(&m_packet);
+    av_packet_free(&mPacket);
 }
 
 Frame::Frame() {
-    m_frame = av_frame_alloc();
+    mFrame = av_frame_alloc();
 }
 
 Frame::~Frame() {
-    av_frame_free(&m_frame);
+    av_frame_free(&mFrame);
 }
 
 Decoder::Decoder(skyline::soc::host1x::VideoCodec codec) {
-    const AVCodecID av_codec = [&] {
+    const AVCodecID avCodec = [&] {
         switch (codec) {
         case skyline::soc::host1x::VideoCodec::H264:
             return AV_CODEC_ID_H264;
@@ -63,21 +63,21 @@ Decoder::Decoder(skyline::soc::host1x::VideoCodec codec) {
         }
     }();
 
-    m_codec = avcodec_find_decoder(av_codec);
+    m_codec = avcodec_find_decoder(avCodec);
 }
 
-bool Decoder::SupportsDecodingOnDevice(AVPixelFormat* out_pix_fmt, AVHWDeviceType type) const {
+bool Decoder::SupportsDecodingOnDevice(AVPixelFormat* outPixFmt, AVHWDeviceType type) const {
     for (int i = 0;; i++) {
-        const AVCodecHWConfig* config = avcodec_get_hw_config(m_codec, i);
+        const AVCodecHWConfig* config = avcodec_get_hw_config(mCodec, i);
         if (!config) {
-            LOGD("{} decoder does not support device type {}", m_codec->name,
+            LOGD("{} decoder does not support device type {}", mCodec->name,
                       av_hwdevice_get_type_name(type));
             break;
         }
         if ((config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX) != 0 &&
             config->device_type == type) {
             LOGI("Using {} GPU decoder", av_hwdevice_get_type_name(type));
-            *out_pix_fmt = config->pix_fmt;
+            *outPixFmt = config->pix_fmt;
             return true;
         }
     }
@@ -87,29 +87,29 @@ bool Decoder::SupportsDecodingOnDevice(AVPixelFormat* out_pix_fmt, AVHWDeviceTyp
 
 std::vector<AVHWDeviceType> HardwareContext::GetSupportedDeviceTypes() {
     std::vector<AVHWDeviceType> types;
-    AVHWDeviceType current_device_type = AV_HWDEVICE_TYPE_NONE;
+    AVHWDeviceType currentDeviceType = AV_HWDEVICE_TYPE_NONE;
 
     while (true) {
-        current_device_type = av_hwdevice_iterate_types(current_device_type);
-        if (current_device_type == AV_HWDEVICE_TYPE_NONE) {
+        currentDeviceType = av_hwdevice_iterate_types(currentDeviceType);
+        if (currentDeviceType == AV_HWDEVICE_TYPE_NONE) {
             return types;
         }
 
-        types.push_back(current_device_type);
+        types.push_back(currentDeviceType);
     }
 }
 
 HardwareContext::~HardwareContext() {
-    av_buffer_unref(&m_gpu_decoder);
+    av_buffer_unref(&mGPUDecoder);
 }
 
-bool HardwareContext::InitializeForDecoder(DecoderContext& decoder_context,
+bool HardwareContext::InitializeForDecoder(DecoderContext& decoderContext,
                                            const Decoder& decoder) {
-    const auto supported_types = GetSupportedDeviceTypes();
-    for (const auto type : PreferredGpuDecoders) {
-        AVPixelFormat hw_pix_fmt;
+    const auto supportedTypes = GetSupportedDeviceTypes();
+    for (const auto type : PreferredGPUDecoders) {
+        AVPixelFormat hwPixFmt;
 
-        if (std::ranges::find(supported_types, type) == supported_types.end()) {
+        if (std::ranges::find(supportedTypes, type) == supportedTypes.end()) {
             LOGD("{} explicitly unsupported", av_hwdevice_get_type_name(type));
             continue;
         }
@@ -118,8 +118,8 @@ bool HardwareContext::InitializeForDecoder(DecoderContext& decoder_context,
             continue;
         }
 
-        if (decoder.SupportsDecodingOnDevice(&hw_pix_fmt, type)) {
-            decoder_context.InitializeHardwareDecoder(*this, hw_pix_fmt);
+        if (decoder.SupportsDecodingOnDevice(&hwPixFmt, type)) {
+            decoderContext.InitializeHardwareDecoder(*this, hwPixFmt);
             return true;
         }
     }
@@ -128,9 +128,9 @@ bool HardwareContext::InitializeForDecoder(DecoderContext& decoder_context,
 }
 
 bool HardwareContext::InitializeWithType(AVHWDeviceType type) {
-    av_buffer_unref(&m_gpu_decoder);
+    av_buffer_unref(&mGPUDecoder);
 
-    if (const int ret = av_hwdevice_ctx_create(&m_gpu_decoder, type, nullptr, nullptr, 0);
+    if (const int ret = av_hwdevice_ctx_create(&mGPUDecoder, type, nullptr, nullptr, 0);
         ret < 0) {
         LOGD("av_hwdevice_ctx_create({}) failed: {}", av_hwdevice_get_type_name(type),
                   AVError(ret));
@@ -141,31 +141,31 @@ bool HardwareContext::InitializeWithType(AVHWDeviceType type) {
 }
 
 DecoderContext::DecoderContext(const Decoder& decoder) {
-    m_codec_context = avcodec_alloc_context3(decoder.GetCodec());
-    av_opt_set(m_codec_context->priv_data, "tune", "zerolatency", 0);
-    m_codec_context->thread_count = 0;
-    m_codec_context->thread_type &= ~FF_THREAD_FRAME;
+    mCodecContext = avcodec_alloc_context3(decoder.GetCodec());
+    av_opt_set(mCodecContext->priv_data, "tune", "zerolatency", 0);
+    mCodecContext->thread_count = 0;
+    mCodecContext->thread_type &= ~FF_THREAD_FRAME;
 }
 
 DecoderContext::~DecoderContext() {
-    av_buffer_unref(&m_codec_context->hw_device_ctx);
-    avcodec_free_context(&m_codec_context);
+    av_buffer_unref(&mCodecContext->hw_device_ctx);
+    avcodec_free_context(&mCodecContext);
 }
 
 void DecoderContext::InitializeHardwareDecoder(const HardwareContext& context,
-                                               AVPixelFormat hw_pix_fmt) {
-    m_codec_context->hw_device_ctx = av_buffer_ref(context.GetBufferRef());
-    m_codec_context->get_format = GetGpuFormat;
-    m_codec_context->pix_fmt = hw_pix_fmt;
+                                               AVPixelFormat hwPixFmt) {
+    mCodecContext->hw_device_ctx = av_buffer_ref(context.GetBufferRef());
+    mCodecContext->get_format = GetGPUFormat;
+    mCodecContext->pix_fmt = hwPixFmt;
 }
 
 bool DecoderContext::OpenContext(const Decoder& decoder) {
-    if (const int ret = avcodec_open2(m_codec_context, decoder.GetCodec(), nullptr); ret < 0) {
+    if (const int ret = avcodec_open2(mCodecContext, decoder.GetCodec(), nullptr); ret < 0) {
         LOGE("avcodec_open2 error: {}", AVError(ret));
         return false;
     }
 
-    if (!m_codec_context->hw_device_ctx) {
+    if (!mCodecContext->hw_device_ctx) {
         LOGI("Using FFmpeg software decoding");
     }
 
@@ -173,7 +173,7 @@ bool DecoderContext::OpenContext(const Decoder& decoder) {
 }
 
 bool DecoderContext::SendPacket(const Packet& packet) {
-    if (const int ret = avcodec_send_packet(m_codec_context, packet.GetPacket()); ret < 0) {
+    if (const int ret = avcodec_send_packet(mCodecContext, packet.GetPacket()); ret < 0) {
         LOGE("avcodec_send_packet error: {}", AVError(ret));
         return false;
     }
@@ -181,16 +181,16 @@ bool DecoderContext::SendPacket(const Packet& packet) {
     return true;
 }
 
-std::unique_ptr<Frame> DecoderContext::ReceiveFrame(bool* out_is_interlaced) {
-    auto dst_frame = std::make_unique<Frame>();
+std::unique_ptr<Frame> DecoderContext::ReceiveFrame(bool* outIsInterlaced) {
+    auto dstFrame = std::make_unique<Frame>();
 
     const auto ReceiveImpl = [&](AVFrame* frame) {
-        if (const int ret = avcodec_receive_frame(m_codec_context, frame); ret < 0) {
+        if (const int ret = avcodec_receive_frame(mCodecContext, frame); ret < 0) {
             LOGE("avcodec_receive_frame error: {}", AVError(ret));
             return false;
         }
 
-        *out_is_interlaced =
+        *outIsInterlaced =
 #if defined(FF_API_INTERLACED_FRAME) || LIBAVUTIL_VERSION_MAJOR >= 59
             (frame->flags & AV_FRAME_FLAG_INTERLACED) != 0;
 #else
@@ -199,80 +199,82 @@ std::unique_ptr<Frame> DecoderContext::ReceiveFrame(bool* out_is_interlaced) {
         return true;
     };
 
-    if (m_codec_context->hw_device_ctx) {
+    if (mCodecContext->hw_device_ctx) {
         // If we have a hardware context, make a separate frame here to receive the
         // hardware result before sending it to the output.
-        Frame intermediate_frame;
+        Frame intermediateFrame;
 
-        if (!ReceiveImpl(intermediate_frame.GetFrame())) {
+        if (!ReceiveImpl(intermediateFrame.GetFrame())) {
             return {};
         }
 
-        dst_frame->SetFormat(PreferredGpuFormat);
+        dstFrame->SetFormat(PreferredGPUFormat);
         if (const int ret =
-                av_hwframe_transfer_data(dst_frame->GetFrame(), intermediate_frame.GetFrame(), 0);
+                av_hwframe_transfer_data(dstFrame->GetFrame(), intermediateFrame.GetFrame(), 0);
             ret < 0) {
             LOGE("av_hwframe_transfer_data error: {}", AVError(ret));
             return {};
         }
     } else {
         // Otherwise, decode the frame as normal.
-        if (!ReceiveImpl(dst_frame->GetFrame())) {
+        if (!ReceiveImpl(dstFrame->GetFrame())) {
             return {};
         }
     }
 
-    return dst_frame;
+    return dstFrame;
 }
 
 DeinterlaceFilter::DeinterlaceFilter(const Frame& frame) {
-    const AVFilter* buffer_src = avfilter_get_by_name("buffer");
-    const AVFilter* buffer_sink = avfilter_get_by_name("buffersink");
-    AVFilterInOut* inputs = avfilter_inout_alloc();
-    AVFilterInOut* outputs = avfilter_inout_alloc();
-    SCOPE_EXIT {
-        avfilter_inout_free(&inputs);
-        avfilter_inout_free(&outputs);
-    };
+    const AVFilter* bufferSrc = avfilter_get_by_name("buffer");
+    const AVFilter* bufferSink = avfilter_get_by_name("buffersink");
+    auto inputs = std::unique_ptr<AVFilterInOut, decltype(&avfilter_inout_free)>(
+        avfilter_inout_alloc(), &avfilter_inout_free
+    );
+
+    auto outputs = std::unique_ptr<AVFilterInOut, decltype(&avfilter_inout_free)>(
+        avfilter_inout_alloc(), &avfilter_inout_free
+    );
+
 
     // Don't know how to get the accurate time_base but it doesn't matter for yadif filter
     // so just use 1/1 to make buffer filter happy
     std::string args = fmt::format("video_size={}x{}:pix_fmt={}:time_base=1/1", frame.GetWidth(),
                                    frame.GetHeight(), static_cast<int>(frame.GetPixelFormat()));
 
-    m_filter_graph = avfilter_graph_alloc();
-    int ret = avfilter_graph_create_filter(&m_source_context, buffer_src, "in", args.c_str(),
-                                           nullptr, m_filter_graph);
+    mFilterGraph = avfilter_graph_alloc();
+    int ret = avfilter_graph_create_filter(&mSourceContext, bufferSrc, "in", args.c_str(),
+                                           nullptr, mFilterGraph);
     if (ret < 0) {
         LOGE("avfilter_graph_create_filter source error: {}", AVError(ret));
         return;
     }
 
-    ret = avfilter_graph_create_filter(&m_sink_context, buffer_sink, "out", nullptr, nullptr,
-                                       m_filter_graph);
+    ret = avfilter_graph_create_filter(&mSinkContext, bufferSink, "out", nullptr, nullptr,
+                                       mFilterGraph);
     if (ret < 0) {
         LOGE("avfilter_graph_create_filter sink error: {}", AVError(ret));
         return;
     }
 
     inputs->name = av_strdup("out");
-    inputs->filter_ctx = m_sink_context;
+    inputs->filter_ctx = mSinkContext;
     inputs->pad_idx = 0;
     inputs->next = nullptr;
 
     outputs->name = av_strdup("in");
-    outputs->filter_ctx = m_source_context;
+    outputs->filter_ctx = mSourceContext;
     outputs->pad_idx = 0;
     outputs->next = nullptr;
 
     const char* description = "yadif=1:-1:0";
-    ret = avfilter_graph_parse_ptr(m_filter_graph, description, &inputs, &outputs, nullptr);
+    ret = avfilter_graph_parse_ptr(mFilterGraph, description, &inputs.get(), &outputs.get(), nullptr);
     if (ret < 0) {
         LOGE("avfilter_graph_parse_ptr error: {}", AVError(ret));
         return;
     }
 
-    ret = avfilter_graph_config(m_filter_graph, nullptr);
+    ret = avfilter_graph_config(mFilterGraph, nullptr);
     if (ret < 0) {
         LOGE("avfilter_graph_config error: {}", AVError(ret));
         return;
@@ -282,7 +284,7 @@ DeinterlaceFilter::DeinterlaceFilter(const Frame& frame) {
 }
 
 bool DeinterlaceFilter::AddSourceFrame(const Frame& frame) {
-    if (const int ret = av_buffersrc_add_frame_flags(m_source_context, frame.GetFrame(),
+    if (const int ret = av_buffersrc_add_frame_flags(mSourceContext, frame.GetFrame(),
                                                      AV_BUFFERSRC_FLAG_KEEP_REF);
         ret < 0) {
         LOGE("av_buffersrc_add_frame_flags error: {}", AVError(ret));
@@ -293,8 +295,8 @@ bool DeinterlaceFilter::AddSourceFrame(const Frame& frame) {
 }
 
 std::unique_ptr<Frame> DeinterlaceFilter::DrainSinkFrame() {
-    auto dst_frame = std::make_unique<Frame>();
-    const int ret = av_buffersink_get_frame(m_sink_context, dst_frame->GetFrame());
+    auto dstFrame = std::make_unique<Frame>();
+    const int ret = av_buffersink_get_frame(mSinkContext, dstFrame->GetFrame());
 
     if (ret == AVERROR(EAGAIN) || ret == AVERROR(AVERROR_EOF)) {
         return {};
@@ -305,31 +307,31 @@ std::unique_ptr<Frame> DeinterlaceFilter::DrainSinkFrame() {
         return {};
     }
 
-    return dst_frame;
+    return dstFrame;
 }
 
 DeinterlaceFilter::~DeinterlaceFilter() {
-    avfilter_graph_free(&m_filter_graph);
+    avfilter_graph_free(&mFilterGraph);
 }
 
 void DecodeApi::Reset() {
-    m_deinterlace_filter.reset();
-    m_hardware_context.reset();
-    m_decoder_context.reset();
-    m_decoder.reset();
+    mDeinterlaceFilter.reset();
+    mHardwareContext.reset();
+    mDecoderContext.reset();
+    mDecoder.reset();
 }
 
 bool DecodeApi::Initialize(Tegra::Host1x::NvdecCommon::VideoCodec codec) {
     this->Reset();
-    m_decoder.emplace(codec);
-    m_decoder_context.emplace(*m_decoder);
+    mDecoder.emplace(codec);
+    mDecoderContext.emplace(*mDecoder);
 
    // TODO: investigate gpu decoding
    // m_hardware_context.emplace();
    // m_hardware_context->InitializeForDecoder(*m_decoder_context, *m_decoder);
 
     // Open the decoder context.
-    if (!m_decoder_context->OpenContext(*m_decoder)) {
+    if (!mDecoderContext->OpenContext(*mDecoder)) {
         this->Reset();
         return false;
     }
@@ -337,41 +339,41 @@ bool DecodeApi::Initialize(Tegra::Host1x::NvdecCommon::VideoCodec codec) {
     return true;
 }
 
-bool DecodeApi::SendPacket(std::span<const u8> packet_data, size_t configuration_size) {
-    FFmpeg::Packet packet(packet_data);
-    return m_decoder_context->SendPacket(packet);
+bool DecodeApi::SendPacket(std::span<const u8> packetData, size_t configurationSize) {
+    FFmpeg::Packet packet(packetData);
+    return mDecoderContext->SendPacket(packet);
 }
 
-void DecodeApi::ReceiveFrames(std::queue<std::unique_ptr<Frame>>& frame_queue) {
+void DecodeApi::ReceiveFrames(std::queue<std::unique_ptr<Frame>>& frameQueue) {
     // Receive raw frame from decoder.
-    bool is_interlaced;
-    auto frame = m_decoder_context->ReceiveFrame(&is_interlaced);
+    bool isInterlaced;
+    auto frame = mDecoderContext->ReceiveFrame(&isInterlaced);
     if (!frame) {
         return;
     }
 
-    if (!is_interlaced) {
+    if (!isInterlaced) {
         // If the frame is not interlaced, we can pend it now.
-        frame_queue.push(std::move(frame));
+        frameQueue.push(std::move(frame));
     } else {
         // Create the deinterlacer if needed.
-        if (!m_deinterlace_filter) {
-            m_deinterlace_filter.emplace(*frame);
+        if (!mDeinterlaceFilter) {
+            mDeinterlaceFilter.emplace(*frame);
         }
 
         // Add the frame we just received.
-        if (!m_deinterlace_filter->AddSourceFrame(*frame)) {
+        if (!mDeinterlaceFilter->AddSourceFrame(*frame)) {
             return;
         }
 
         // Pend output fields.
         while (true) {
-            auto filter_frame = m_deinterlace_filter->DrainSinkFrame();
-            if (!filter_frame) {
+            auto filterFrame = mDeinterlaceFilter->DrainSinkFrame();
+            if (!filterFrame) {
                 break;
             }
 
-            frame_queue.push(std::move(filter_frame));
+            frameQueue.push(std::move(filterFrame));
         }
     }
 }
