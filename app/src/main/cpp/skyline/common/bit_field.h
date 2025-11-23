@@ -81,6 +81,7 @@
  * TODO(neobrain): Confirm that this is a proper fix and not just masking
  * symptoms.
  */
+namespace skyline {
 #pragma pack(1)
 template <std::size_t Position, std::size_t Bits, typename T, typename EndianTag = LETag>
 struct BitField {
@@ -188,4 +189,5 @@ using BitFieldBE = BitField<Position, Bits, T, BETag>;
 template <std::size_t Position, std::size_t Bits, typename T, typename EndianTag = LETag>
 inline auto format_as(BitField<Position, Bits, T, EndianTag> bitfield) {
     return bitfield.Value();
+}
 }
