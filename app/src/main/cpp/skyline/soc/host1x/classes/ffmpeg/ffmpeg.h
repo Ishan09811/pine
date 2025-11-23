@@ -32,7 +32,7 @@ public:
     NON_COPYABLE(Packet);
     NON_MOVEABLE(Packet);
 
-    explicit Packet(std::span<const u8> data);
+    explicit Packet(std::span<const uint8_t> data);
     ~Packet();
 
     AVPacket* GetPacket() const {
@@ -72,11 +72,11 @@ public:
         return mFrame->linesize;
     }
 
-    u8* GetData(int plane) const {
+    uint8_t* GetData(int plane) const {
         return mFrame->data[plane];
     }
 
-    u8** GetPlanes() const {
+    uint8_t* GetPlanes() const {
         return mFrame->data;
     }
 
@@ -186,7 +186,7 @@ public:
     bool Initialize(skyline::soc::host1x::VideoCodec codec);
     void Reset();
 
-    bool SendPacket(std::span<const u8> packetData, size_t configurationSize);
+    bool SendPacket(std::span<const uint8_t> packetData, size_t configurationSize);
     void ReceiveFrames(std::queue<std::unique_ptr<Frame>>& frameQueue);
 
 private:
