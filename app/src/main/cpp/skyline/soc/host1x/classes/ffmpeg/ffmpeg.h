@@ -76,7 +76,7 @@ public:
         return mFrame->data[plane];
     }
 
-    uint8_t* GetPlanes() const {
+    uint8_t** GetPlanes() const {
         return mFrame->data;
     }
 
