@@ -233,13 +233,16 @@ std::unique_ptr<Frame> DecoderContext::ReceiveFrame(bool* outIsInterlaced) {
 DeinterlaceFilter::DeinterlaceFilter(const Frame& frame) {
     const AVFilter* bufferSrc = avfilter_get_by_name("buffer");
     const AVFilter* bufferSink = avfilter_get_by_name("buffersink");
-    auto inputs = std::unique_ptr<AVFilterInOut, decltype(&avfilter_inout_free)>(
-        avfilter_inout_alloc(), &avfilter_inout_free
+    auto inputs = std::unique_ptr<AVFilterInOut, std::function<void(AVFilterInOut*)>>(
+        avfilter_inout_alloc(),
+        [](AVFilterInOut* p) { avfilter_inout_free(&p); }
     );
 
-    auto outputs = std::unique_ptr<AVFilterInOut, decltype(&avfilter_inout_free)>(
-        avfilter_inout_alloc(), &avfilter_inout_free
+    auto outputs = std::unique_ptr<AVFilterInOut, std::function<void(AVFilterInOut*)>>(
+        avfilter_inout_alloc(),
+        [](AVFilterInOut* p) { avfilter_inout_free(&p); }
     );
+
 
 
     // Don't know how to get the accurate time_base but it doesn't matter for yadif filter
