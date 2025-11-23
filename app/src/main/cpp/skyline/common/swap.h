@@ -601,9 +601,9 @@ using u16_le = AddEndian<u16, LETag>::type;
 using u32_le = AddEndian<u32, LETag>::type;
 using u64_le = AddEndian<u64, LETag>::type;
 
-using i16_le = AddEndian<s16, LETag>::type;
-using i32_le = AddEndian<s32, LETag>::type;
-using i64_le = AddEndian<s64, LETag>::type;
+using i16_le = AddEndian<i16, LETag>::type;
+using i32_le = AddEndian<i32, LETag>::type;
+using i64_le = AddEndian<i64, LETag>::type;
 
 template <typename T>
 using enum_le = std::enable_if_t<std::is_enum_v<T>, typename AddEndian<T, LETag>::type>;
@@ -616,9 +616,9 @@ using u16_be = AddEndian<u16, BETag>::type;
 using u32_be = AddEndian<u32, BETag>::type;
 using u64_be = AddEndian<u64, BETag>::type;
 
-using i16_be = AddEndian<s16, BETag>::type;
-using i32_be = AddEndian<s32, BETag>::type;
-using i64_be = AddEndian<s64, BETag>::type;
+using i16_be = AddEndian<i16, BETag>::type;
+using i32_be = AddEndian<i32, BETag>::type;
+using i64_be = AddEndian<i64, BETag>::type;
 
 template <typename T>
 using enum_be = std::enable_if_t<std::is_enum_v<T>, typename AddEndian<T, BETag>::type>;
