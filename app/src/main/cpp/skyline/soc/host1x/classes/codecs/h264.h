@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: Ryujinx Team and Contributors
 // SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
+// Copyright © 2025 Pine (https://github.com/Ishan09811/pine)
 
 #pragma once
 
