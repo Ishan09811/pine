@@ -7,6 +7,7 @@
 #include <queue>
 #include "common/base.h"
 #include "soc/host1x/classes/ffmpeg/ffmpeg.h"
+#include "soc/host1x/classes/nvdec.h"
 
 namespace skyline::soc::host1x {
 
