@@ -39,7 +39,7 @@ public:
 
 private:
     bool initialized{};
-    VideoCodec current_codec{VideoCodec::None};
+    VideoCodec currentCodec{VideoCodec::None};
     FFmpeg::DecodeApi decodeAPI;
 
     const DeviceState &deviceState;
