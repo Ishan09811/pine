@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Ryujinx Team and Contributors
 // SPDX-License-Identifier: MIT
-// SPDX-License-Identifier: GPL-3.0
 // Copyright © 2025 Pine (https://github.com/Ishan09811/pine)
+// SPDX-License-Identifier: GPL-3.0
 
 #include <array>
 #include <bit>
@@ -79,7 +79,7 @@ std::span<const u8> H264::ComposeFrame(const NvdecRegisters& state,
         writer.WriteUe(0);
     }
 
-    const s32 pic_height = context.h264_parameter_set.frame_height_in_map_units /
+    const i32 pic_height = context.h264_parameter_set.frame_height_in_map_units /
                            (context.h264_parameter_set.frame_mbs_only_flag ? 1 : 2);
 
     // TODO (ameerj): Where do we get this number, it seems to be particular for each stream
@@ -115,12 +115,12 @@ std::span<const u8> H264::ComposeFrame(const NvdecRegisters& state,
     writer.WriteUe(context.h264_parameter_set.num_refidx_l0_default_active);
     writer.WriteUe(context.h264_parameter_set.num_refidx_l1_default_active);
     writer.WriteBit(context.h264_parameter_set.flags.weighted_pred.Value() != 0);
-    writer.WriteU(static_cast<s32>(context.h264_parameter_set.weighted_bipred_idc.Value()), 2);
-    s32 pic_init_qp = static_cast<s32>(context.h264_parameter_set.pic_init_qp_minus26.Value());
+    writer.WriteU(static_cast<i32>(context.h264_parameter_set.weighted_bipred_idc.Value()), 2);
+    i32 pic_init_qp = static_cast<i32>(context.h264_parameter_set.pic_init_qp_minus26.Value());
     writer.WriteSe(pic_init_qp);
     writer.WriteSe(0);
-    s32 chroma_qp_index_offset =
-        static_cast<s32>(context.h264_parameter_set.chroma_qp_index_offset.Value());
+    i32 chroma_qp_index_offset =
+        static_cast<i32>(context.h264_parameter_set.chroma_qp_index_offset.Value());
 
     writer.WriteSe(chroma_qp_index_offset);
     writer.WriteBit(context.h264_parameter_set.deblocking_filter_control_present_flag != 0);
@@ -130,22 +130,22 @@ std::span<const u8> H264::ComposeFrame(const NvdecRegisters& state,
 
     writer.WriteBit(true); // pic_scaling_matrix_present_flag
 
-    for (s32 index = 0; index < 6; index++) {
+    for (i32 index = 0; index < 6; index++) {
         writer.WriteBit(true);
         std::span<const u8> matrix{context.weight_scale};
         writer.WriteScalingList(scan, matrix, index * 16, 16);
     }
 
     if (context.h264_parameter_set.transform_8x8_mode_flag) {
-        for (s32 index = 0; index < 2; index++) {
+        for (i32 index = 0; index < 2; index++) {
             writer.WriteBit(true);
             std::span<const u8> matrix{context.weight_scale_8x8};
             writer.WriteScalingList(scan, matrix, index * 64, 64);
         }
     }
 
-    s32 chroma_qp_index_offset2 =
-        static_cast<s32>(context.h264_parameter_set.second_chroma_qp_index_offset.Value());
+    i32 chroma_qp_index_offset2 =
+        static_cast<i32>(context.h264_parameter_set.second_chroma_qp_index_offset.Value());
 
     writer.WriteSe(chroma_qp_index_offset2);
 
@@ -166,11 +166,11 @@ H264BitWriter::H264BitWriter() = default;
 
 H264BitWriter::~H264BitWriter() = default;
 
-void H264BitWriter::WriteU(s32 value, s32 value_sz) {
+void H264BitWriter::WriteU(i32 value, i32 value_sz) {
     WriteBits(value, value_sz);
 }
 
-void H264BitWriter::WriteSe(s32 value) {
+void H264BitWriter::WriteSe(i32 value) {
     WriteExpGolombCodedInt(value);
 }
 
@@ -187,8 +187,8 @@ void H264BitWriter::WriteBit(bool state) {
     WriteBits(state ? 1 : 0, 1);
 }
 
-void H264BitWriter::WriteScalingList(Common::ScratchBuffer<u8>& scan, std::span<const u8> list,
-                                     s32 start, s32 count) {
+void H264BitWriter::WriteScalingList(ScratchBuffer<u8>& scan, std::span<const u8> list,
+                                     i32 start, i32 count) {
     scan.resize_destructive(count);
     if (count == 16) {
         std::memcpy(scan.data(), zig_zag_scan.data(), scan.size());
@@ -197,9 +197,9 @@ void H264BitWriter::WriteScalingList(Common::ScratchBuffer<u8>& scan, std::span<
     }
     u8 last_scale = 8;
 
-    for (s32 index = 0; index < count; index++) {
+    for (i32 index = 0; index < count; index++) {
         const u8 value = list[start + scan[index]];
-        const s32 delta_scale = static_cast<s32>(value - last_scale);
+        const i32 delta_scale = static_cast<i32>(value - last_scale);
 
         WriteSe(delta_scale);
 
@@ -215,24 +215,24 @@ const std::vector<u8>& H264BitWriter::GetByteArray() const {
     return byte_array;
 }
 
-void H264BitWriter::WriteBits(s32 value, s32 bit_count) {
+void H264BitWriter::WriteBits(i32 value, i32 bit_count) {
     s32 value_pos = 0;
 
     s32 remaining = bit_count;
 
     while (remaining > 0) {
-        s32 copy_size = remaining;
+        i32 copy_size = remaining;
 
-        const s32 free_bits = GetFreeBufferBits();
+        const i32 free_bits = GetFreeBufferBits();
 
         if (copy_size > free_bits) {
             copy_size = free_bits;
         }
 
-        const s32 mask = (1 << copy_size) - 1;
+        const i32 mask = (1 << copy_size) - 1;
 
-        const s32 src_shift = (bit_count - value_pos) - copy_size;
-        const s32 dst_shift = (buffer_size - buffer_pos) - copy_size;
+        const i32 src_shift = (bit_count - value_pos) - copy_size;
+        const i32 dst_shift = (buffer_size - buffer_pos) - copy_size;
 
         buffer |= ((value >> src_shift) & mask) << dst_shift;
 
@@ -242,8 +242,8 @@ void H264BitWriter::WriteBits(s32 value, s32 bit_count) {
     }
 }
 
-void H264BitWriter::WriteExpGolombCodedInt(s32 value) {
-    const s32 sign = value <= 0 ? 0 : 1;
+void H264BitWriter::WriteExpGolombCodedInt(i32 value) {
+    const i32 sign = value <= 0 ? 0 : 1;
     if (value < 0) {
         value = -value;
     }
@@ -251,15 +251,15 @@ void H264BitWriter::WriteExpGolombCodedInt(s32 value) {
     WriteExpGolombCodedUInt(value);
 }
 
-void H264BitWriter::WriteExpGolombCodedUInt(u32 value) {
-    const s32 size = 32 - std::countl_zero(value + 1);
+void H264BitWriter::WriteExpGolombCodedUInt(i32 value) {
+    const i32 size = 32 - std::countl_zero(value + 1);
     WriteBits(1, size);
 
     value -= (1U << (size - 1)) - 1;
-    WriteBits(static_cast<s32>(value), size - 1);
+    WriteBits(static_cast<i32>(value), size - 1);
 }
 
-s32 H264BitWriter::GetFreeBufferBits() {
+i32 H264BitWriter::GetFreeBufferBits() {
     if (buffer_pos == buffer_size) {
         Flush();
     }
