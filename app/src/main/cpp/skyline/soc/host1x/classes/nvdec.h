@@ -4,7 +4,7 @@
 #pragma once
 
 #include <common.h>
-#include "soc/host1x/codecs/codec.h"
+#include "soc/host1x/classes/codecs/codec.h"
 
 namespace skyline::soc::host1x {
     /**
