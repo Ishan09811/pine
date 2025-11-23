@@ -251,7 +251,7 @@ void H264BitWriter::WriteExpGolombCodedInt(i32 value) {
     WriteExpGolombCodedUInt(value);
 }
 
-void H264BitWriter::WriteExpGolombCodedUInt(i32 value) {
+void H264BitWriter::WriteExpGolombCodedUInt(u32 value) {
     const i32 size = 32 - std::countl_zero(value + 1);
     WriteBits(1, size);
 
