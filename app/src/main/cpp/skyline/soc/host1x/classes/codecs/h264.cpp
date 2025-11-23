@@ -7,8 +7,7 @@
 #include <bit>
 
 #include "common/scratch_buffer.h"
-#include "soc/host1x/codecs/h264.h"
-#include "soc/host1x/host1x.h"
+#include "soc/host1x/classes/codecs/h264.h"
 
 namespace skyline::soc::host1x::Decoder {
 namespace {
