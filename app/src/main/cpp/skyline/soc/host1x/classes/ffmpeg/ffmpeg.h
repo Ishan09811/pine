@@ -36,11 +36,11 @@ public:
     ~Packet();
 
     AVPacket* GetPacket() const {
-        return m_packet;
+        return mPacket;
     }
 
 private:
-    AVPacket* m_packet{};
+    AVPacket* mPacket{};
 };
 
 // Wraps an AVFrame, a container for audio and video stream data.
@@ -53,43 +53,43 @@ public:
     ~Frame();
 
     int GetWidth() const {
-        return m_frame->width;
+        return mFrame->width;
     }
 
     int GetHeight() const {
-        return m_frame->height;
+        return mFrame->height;
     }
 
     AVPixelFormat GetPixelFormat() const {
-        return static_cast<AVPixelFormat>(m_frame->format);
+        return static_cast<AVPixelFormat>(mFrame->format);
     }
 
     int GetStride(int plane) const {
-        return m_frame->linesize[plane];
+        return mFrame->linesize[plane];
     }
 
     int* GetStrides() const {
-        return m_frame->linesize;
+        return mFrame->linesize;
     }
 
     u8* GetData(int plane) const {
-        return m_frame->data[plane];
+        return mFrame->data[plane];
     }
 
     u8** GetPlanes() const {
-        return m_frame->data;
+        return mFrame->data;
     }
 
     void SetFormat(int format) {
-        m_frame->format = format;
+        mFrame->format = format;
     }
 
     AVFrame* GetFrame() const {
-        return m_frame;
+        return mFrame;
     }
 
 private:
-    AVFrame* m_frame{};
+    AVFrame* mFrame{};
 };
 
 // Wraps an AVCodec, a type containing information about a codec.
@@ -101,14 +101,14 @@ public:
     explicit Decoder(skyline::soc::host1x::VideoCodec codec);
     ~Decoder() = default;
 
-    bool SupportsDecodingOnDevice(AVPixelFormat* out_pix_fmt, AVHWDeviceType type) const;
+    bool SupportsDecodingOnDevice(AVPixelFormat* outPixFmt, AVHWDeviceType type) const;
 
     const AVCodec* GetCodec() const {
-        return m_codec;
+        return mCodec;
     }
 
 private:
-    const AVCodec* m_codec{};
+    const AVCodec* mCodec{};
 };
 
 // Wraps AVBufferRef for an accelerated decoder.
@@ -122,16 +122,16 @@ public:
     explicit HardwareContext() = default;
     ~HardwareContext();
 
-    bool InitializeForDecoder(DecoderContext& decoder_context, const Decoder& decoder);
+    bool InitializeForDecoder(DecoderContext& decoderContext, const Decoder& decoder);
 
     AVBufferRef* GetBufferRef() const {
-        return m_gpu_decoder;
+        return mGPUDecoder;
     }
 
 private:
     bool InitializeWithType(AVHWDeviceType type);
 
-    AVBufferRef* m_gpu_decoder{};
+    AVBufferRef* mGPUDecoder{};
 };
 
 // Wraps an AVCodecContext.
@@ -143,17 +143,17 @@ public:
     explicit DecoderContext(const Decoder& decoder);
     ~DecoderContext();
 
-    void InitializeHardwareDecoder(const HardwareContext& context, AVPixelFormat hw_pix_fmt);
+    void InitializeHardwareDecoder(const HardwareContext& context, AVPixelFormat hwPixFmt);
     bool OpenContext(const Decoder& decoder);
     bool SendPacket(const Packet& packet);
-    std::unique_ptr<Frame> ReceiveFrame(bool* out_is_interlaced);
+    std::unique_ptr<Frame> ReceiveFrame(bool* outIsInterlaced);
 
     AVCodecContext* GetCodecContext() const {
-        return m_codec_context;
+        return mCodecContext;
     }
 
 private:
-    AVCodecContext* m_codec_context{};
+    AVCodecContext* mCodecContext{};
 };
 
 // Wraps an AVFilterGraph.
@@ -169,10 +169,10 @@ public:
     std::unique_ptr<Frame> DrainSinkFrame();
 
 private:
-    AVFilterGraph* m_filter_graph{};
-    AVFilterContext* m_source_context{};
-    AVFilterContext* m_sink_context{};
-    bool m_initialized{};
+    AVFilterGraph* mFilterGraph{};
+    AVFilterContext* mSourceContext{};
+    AVFilterContext* mSinkContext{};
+    bool mInitialized{};
 };
 
 class DecodeApi {
@@ -186,14 +186,14 @@ public:
     bool Initialize(skyline::soc::host1x::VideoCodec codec);
     void Reset();
 
-    bool SendPacket(std::span<const u8> packet_data, size_t configuration_size);
-    void ReceiveFrames(std::queue<std::unique_ptr<Frame>>& frame_queue);
+    bool SendPacket(std::span<const u8> packetData, size_t configurationSize);
+    void ReceiveFrames(std::queue<std::unique_ptr<Frame>>& frameQueue);
 
 private:
-    std::optional<FFmpeg::Decoder> m_decoder;
-    std::optional<FFmpeg::DecoderContext> m_decoder_context;
-    std::optional<FFmpeg::HardwareContext> m_hardware_context;
-    std::optional<FFmpeg::DeinterlaceFilter> m_deinterlace_filter;
+    std::optional<FFmpeg::Decoder> mDecoder;
+    std::optional<FFmpeg::DecoderContext> mDecoderContext;
+    std::optional<FFmpeg::HardwareContext> mHardwareContext;
+    std::optional<FFmpeg::DeinterlaceFilter> mDeinterlaceFilter;
 };
 
 } // namespace FFmpeg
