@@ -37,7 +37,7 @@ std::span<const u8> H264::ComposeFrame(const NvdecRegisters& state,
     const s64 frame_number = context.h264_parameter_set.frame_number.Value();
     if (!isFirstFrame && frame_number != 0) {
         frame.resize_destructive(context.stream_len);
-        deviceState.soc->smmu.ReadBlock(state.frameBitstreamOffset, frame.data(), frame.size());
+        deviceState.soc->smmu.ReadBlock(*state.frameBitstreamOffset, frame.data(), frame.size());
         *outConfigurationSize = 0;
         return frame;
     }
@@ -156,7 +156,7 @@ std::span<const u8> H264::ComposeFrame(const NvdecRegisters& state,
     std::memcpy(frame.data(), encodedHeader.data(), encodedHeader.size());
 
     *outConfigurationSize = encodedHeader.size();
-    deviceState.soc->smmu.ReadBlock(state.frameBitstreamOffset, frame.data() + encodedHeader.size(),
+    deviceState.soc->smmu.ReadBlock(*state.frameBitstreamOffset, frame.data() + encodedHeader.size(),
                             context.stream_len);
 
     return frame;
