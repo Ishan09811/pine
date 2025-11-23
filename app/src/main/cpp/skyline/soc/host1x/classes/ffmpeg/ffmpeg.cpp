@@ -273,7 +273,9 @@ DeinterlaceFilter::DeinterlaceFilter(const Frame& frame) {
     outputs->next = nullptr;
 
     const char* description = "yadif=1:-1:0";
-    ret = avfilter_graph_parse_ptr(mFilterGraph, description, &inputs.get(), &outputs.get(), nullptr);
+    AVFilterInOut* inputsPtr  = inputs.get();
+    AVFilterInOut* outputsPtr = outputs.get();
+    ret = avfilter_graph_parse_ptr(mFilterGraph, description, &inputsPtr, &outputsPtr, nullptr);
     if (ret < 0) {
         LOGE("avfilter_graph_parse_ptr error: {}", AVError(ret));
         return;
