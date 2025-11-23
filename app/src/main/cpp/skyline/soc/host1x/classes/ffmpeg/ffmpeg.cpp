@@ -39,10 +39,10 @@ std::string AVError(int errnum) {
 
 } // namespace
 
-Packet::Packet(std::span<const u8> data) {
+Packet::Packet(std::span<const uint8_t> data) {
     mPacket = av_packet_alloc();
-    mPacket->data = const_cast<u8*>(data.data());
-    mPacket->size = static_cast<s32>(data.size());
+    mPacket->data = const_cast<uint8_t*>(data.data());
+    mPacket->size = static_cast<int32_t>(data.size());
 }
 
 Packet::~Packet() {
