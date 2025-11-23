@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Ryujinx Team and Contributors
 // SPDX-License-Identifier: MIT
-// SPDX-License-Identifier: GPL-3.0
 // Copyright © 2025 Pine (https://github.com/Ishan09811/pine)
+// SPDX-License-Identifier: GPL-3.0
 
 #pragma once
 
@@ -110,9 +110,9 @@ private:
             BitField<8, 4, u64> log2_max_frame_num_minus4;
             BitField<12, 2, u64> chroma_format_idc;
             BitField<14, 2, u64> pic_order_cnt_type;
-            BitField<16, 6, s64> pic_init_qp_minus26;
-            BitField<22, 5, s64> chroma_qp_index_offset;
-            BitField<27, 5, s64> second_chroma_qp_index_offset;
+            BitField<16, 6, i64> pic_init_qp_minus26;
+            BitField<22, 5, i64> chroma_qp_index_offset;
+            BitField<27, 5, i64> second_chroma_qp_index_offset;
             BitField<32, 2, u64> weighted_bipred_idc;
             BitField<34, 7, u64> curr_pic_idx;
             BitField<41, 5, u64> curr_col_idx;
