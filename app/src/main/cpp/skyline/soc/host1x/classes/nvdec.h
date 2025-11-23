@@ -4,6 +4,7 @@
 #pragma once
 
 #include <common.h>
+#include "soc/host1x/codecs/codec.h"
 
 namespace skyline::soc::host1x {
     /**
@@ -20,7 +21,7 @@ namespace skyline::soc::host1x {
     class NvDecClass {
       private:
         std::function<void()> opDoneCallback;
-        const DeviceState &state;
+        std::unique_ptr<Codec> codec;
         void Execute();
 
       public:
