@@ -10,7 +10,7 @@ namespace skyline::service::nvdrv::device::nvhost {
         : NvDevice(state, driver, core, ctx),
           smExceptionBreakpointIntReportEvent(std::make_shared<type::KEvent>(state, false)),
           smExceptionBreakpointPauseReportEvent(std::make_shared<type::KEvent>(state, false)),
-          errorNotifierEvent(std::make_shared<type::KEvent>(state, false)), state(state) {
+          errorNotifierEvent(std::make_shared<type::KEvent>(state, false)) {
         channelSyncpoint = core.syncpointManager.AllocateSyncpoint(false);
     }
 
