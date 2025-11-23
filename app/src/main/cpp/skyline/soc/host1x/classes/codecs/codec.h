@@ -5,6 +5,7 @@
 #include <optional>
 #include <string_view>
 #include <queue>
+#include "common.h"
 #include "common/base.h"
 #include "soc/host1x/classes/ffmpeg/ffmpeg.h"
 #include "soc/host1x/classes/nvdec_common.h"
