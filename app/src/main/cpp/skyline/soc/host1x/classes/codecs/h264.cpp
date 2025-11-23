@@ -32,7 +32,7 @@ H264::~H264() = default;
 std::span<const u8> H264::ComposeFrame(const NvdecRegisters& state,
                                        size_t* outConfigurationSize, bool isFirstFrame) {
     H264DecoderContext context;
-    deviceState.soc->smmu.ReadBlock(state.pictureInfoOffset, &context, sizeof(H264DecoderContext));
+    deviceState.soc->smmu.ReadBlock(*state.pictureInfoOffset, &context, sizeof(H264DecoderContext));
 
     const s64 frame_number = context.h264_parameter_set.frame_number.Value();
     if (!isFirstFrame && frame_number != 0) {
