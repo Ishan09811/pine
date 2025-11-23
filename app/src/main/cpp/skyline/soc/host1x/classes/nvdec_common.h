@@ -65,7 +65,7 @@ namespace skyline::soc::host1x {
         Register<0x165, u64> vp9LastFrameMvsOffset;            // 0xBA8
         Register<0x166, u64> vp9CurrFrameMvsOffset;            // 0xBB0
 
-    } registers{};
+    };
     static_assert(sizeof(NvdecRegisters) == 0xBC0);
     #pragma pack(pop)
 } // namespace skyline
