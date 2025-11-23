@@ -1,5 +1,10 @@
+// SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Copyright © 2025 Pine (https://github.com/Ishan09811/pine)
+// SPDX-License-Identifier: GPL-3.0
 
 #include <common/base.h>
+#include "logger/logger.h"
 #include "soc/host1x/classes/ffmpeg/ffmpeg.h"
 
 namespace FFmpeg {
@@ -12,7 +17,7 @@ constexpr std::array PreferredGPUDecoders = {
     AV_HWDEVICE_TYPE_MEDIACODEC,
 };
 
-AVPixelFormat GetGpuFormat(AVCodecContext* codecContext, const AVPixelFormat* pixFmts) {
+AVPixelFormat GetGPUFormat(AVCodecContext* codecContext, const AVPixelFormat* pixFmts) {
     for (const AVPixelFormat* p = pixFmts; *p != AV_PIX_FMT_NONE; ++p) {
         if (*p == codecContext->pix_fmt) {
             return codecContext->pix_fmt;
@@ -63,7 +68,7 @@ Decoder::Decoder(skyline::soc::host1x::VideoCodec codec) {
         }
     }();
 
-    m_codec = avcodec_find_decoder(avCodec);
+    mCodec = avcodec_find_decoder(avCodec);
 }
 
 bool Decoder::SupportsDecodingOnDevice(AVPixelFormat* outPixFmt, AVHWDeviceType type) const {
