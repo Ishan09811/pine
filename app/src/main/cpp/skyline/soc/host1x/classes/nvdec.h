@@ -38,50 +38,16 @@ namespace skyline::soc::host1x {
             Register<0x80, VideoCodec> setCodecId;    // 0x400 / 8
             Register<0xC0, u64> execute;              // 0x600 / 8
 
-            struct ControlParams {
-                uint64_t raw = 0;
-
-                uint64_t getCodec() const {
-                    return (raw >> 0) & 0b111;
-                }
-
-                void setCodec(uint64_t v) {
-                    raw = (raw & ~(0b111ULL << 0)) | ((v & 0b111) << 0);
-                }
-
-                bool getGpTimerOn() const {
-                    return (raw >> 4) & 1;
-                }
-
-                void setGpTimerOn(bool v) {
-                    raw = (raw & ~(1ULL << 4)) | ((uint64_t)v << 4);
-                }
-
-                bool getMbTimerOn() const {
-                    return (raw >> 13) & 1;
-                }
-
-                void setMbTimerOn(bool v) {
-                    raw = (raw & ~(1ULL << 13)) | ((uint64_t)v << 13);
-                }
-
-                bool getIntraFramePslc() const {
-                    return (raw >> 14) & 1;
-                }
-
-                void setIntraFramePslc(bool v) {
-                    raw = (raw & ~(1ULL << 14)) | ((uint64_t)v << 14);
-                }
-
-                bool getAllIntraFrame() const {
-                    return (raw >> 17) & 1;
-                }
-
-                void setAllIntraFrame(bool v) {
-                    raw = (raw & ~(1ULL << 17)) | ((uint64_t)v << 17);
-                }
+            struct ControlParams {                          //< 0x0800
+                union {
+                    BitField<0, 3, VideoCodec> codec;
+                    BitField<4, 1, u64> gpTimerOn;
+                    BitField<13, 1, u64> mbTimerOn;
+                    BitField<14, 1, u64> intraFramePslc;
+                    BitField<17, 1, u64> allIntraFrame;
+                };
             };
-            static_assert(sizeof(ControlParams) == 8, "Must remain 8 bytes");
+            static_assert(sizeof(ControlParams) == 8);
 
             Register<0x100, ControlParams> controlParams;     // 0x800 / 8
             Register<0x101, u64> pictureInfoOffset;           // 0x808
