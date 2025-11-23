@@ -6,7 +6,7 @@
 #include <string_view>
 #include <queue>
 #include "common/base.h"
-#include "soc/host1x/ffmpeg/ffmpeg.h"
+#include "soc/host1x/classes/ffmpeg/ffmpeg.h"
 
 namespace skyline::soc::host1x {
 
