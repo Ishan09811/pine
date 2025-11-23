@@ -241,12 +241,12 @@ add_library(skyline SHARED
         ${source_DIR}/skyline/soc/smmu.cpp
         ${source_DIR}/skyline/soc/host1x/syncpoint.cpp
         ${source_DIR}/skyline/soc/host1x/command_fifo.cpp
-        ${source_DIR}/skyline/soc/host1x/classes/ffmpeg/ffmpeg.cpp
-        ${source_DIR}/skyline/soc/host1x/classes/codecs/codec.cpp
-        ${source_DIR}/skyline/soc/host1x/classes/codecs/h264.cpp
         ${source_DIR}/skyline/soc/host1x/classes/host1x.cpp
         ${source_DIR}/skyline/soc/host1x/classes/vic.cpp
         ${source_DIR}/skyline/soc/host1x/classes/nvdec.cpp
+        ${source_DIR}/skyline/soc/host1x/classes/ffmpeg/ffmpeg.cpp
+        ${source_DIR}/skyline/soc/host1x/classes/codecs/codec.cpp
+        ${source_DIR}/skyline/soc/host1x/classes/codecs/h264.cpp
         ${source_DIR}/skyline/soc/gm20b/channel.cpp
         ${source_DIR}/skyline/soc/gm20b/gpfifo.cpp
         ${source_DIR}/skyline/soc/gm20b/gmmu.cpp
