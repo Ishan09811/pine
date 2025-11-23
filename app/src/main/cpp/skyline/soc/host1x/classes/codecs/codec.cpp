@@ -33,7 +33,7 @@ void Codec::Decode() {
     // Assemble bitstream.
     size_t configurationSize = 0;
     const auto packetData = [&]() {
-        switch (current_codec) {
+        switch (currentCodec) {
         case VideoCodec::H264:
             return h264Decoder->ComposeFrame(state, &configurationSize, isFirstFrame);
         default:
