@@ -8,6 +8,7 @@
 #include <span>
 #include <vector>
 #include "common/base.h"
+#include "common/bit_field.h"
 #include "common/scratch_buffer.h"
 
 namespace skyline::soc::host1x {
@@ -75,9 +76,10 @@ private:
         i32 frame_mbs_only_flag;               ///< 0x08
         u32 pic_width_in_mbs;                  ///< 0x0C
         u32 frame_height_in_map_units;         ///< 0x10
-
-        u32 tileGobRaw;                        ///< 0x14
-
+        union {                                ///< 0x14
+            BitField<0, 2, u32> tile_format;
+            BitField<2, 3, u32> gob_height;
+        };             
         u32 entropy_coding_mode_flag;               ///< 0x18
         i32 pic_order_present_flag;                 ///< 0x1C
         i32 num_refidx_l0_default_active;           ///< 0x20
@@ -94,108 +96,30 @@ private:
         u32 chroma_bot_offset;                      ///< 0x4C
         u32 chroma_frame_offset;                    ///< 0x50
         u32 hist_buffer_size;                       ///< 0x54
-
-        u64 psFlags;                                ///< 0x58
-
-        u32 getTileFormat() const { return (tileGobRaw >> 0) & 0b11; }
-        void setTileFormat(u32 v) {
-            tileGobRaw = (tileGobRaw & ~(0b11u << 0)) | ((v & 0b11u) << 0);
-        }
-
-        u32 getGobHeight() const { return (tileGobRaw >> 2) & 0b111; }
-        void setGobHeight(u32 v) {
-            tileGobRaw = (tileGobRaw & ~(0b111u << 2)) | ((v & 0b111u) << 2);
-        }
-
-        bool getMbaffFrame() const { return (psFlags >> 0) & 1; }
-        void setMbaffFrame(bool v) { psFlags = (psFlags & ~(1ULL << 0)) | (u64(v) << 0); }
-
-        bool getDirect8x8Inference() const { return (psFlags >> 1) & 1; }
-        void setDirect8x8Inference(bool v) { psFlags = (psFlags & ~(1ULL << 1)) | (uint64_t(v) << 1); }
-
-        bool getWeightedPred() const { return (psFlags >> 2) & 1; }
-        void setWeightedPred(bool v) { psFlags = (psFlags & ~(1ULL << 2)) | (u64(v) << 2); }
-
-        bool getConstrainedIntraPred() const { return (psFlags >> 3) & 1; }
-        void setConstrainedIntraPred(bool v) { psFlags = (psFlags & ~(1ULL << 3)) | (uint64_t(v) << 3); }
-
-        bool getRefPic() const { return (psFlags >> 4) & 1; }
-        void setRefPic(bool v) { psFlags = (psFlags & ~(1ULL << 4)) | (u64(v) << 4); }
-
-        bool getFieldPic() const { return (psFlags >> 5) & 1; }
-        void setFieldPic(bool v) { psFlags = (psFlags & ~(1ULL << 5)) | (u64(v) << 5); }
-
-        bool getBottomField() const { return (psFlags >> 6) & 1; }
-        void setBottomField(bool v) { psFlags = (psFlags & ~(1ULL << 6)) | (u64(v) << 6); }
-
-        bool getSecondField() const { return (psFlags >> 7) & 1; }
-        void setSecondField(bool v) { psFlags = (psFlags & ~(1ULL << 7)) | (u64(v) << 7); }
-
-        u32 getLog2MaxFrameNumMinus4() const { return (psFlags >> 8) & 0xF; }
-        void setLog2MaxFrameNumMinus4(u32 v) {
-            psFlags = (psFlags & ~(0xFULL << 8)) | ((u64)(v & 0xF) << 8);
-        }
-
-        u32 getChromaFormatIdc() const { return (psFlags >> 12) & 0x3; }
-        void setChromaFormatIdc(u32 v) {
-            psFlags = (psFlags & ~(0x3ULL << 12)) | ((u64)(v & 0x3) << 12);
-        }
-
-        u32 getPicOrderCntType() const { return (psFlags >> 14) & 0x3; }
-        void setPicOrderCntType(u32 v) {
-            psFlags = (psFlags & ~(0x3ULL << 14)) | ((u64)(v & 0x3) << 14);
-        }
-
-        i32 getPicInitQpMinus26() const {
-            return (i32)((psFlags >> 16) & 0x3F); // 6 bits signed
-        }
-        void setPicInitQpMinus26(i32) {
-            psFlags = (psFlags & ~(0x3FULL << 16)) | ((u64)(v & 0x3F) << 16);
-        }
-
-        i32 getChromaQpIndexOffset() const {
-            return (i32)((psFlags >> 22) & 0x1F);
-        }
-        void setChromaQpIndexOffset(i32 v) {
-            psFlags = (psFlags & ~(0x1FULL << 22)) | ((u64)(v & 0x1F) << 22);
-        }
-
-        i32 getSecondChromaQpIndexOffset() const {
-            return (i32)((psFlags >> 27) & 0x1F);
-        }
-        void setSecondChromaQpIndexOffset(i32 v) {
-            psFlags = (psFlags & ~(0x1FULL << 27)) | ((u64)(v & 0x1F) << 27);
-        }
-
-        u32 getWeightedBipredIdc() const { return (psFlags >> 32) & 0x3; }
-        void setWeightedBipredIdc(u32 v) {
-            psFlags = (psFlags & ~(0x3ULL << 32)) | ((u64)(v & 0x3) << 32);
-        }
-
-        u32 getCurrPicIdx() const { return (psFlags >> 34) & 0x7F; }
-        void setCurrPicIdx(u32 v) {
-            psFlags = (psFlags & ~(0x7FULL << 34)) | ((u64)(v & 0x7F) << 34);
-        }
-
-        u32 getCurrColIdx() const { return (psFlags >> 41) & 0x1F; }
-        void setCurrColIdx(u32 v) {
-            psFlags = (psFlags & ~(0x1FULL << 41)) | ((u64)(v & 0x1F) << 41);
-        }
-
-        u32 getFrameNumber() const { return (psFlags >> 46) & 0xFFFF; }
-        void setFrameNumber(u32 v) {
-            psFlags = (psFlags & ~(0xFFFFULL << 46)) | ((u64)(v & 0xFFFF) << 46);
-        }
-
-        bool getFrameSurfaces() const { return (psFlags >> 62) & 1; }
-        void setFrameSurfaces(bool v) {
-            psFlags = (psFlags & ~(1ULL << 62)) | ((u64)v << 62);
-        }
-
-        bool getOutputMemoryLayout() const { return (psFlags >> 63) & 1; }
-        void setOutputMemoryLayout(bool v) {
-            psFlags = (psFlags & ~(1ULL << 63)) | ((u64)v << 63);
-        }
+        union {                                     ///< 0x58
+            union {
+                BitField<0, 1, u64> mbaff_frame;
+                BitField<1, 1, u64> direct_8x8_inference;
+                BitField<2, 1, u64> weighted_pred;
+                BitField<3, 1, u64> constrained_intra_pred;
+                BitField<4, 1, u64> ref_pic;
+                BitField<5, 1, u64> field_pic;
+                BitField<6, 1, u64> bottom_field;
+                BitField<7, 1, u64> second_field;
+            } flags; ///< 0x58
+            BitField<8, 4, u64> log2_max_frame_num_minus4;
+            BitField<12, 2, u64> chroma_format_idc;
+            BitField<14, 2, u64> pic_order_cnt_type;
+            BitField<16, 6, s64> pic_init_qp_minus26;
+            BitField<22, 5, s64> chroma_qp_index_offset;
+            BitField<27, 5, s64> second_chroma_qp_index_offset;
+            BitField<32, 2, u64> weighted_bipred_idc;
+            BitField<34, 7, u64> curr_pic_idx;
+            BitField<41, 5, u64> curr_col_idx;
+            BitField<46, 16, u64> frame_number;
+            BitField<62, 1, u64> frame_surfaces;
+            BitField<63, 1, u64> output_memory_layout;
+        };
     };
     static_assert(sizeof(H264ParameterSet) == 0x60, "H264ParameterSet is an invalid size");
 
@@ -236,7 +160,7 @@ private:
     ASSERT_POSITION(chroma_bot_offset, 0x4C);
     ASSERT_POSITION(chroma_frame_offset, 0x50);
     ASSERT_POSITION(hist_buffer_size, 0x54);
-    ASSERT_POSITION(psFlags, 0x58);
+    ASSERT_POSITION(flags, 0x58);
 #undef ASSERT_POSITION
 
 #define ASSERT_POSITION(field_name, position)                                                      \
