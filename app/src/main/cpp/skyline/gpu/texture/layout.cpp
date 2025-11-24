@@ -18,6 +18,10 @@ namespace skyline::gpu::texture {
     constexpr size_t GobHeight{8}; //!< The height of a GOB in lines
     constexpr size_t SectorLinesInGob{(GobWidth / SectorWidth) * GobHeight}; //!< The number of lines of sectors inside a GOB
 
+    constexpr u32 GOB_SIZE_X_SHIFT = 6;
+    constexpr u32 GOB_SIZE_Y_SHIFT = 3;
+    constexpr u32 GOB_SIZE_Z_SHIFT = 0;
+
     size_t GetBlockLinearLayerSize(Dimensions dimensions, size_t formatBlockWidth, size_t formatBlockHeight, size_t formatBpb, size_t gobBlockHeight, size_t gobBlockDepth) {
         size_t robLineWidth{util::DivideCeil<size_t>(dimensions.width, formatBlockWidth)}; //!< The width of the ROB in terms of format blocks
         size_t robLineBytes{util::AlignUp(robLineWidth * formatBpb, GobWidth)}; //!< The amount of bytes in a single block
@@ -457,5 +461,32 @@ namespace skyline::gpu::texture {
             inputLine += sizeLine;
             outputLine += sizeStride;
         }
+    }
+
+    std::size_t AlignUpPow2(std::size_t value, unsigned shift) {
+        const std::size_t alignment = std::size_t{1} << shift;
+        return (value + alignment - 1) / alignment * alignment;
+    }
+
+    std::size_t CalculateSize(bool tiled, u32 bytes_per_pixel, u32 width, u32 height, u32 depth,
+                              u32 block_height, u32 block_depth) {
+        if (!tiled) {
+            return std::size_t(width) * height * depth * bytes_per_pixel;
+        }
+
+        const u32 gob_width  = 1u << GOB_SIZE_X_SHIFT;                    
+        const u32 gob_height = 1u << (GOB_SIZE_Y_SHIFT + block_height);  
+        const u32 gob_depth  = 1u << (GOB_SIZE_Z_SHIFT + block_depth);    
+  
+        const std::size_t aligned_width_bytes =
+            AlignUpPow2(std::size_t(width) * bytes_per_pixel, GOB_SIZE_X_SHIFT);
+
+        const std::size_t aligned_height =
+            AlignUpPow2(height, GOB_SIZE_Y_SHIFT + block_height);
+
+        const std::size_t aligned_depth =
+            AlignUpPow2(depth, GOB_SIZE_Z_SHIFT + block_depth);
+
+        return aligned_width_bytes * aligned_height * aligned_depth;
     }
 }
