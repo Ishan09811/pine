@@ -112,4 +112,7 @@ namespace skyline::gpu::texture {
      * @note This does not support 3D textures
      */
     void CopyLinearToPitchLinear(const GuestTexture &guest, u8 *linearInput, u8 *guestOutput);
+
+    std::size_t CalculateSize(bool tiled, u32 bytes_per_pixel, u32 width, u32 height, u32 depth,
+                              u32 block_height, u32 block_depth);
 }
