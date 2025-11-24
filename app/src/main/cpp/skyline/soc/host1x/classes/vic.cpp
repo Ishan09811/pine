@@ -34,10 +34,10 @@ namespace skyline::soc::host1x {
     VicClass::VicClass(std::function<void()> opDoneCallback, const DeviceState &state, NvDecClass& nvDecClass)
         : opDoneCallback(std::move(opDoneCallback)), state(state), nvDecClass(nvDecClass), convertedFrameBuffer{nullptr, av_free} {}
 
-    void VicClass::CallMethod(Method method, u32 argument) {
+    void VicClass::CallMethod(u32 method, u32 argument) {
         LOGW("VIC class method called: 0x{:X} argument: 0x{:X}", method, argument);
         const u64 arg = static_cast<u64>(argument) << 8;
-        switch (method) {
+        switch (static_cast<Method>(method)) {
             case Method::Execute:
                 Execute();
                 break;
