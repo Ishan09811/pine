@@ -4,6 +4,7 @@
 #pragma once
 
 #include <common.h>
+#include "common/scratch_buffer.h"
 
 namespace skyline::soc::host1x {
     /**
@@ -12,10 +13,31 @@ namespace skyline::soc::host1x {
     class VicClass {
       private:
         std::function<void()> opDoneCallback;
+        using AVMallocPtr = std::unique_ptr<u8, decltype(&av_free)>;
+        AVMallocPtr convertedFrameBuffer;
+        ScratchBuffer<u8> lumaBuffer;
+        ScratchBuffer<u8> chromaBuffer;
+
+        u64 configStructAddress{};
+        u64 outputSurfaceLumaAddress{};
+        u64 outputSurfaceChromaAddress{};
+
+        SwsContext* scalerCtx{};
+        i32 scalerWidth{};
+        i32 scalerHeight{};
 
       public:
+        enum class Method : u32 {
+            Execute = 0xc0,
+            SetControlParams = 0x1c1,
+            SetConfigStructOffset = 0x1c2,
+            SetOutputSurfaceLumaOffset = 0x1c8,
+            SetOutputSurfaceChromaOffset = 0x1c9,
+            SetOutputSurfaceChromaUnusedOffset = 0x1ca
+        };
+
         VicClass(std::function<void()> opDoneCallback, const DeviceState &state);
 
-        void CallMethod(u32 method, u32 argument);
+        void CallMethod(Method method, u32 argument);
     };
 }
