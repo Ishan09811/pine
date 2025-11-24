@@ -46,6 +46,9 @@ namespace skyline::soc::host1x {
           : deviceClass([&] { SubmitPendingIncrs(); }, std::forward<Args>(args)...),
             syncpoints(syncpoints) {}
 
+         ClassType & device() { return deviceClass; }
+         const ClassType & device() const { return deviceClass; }
+
         void CallMethod(u32 method, u32 argument)  {
             constexpr u32 Method0MethodId{0x10}; //!< Sets the method to be called on the device class upon a call to Method1, see TRM '15.5.6 NV_PVIC_THI_METHOD0'
             constexpr u32 Method1MethodId{0x11}; //!< Calls the method set by Method1 with the supplied argument, see TRM '15.5.7 NV_PVIC_THI_METHOD1"
