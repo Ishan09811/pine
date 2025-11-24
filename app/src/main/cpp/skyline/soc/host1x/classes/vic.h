@@ -15,6 +15,7 @@ namespace skyline::soc::host1x {
       private:
         NvDecClass nvDecClass;
         std::function<void()> opDoneCallback;
+        const DeviceState &state;
         using AVMallocPtr = std::unique_ptr<u8, decltype(&av_free)>;
         AVMallocPtr convertedFrameBuffer;
         ScratchBuffer<u8> lumaBuffer;
