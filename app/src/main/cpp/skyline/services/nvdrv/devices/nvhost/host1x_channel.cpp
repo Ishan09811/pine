@@ -57,8 +57,7 @@ namespace skyline::service::nvdrv::device::nvhost {
             LOGD("Submit gather, CPU address: 0x{:X}, words: 0x{:X}", gatherAddress, cmdBuf.words);
 
             span gather(reinterpret_cast<u32 *>(gatherAddress), cmdBuf.words);
-            // Skip submitting the cmdbufs as no functionality is implemented
-            // state.soc->host1x.channels[static_cast<size_t>(channelType)].Push(gather);
+            state.soc->host1x.channels[static_cast<size_t>(channelType)].Push(gather);
         }
 
         return PosixResult::Success;
