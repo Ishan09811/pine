@@ -189,8 +189,8 @@ namespace skyline::soc::host1x {
             case AV_PIX_FMT_YUV420P: {
                 // Frame from FFmpeg software
                 // Populate chroma buffer from both channels with interleaving.
-                const std::size_t halfWidth = frame_width / 2;
-                u8* chromaBufferData = chroma_buffer.data();
+                const std::size_t halfWidth = frameWidth / 2;
+                u8* chromaBufferData = chromaBuffer.data();
                 const u8* chromaBSrc = frame->GetData(1);
                 const u8* chromaRSrc = frame->GetData(2);
                 for (std::size_t y = 0; y < halfHeight; ++y) {
