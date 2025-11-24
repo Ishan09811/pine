@@ -16,6 +16,9 @@ namespace skyline::soc::host1x {
         NvDecClass nvDecClass;
         std::function<void()> opDoneCallback;
         const DeviceState &state;
+        void Execute();
+        void WriteRGBFrame(std::unique_ptr<FFmpeg::Frame> frame, const VicConfig& config);
+        void WriteYUVFrame(std::unique_ptr<FFmpeg::Frame> frame, const VicConfig& config);
         using AVMallocPtr = std::unique_ptr<u8, decltype(&av_free)>;
         AVMallocPtr convertedFrameBuffer;
         ScratchBuffer<u8> lumaBuffer;
