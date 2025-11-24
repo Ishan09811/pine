@@ -47,6 +47,6 @@ namespace skyline::soc::host1x {
 
         VicClass(std::function<void()> opDoneCallback, const DeviceState &state, NvDecClass& nvDecClass);
 
-        void CallMethod(Method method, u32 argument);
+        void CallMethod(u32 method, u32 argument);
     };
 }
