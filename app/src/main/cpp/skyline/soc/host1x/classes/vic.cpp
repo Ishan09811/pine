@@ -157,7 +157,7 @@ namespace skyline::soc::host1x {
         }
     }
 
-    void Vic::WriteYUVFrame(std::unique_ptr<FFmpeg::Frame> frame, const VicConfig& config) {
+    void VicClass::WriteYUVFrame(std::unique_ptr<FFmpeg::Frame> frame, const VicConfig& config) {
         LOGD("Writing YUV420 Frame");
 
         const std::size_t surfaceWidth = config.surfaceWidthMinus1 + 1;
