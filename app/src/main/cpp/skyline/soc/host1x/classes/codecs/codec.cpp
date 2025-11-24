@@ -77,6 +77,12 @@ std::string_view Codec::GetCurrentCodecName() const {
         return "None";
     case VideoCodec::H264:
         return "H264";
+    case VideoCodec::VP8:
+        return "VP8";
+    case VideoCodec::H265:
+        return "H265";
+    case VideoCodec::VP9:
+        return "VP9";
     default:
         return "Unknown";
     }
