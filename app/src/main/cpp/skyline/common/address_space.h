@@ -182,7 +182,6 @@ namespace skyline {
             Read(reinterpret_cast<u8*>(dest), virt, size, cpuAccessCallback);
         }
 
-
         /**
          * @brief Writes contents starting from the virtual address till the end of the span or an unmapped block has been hit or when `function` returns a non-nullopt value
          * @param function A function that is called on every block where it should return an end offset into the block when it wants to end reading or std::nullopt when it wants to continue reading
@@ -248,6 +247,10 @@ namespace skyline {
 
         void Write(VaType virt, util::TrivialObject auto source, std::function<void(span<u8>)> cpuAccessCallback = {}) {
             Write(virt, reinterpret_cast<u8 *>(&source), sizeof(source), cpuAccessCallback);
+        }
+
+        void WriteBlock(VaType virt, const void* src, size_t size, std::function<void(span<u8>)> cpuAccessCallback = {}) {
+            Write(virt, (u8*)src, size, cpuAccessCallback);
         }
 
         void Copy(VaType dst, VaType src, VaType size, std::function<void(span<u8>)> cpuAccessCallback = {});
