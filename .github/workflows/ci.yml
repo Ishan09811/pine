@@ -72,6 +72,7 @@ jobs:
             ndk-path: $ANDROID_HOME/ndk/${{ env.NDK_VERSION }}
             android-api: 34
             abis: arm64-v8a
+            version: 5.1
             output-dir: ./app/libraries/ffmpeg
             extra-args: "--disable-doc --disable-programs --enable-libx264"
 
