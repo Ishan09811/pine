@@ -5,6 +5,7 @@
 
 #include <common.h>
 #include "common/scratch_buffer.h"
+#include "nvdec.h"
 
 namespace skyline::soc::host1x {
     /**
@@ -12,6 +13,7 @@ namespace skyline::soc::host1x {
      */
     class VicClass {
       private:
+        NvDecClass nvDecClass;
         std::function<void()> opDoneCallback;
         using AVMallocPtr = std::unique_ptr<u8, decltype(&av_free)>;
         AVMallocPtr convertedFrameBuffer;
@@ -36,7 +38,7 @@ namespace skyline::soc::host1x {
             SetOutputSurfaceChromaUnusedOffset = 0x1ca
         };
 
-        VicClass(std::function<void()> opDoneCallback, const DeviceState &state);
+        VicClass(std::function<void()> opDoneCallback, const DeviceState &state, NvDecClass nvDecClass);
 
         void CallMethod(Method method, u32 argument);
     };
