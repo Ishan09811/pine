@@ -54,7 +54,7 @@ namespace skyline::soc::host1x {
         }
     }
 
-    void Vic::Execute() {
+    void VicClass::Execute() {
         if (outputSurfaceLumaAddress == 0) {
             LOGE("VIC Luma address not set.");
             return;
@@ -87,7 +87,7 @@ namespace skyline::soc::host1x {
         }
     }
 
-    void Vic::WriteRGBFrame(std::unique_ptr<FFmpeg::Frame> frame, const VicConfig& config) {
+    void VicClass::WriteRGBFrame(std::unique_ptr<FFmpeg::Frame> frame, const VicConfig& config) {
         LOGD("Writing RGB Frame");
 
         const auto frameWidth = frame->GetWidth();
@@ -144,8 +144,61 @@ namespace skyline::soc::host1x {
         } else {
             // send pitch linear frame
             const size_t linearSize = width * height * 4;
-            /*state.soc->smmu.WriteBlock(outputSurfaceLumaAddress, convertedFrameBufAddr,
-                                     linearSize);*/
+            //state.soc->smmu.WriteBlock(outputSurfaceLumaAddress, convertedFrameBufAddr, linearSize);
         }
+    }
+
+    void Vic::WriteYUVFrame(std::unique_ptr<FFmpeg::Frame> frame, const VicConfig& config) {
+        LOGD("Writing YUV420 Frame");
+
+        const std::size_t surfaceWidth = config.surfaceWidthMinus1 + 1;
+        const std::size_t surfaceHeight = config.surfaceHeightMinus1 + 1;
+        const std::size_t alignedWidth = (surfaceWidth + 0xff) & ~0xffUL;
+        // Use the minimum of surface/frame dimensions to avoid buffer overflow.
+        const auto frameWidth = std::min(surfaceWidth, static_cast<size_t>(frame->GetWidth()));
+        const auto frameHeight = std::min(surfaceHeight, static_cast<size_t>(frame->GetHeight()));
+
+        const auto stride = static_cast<size_t>(frame->GetStride(0));
+
+        lumaBuffer.resize_destructive(alignedWidth * surfaceHeight);
+        chromaBuffer.resize_destructive(alignedWidth * surfaceHeight / 2);
+
+        // Populate luma buffer
+        const u8* lumaSrc = frame->GetData(0);
+        for (std::size_t y = 0; y < frameHeight; ++y) {
+            const std::size_t src = y * stride;
+            const std::size_t dst = y * alignedWidth;
+            std::memcpy(lumaBuffer.data() + dst, lumaSrc + src, frameWidth);
+        }
+        //state.soc->smmu.WriteBlock(outputSurfaceLumaAddress, lumaBuffer.data(), lumaBuffer.size());
+
+        // Chroma
+        const std::size_t halfHeight = frameHeight / 2;
+        const auto halfStride = static_cast<size_t>(frame->GetStride(1));
+
+        switch (frame->GetPixelFormat()) {
+            case AV_PIX_FMT_YUV420P: {
+                // Frame from FFmpeg software
+                // Populate chroma buffer from both channels with interleaving.
+                const std::size_t halfWidth = frame_width / 2;
+                u8* chromaBufferData = chroma_buffer.data();
+                const u8* chromaBSrc = frame->GetData(1);
+                const u8* chromaRSrc = frame->GetData(2);
+                for (std::size_t y = 0; y < halfHeight; ++y) {
+                    const std::size_t src = y * halfStride;
+                    const std::size_t dst = y * alignedWidth;
+                    for (std::size_t x = 0; x < halfWidth; ++x) {
+                        chromaBufferData[dst + x * 2] = chromaBSrc[src + x];
+                        chromaBufferData[dst + x * 2 + 1] = chromaRSrc[src + x];
+                    }
+                }
+                break;
+            }
+            default: {
+               LOGW("Unexpected frame format!");
+               break;
+            }
+        }
+        //state.soc->smmu.WriteBlock(outputSurfaceChromaAddress, chromaBuffer.data(), chromaBuffer.size());
     }
 } // namespace skyline
