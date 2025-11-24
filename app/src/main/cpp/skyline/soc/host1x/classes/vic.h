@@ -7,7 +7,10 @@
 #include "common/scratch_buffer.h"
 #include "nvdec.h"
 
+struct SwsContext;
+
 namespace skyline::soc::host1x {
+    union VicConfig;
     /**
      * @brief The VIC Host1x class implements hardware accelerated image operations
      */
