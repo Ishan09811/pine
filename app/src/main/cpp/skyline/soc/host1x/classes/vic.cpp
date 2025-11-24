@@ -4,6 +4,7 @@
 #include "vic.h"
 #include "soc.h"
 #include "common/bit_field.h"
+#include "gpu/texture/layout.h"
 extern "C" {
 #include <libswscale/swscale.h>
 }
@@ -134,12 +135,20 @@ namespace skyline::soc::host1x {
         if (blkKind != 0) {
             // swizzle pitch linear to block linear
             const u32 blockHeight = static_cast<u32>(config.blockLinearHeightLog2);
-            const auto size = Texture::CalculateSize(true, 4, width, height, 1, blockHeight, 0);
+            const auto size = gpu::texture::CalculateSize(true, 4, width, height, 1, blockHeight, 0);
             lumaBuffer.resize_destructive(size);
             std::span<const u8> frameBuff(convertedFrameBufAddr, 4 * width * height);
-            Texture::SwizzleSubrect(lumaBuffer, frameBuff, 4, width, height, 1, 0, 0, width, height,
-                                    blockHeight, 0, width * 4);
-
+            gpu::texture::CopyPitchToBlockLinearSubrect(
+                {width, height, 1}, 
+                {width, height, 1},
+                1, 1, 4,                    
+                width * 4,            
+                1u << blockHeight,    
+                1,                   
+                convertedFrameBufAddr,
+                lumaBuffer.data(),
+                0, 0                  
+            );
             state.soc->smmu.WriteBlock(outputSurfaceLumaAddress, lumaBuffer.data(), size);
         } else {
             // send pitch linear frame
