@@ -41,9 +41,10 @@ namespace skyline::soc::host1x {
         }
 
       public:
-        TegraHostInterface(SyncpointSet &syncpoints, const DeviceState &state)
-            : deviceClass([&] { SubmitPendingIncrs(); }, state),
-              syncpoints(syncpoints) {}
+        template<typename... Args>
+        TegraHostInterface(SyncpointSet &syncpoints, Args&&... args)
+          : deviceClass([&] { SubmitPendingIncrs(); }, std::forward<Args>(args)...),
+            syncpoints(syncpoints) {}
 
         void CallMethod(u32 method, u32 argument)  {
             constexpr u32 Method0MethodId{0x10}; //!< Sets the method to be called on the device class upon a call to Method1, see TRM '15.5.6 NV_PVIC_THI_METHOD0'
