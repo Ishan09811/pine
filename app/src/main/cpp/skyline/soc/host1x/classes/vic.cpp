@@ -31,7 +31,7 @@ namespace skyline::soc::host1x {
     };
 
     VicClass::VicClass(std::function<void()> opDoneCallback, const DeviceState &state, NvDecClass nvDecClass)
-        : opDoneCallback(std::move(opDoneCallback)), state(state), nvDecClass(nvDecClass) {}
+        : opDoneCallback(std::move(opDoneCallback)), state(state), nvDecClass(nvDecClass), convertedFrameBuffer{nullptr, av_free} {}
 
     void VicClass::CallMethod(Method method, u32 argument) {
         LOGW("VIC class method called: 0x{:X} argument: 0x{:X}", method, argument);
@@ -140,11 +140,11 @@ namespace skyline::soc::host1x {
             Texture::SwizzleSubrect(lumaBuffer, frameBuff, 4, width, height, 1, 0, 0, width, height,
                                     blockHeight, 0, width * 4);
 
-            //state.soc->smmu.WriteBlock(outputSurfaceLumaAddress, lumaBuffer.data(), size);
+            state.soc->smmu.WriteBlock(outputSurfaceLumaAddress, lumaBuffer.data(), size);
         } else {
             // send pitch linear frame
             const size_t linearSize = width * height * 4;
-            //state.soc->smmu.WriteBlock(outputSurfaceLumaAddress, convertedFrameBufAddr, linearSize);
+            state.soc->smmu.WriteBlock(outputSurfaceLumaAddress, convertedFrameBufAddr, linearSize);
         }
     }
 
@@ -170,7 +170,7 @@ namespace skyline::soc::host1x {
             const std::size_t dst = y * alignedWidth;
             std::memcpy(lumaBuffer.data() + dst, lumaSrc + src, frameWidth);
         }
-        //state.soc->smmu.WriteBlock(outputSurfaceLumaAddress, lumaBuffer.data(), lumaBuffer.size());
+        state.soc->smmu.WriteBlock(outputSurfaceLumaAddress, lumaBuffer.data(), lumaBuffer.size());
 
         // Chroma
         const std::size_t halfHeight = frameHeight / 2;
@@ -199,6 +199,6 @@ namespace skyline::soc::host1x {
                break;
             }
         }
-        //state.soc->smmu.WriteBlock(outputSurfaceChromaAddress, chromaBuffer.data(), chromaBuffer.size());
+        state.soc->smmu.WriteBlock(outputSurfaceChromaAddress, chromaBuffer.data(), chromaBuffer.size());
     }
 } // namespace skyline
