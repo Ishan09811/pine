@@ -16,7 +16,7 @@ namespace skyline::soc::host1x {
      */
     class VicClass {
       private:
-        NvDecClass nvDecClass;
+        NvDecClass& nvDecClass;
         std::function<void()> opDoneCallback;
         const DeviceState &state;
         void Execute();
@@ -45,7 +45,7 @@ namespace skyline::soc::host1x {
             SetOutputSurfaceChromaUnusedOffset = 0x1ca
         };
 
-        VicClass(std::function<void()> opDoneCallback, const DeviceState &state, NvDecClass nvDecClass);
+        VicClass(std::function<void()> opDoneCallback, const DeviceState &state, NvDecClass& nvDecClass);
 
         void CallMethod(Method method, u32 argument);
     };

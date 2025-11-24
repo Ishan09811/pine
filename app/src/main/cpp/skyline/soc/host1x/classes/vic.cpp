@@ -30,7 +30,7 @@ namespace skyline::soc::host1x {
         BitField<46, 14, u64_le> surfaceHeightMinus1;
     };
 
-    VicClass::VicClass(std::function<void()> opDoneCallback, const DeviceState &state, NvDecClass nvDecClass)
+    VicClass::VicClass(std::function<void()> opDoneCallback, const DeviceState &state, NvDecClass& nvDecClass)
         : opDoneCallback(std::move(opDoneCallback)), state(state), nvDecClass(nvDecClass), convertedFrameBuffer{nullptr, av_free} {}
 
     void VicClass::CallMethod(Method method, u32 argument) {
