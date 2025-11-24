@@ -1,5 +1,6 @@
 
 #include "soc/host1x/classes/codecs/codec.h"
+#include "logger/logger.h"
 #include "soc/host1x/classes/codecs/h264.h"
 
 namespace skyline::soc::host1x {
@@ -43,6 +44,7 @@ void Codec::Decode() {
 
     // Send assembled bitstream to decoder.
     if (!decodeAPI.SendPacket(packetData, configurationSize)) {
+        LOGE("SendPacket: Failed")
         return;
     }
 
