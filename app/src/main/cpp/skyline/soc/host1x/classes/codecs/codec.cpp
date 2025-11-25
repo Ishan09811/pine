@@ -44,7 +44,7 @@ void Codec::Decode() {
 
     // Send assembled bitstream to decoder.
     if (!decodeAPI.SendPacket(packetData, configurationSize)) {
-        LOGE("SendPacket: Failed")
+        LOGE("SendPacket: Failed");
         return;
     }
 
