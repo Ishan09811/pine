@@ -159,6 +159,34 @@ std::span<const u8> H264::ComposeFrame(const NvdecRegisters& state,
     deviceState.soc->smmu.ReadBlock(*state.frameBitstreamOffset, frame.data() + encodedHeader.size(),
                             context.stream_len);
 
+   LOGI("ComposeFrame: encodedHeaderSize={} stream_len={} total={}",
+     *outConfigurationSize, context.stream_len, frame.size());
+
+    {
+        std::string hex;
+        for (size_t i = 0; i < std::min<size_t>(frame.size(), 64); i++) {
+            char buf[4];
+            std::snprintf(buf, sizeof(buf), "%02X ", frame[i]);
+            hex += buf;
+        }
+        LOGI("Frame first 64 bytes: {}", hex);
+    }
+
+    {
+        for (size_t i = 0; i + 4 < frame.size(); i++) {
+            if (frame[i] == 0x00 && frame[i+1] == 0x00 && frame[i+2] == 0x01) {
+                u8 nal = frame[i+3] & 0x1F;
+                LOGI("NAL type={} at offset={}", nal, i);
+            }
+            if (i + 5 < frame.size() &&
+                frame[i] == 0x00 && frame[i+1] == 0x00 &&
+                frame[i+2] == 0x00 && frame[i+3] == 0x01) {
+                u8 nal = frame[i+4] & 0x1F;
+                LOGI("NAL type={} (4B) at offset={}", nal, i);
+            }
+        }
+    }
+
     return frame;
 }
 
