@@ -44,8 +44,10 @@ namespace skyline::service::nvdrv::device::nvhost {
     }
 
     PosixResult CtrlGpu::GetTpcMasks3(span<u8> inlineBuffer, In<u32> bufSize, Out<u32> mask) {
-        if (bufSize)
-            mask = inlineBuffer.as<u32>() = 0x3;
+        if (bufSize) {
+            inlineBuffer.as<u32>() = 0x3;
+            mask = 0x3;
+        }
 
         return PosixResult::Success;
     }
